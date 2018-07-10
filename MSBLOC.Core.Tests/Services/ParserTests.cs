@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using Microsoft.Extensions.Logging;
+using MSBLOC.Core.Services;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 
-namespace MSBLOC.Core.Tests
+namespace MSBLOC.Core.Tests.Services
 {
     [TestFixture]
     public class ParserTests
@@ -16,7 +16,7 @@ namespace MSBLOC.Core.Tests
         }
 
         [Test]
-        public void ParseBinaryLogTest()
+        public void ShouldParseLog()
         {
             var resourcePath = GetResourcePath("testconsoleapp1-warning.binlog");
             FileAssert.Exists(resourcePath);

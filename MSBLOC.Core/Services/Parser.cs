@@ -1,10 +1,9 @@
-﻿using System;
-using Microsoft.Build.Framework;
+﻿using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace MSBLOC.Core
+namespace MSBLOC.Core.Services
 {
     public class Parser
     {
@@ -18,7 +17,6 @@ namespace MSBLOC.Core
         public void Parse(string resourcePath)
         {
             var binLogReader = new BinaryLogReplayEventSource();
-
             foreach (var record in binLogReader.ReadRecords(resourcePath))
             {
                 var buildEventArgs = record.Args;
