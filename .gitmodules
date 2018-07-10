@@ -1,0 +1,3 @@
+[submodule "submodules/octokit.net"]
+	path = submodules/octokit.net
+	url = https://github.com/octokit/octokit.net.git
