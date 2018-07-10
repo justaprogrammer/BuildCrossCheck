@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Octokit.Net", "Octokit.Net"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Octokit", "submodules\octokit.net\Octokit\Octokit.csproj", "{8506AF4A-15A3-4B4E-8E5C-E22773D67A5E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBLOC.Web", "MSBLOC.Web\MSBLOC.Web.csproj", "{D380B199-8568-4183-B3E6-0D2ACD79A0EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBLOC.Web.Tests", "MSBLOC.Web.Tests\MSBLOC.Web.Tests.csproj", "{EA50DC88-70CC-4BFC-9C8F-3641450ED8DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +33,14 @@ Global
 		{8506AF4A-15A3-4B4E-8E5C-E22773D67A5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8506AF4A-15A3-4B4E-8E5C-E22773D67A5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8506AF4A-15A3-4B4E-8E5C-E22773D67A5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D380B199-8568-4183-B3E6-0D2ACD79A0EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D380B199-8568-4183-B3E6-0D2ACD79A0EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D380B199-8568-4183-B3E6-0D2ACD79A0EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D380B199-8568-4183-B3E6-0D2ACD79A0EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA50DC88-70CC-4BFC-9C8F-3641450ED8DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA50DC88-70CC-4BFC-9C8F-3641450ED8DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA50DC88-70CC-4BFC-9C8F-3641450ED8DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA50DC88-70CC-4BFC-9C8F-3641450ED8DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
