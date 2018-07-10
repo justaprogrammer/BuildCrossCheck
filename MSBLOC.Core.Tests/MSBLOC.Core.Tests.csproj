@@ -112,6 +112,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Services\ModelExtensions.cs" />
     <Compile Include="Services\TokenGeneratorTests.cs" />
     <Compile Include="Services\ParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -120,7 +121,10 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="Resources\testconsoleapp1-warning.binlog">
+    <None Include="Resources\testconsoleapp1-1error.binlog">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\testconsoleapp1-1warning.binlog">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="version.json" />

@@ -220,6 +220,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interfaces\ITokenGenerator.cs" />
+    <Compile Include="Interfaces\IParser.cs" />
+    <Compile Include="Models\StubAnnotation.cs" />
     <Compile Include="Services\TokenGenerator.cs" />
     <Compile Include="Services\Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
