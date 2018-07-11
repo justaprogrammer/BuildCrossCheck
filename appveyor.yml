@@ -4,12 +4,11 @@ environment:
     MSBLOC_KEY:
         secure: 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
 before_build:
-    - ps: >-
+    - ps: |
+        $full_build = Test-Path env:MSBLOC_KEY
         git submodule sync
-        
         git submodule init
 
-        $full_build = Test-Path env:MSBLOC_KEY
         if ($full_build) {
             $fileContent = "-----BEGIN RSA PRIVATE KEY-----`n"
             $fileContent += $env:MSBLOC_KEY.Replace(' ', "`n")
@@ -20,8 +19,7 @@ before_build:
         }
 
         git submodule update
-
-        nuget restore
+        nuget restore MSBuildLogOctokitChecker.sln
 build:
     project: MSBuildLogOctokitChecker.sln
     publish_wap: true
