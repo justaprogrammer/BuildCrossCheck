@@ -18,7 +18,7 @@ before_build:
             git submodule deinit private
         }
 
-        git submodule update
+        git submodule -q update
         nuget restore MSBuildLogOctokitChecker.sln
 build:
     project: MSBuildLogOctokitChecker.sln
