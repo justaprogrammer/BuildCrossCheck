@@ -7,7 +7,7 @@ before_build:
     - ps: |
         $full_build = Test-Path env:MSBLOC_KEY
         git submodule sync
-        git submodule init
+        git submodule -q init
 
         if ($full_build) {
             $fileContent = "-----BEGIN RSA PRIVATE KEY-----`n"
