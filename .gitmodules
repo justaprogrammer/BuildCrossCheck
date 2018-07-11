@@ -1,6 +1,6 @@
 [submodule "private"]
 	path = private
-	url = https://github.com/StanleyGoldman/MSBuildLogOctokitCheckerPrivate.git
+	url = git@github.com:StanleyGoldman/MSBuildLogOctokitCheckerPrivate.git
 [submodule "octokit.net"]
 	path = octokit.net
 	url = https://github.com/octokit/octokit.net.git
