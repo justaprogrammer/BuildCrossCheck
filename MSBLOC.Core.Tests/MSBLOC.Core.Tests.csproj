@@ -121,8 +121,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Condition="Exists('..\private\private-key.pem')" Include="..\private\private-key.pem">
-      <Link>Resources\private-key.pem</Link>
+    <None Include="Resources\private-key.pem">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Resources\testconsoleapp1-1error.binlog">
