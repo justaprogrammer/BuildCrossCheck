@@ -7,7 +7,7 @@ before_build:
     - ps: |
         $full_build = Test-Path env:MSBLOC_KEY
         git submodule sync
-        git submodule -q init
+        git submodule init
 
         if ($full_build) {
             $fileContent = "-----BEGIN RSA PRIVATE KEY-----`n"
@@ -18,7 +18,7 @@ before_build:
             git submodule deinit private
         }
 
-        git submodule -q update
+        git submodule update
         nuget restore MSBuildLogOctokitChecker.sln
 build:
     project: MSBuildLogOctokitChecker.sln
