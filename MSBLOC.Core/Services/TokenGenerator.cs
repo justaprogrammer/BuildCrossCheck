@@ -18,7 +18,7 @@ namespace MSBLOC.Core.Services
         public string GetToken()
         {
             var generator = new GitHubJwtFactory(
-                new PrivateKeySource(),
+                new FilePrivateKeySource("Resources\\private-key.pem"), 
                 new GitHubJwtFactoryOptions
                 {
                     AppIntegrationId = 1, // The GitHub App Id
@@ -27,14 +27,6 @@ namespace MSBLOC.Core.Services
             );
 
             return generator.CreateEncodedJwtToken();
-        }
-
-        private class PrivateKeySource : IPrivateKeySource
-        {
-            public TextReader GetPrivateKeyReader()
-            {
-                return new StreamReader(new MemoryStream(Resources.msbuildlog_octokit_checker_2018_07_11_private_key));
-            }
         }
     }
 }

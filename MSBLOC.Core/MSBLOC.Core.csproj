@@ -222,11 +222,6 @@
     <Compile Include="Interfaces\ITokenGenerator.cs" />
     <Compile Include="Interfaces\IParser.cs" />
     <Compile Include="Models\StubAnnotation.cs" />
-    <Compile Include="Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Services\TokenGenerator.cs" />
     <Compile Include="Services\Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -234,18 +229,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="..\private\msbuildlog-octokit-checker.2018-07-11.private-key.pem">
-      <Link>Resources\msbuildlog-octokit-checker.2018-07-11.private-key.pem</Link>
+    <None Condition="Exists('..\private\private-key.pem')" Include="..\private\private-key.pem">
+      <Link>Resources\private-key.pem</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
     <None Include="version.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <SubType>Designer</SubType>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\octokit.net\Octokit\Octokit.csproj">
