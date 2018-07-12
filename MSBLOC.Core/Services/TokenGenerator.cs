@@ -8,17 +8,19 @@ namespace MSBLOC.Core.Services
 {
     public class TokenGenerator : ITokenGenerator
     {
+        private IPrivateKeySource _privateKeySource;
         private  ILogger<TokenGenerator> Logger { get; }
 
-        public TokenGenerator(ILogger<TokenGenerator> logger = null)
+        public TokenGenerator(IPrivateKeySource privateKeySource, ILogger<TokenGenerator> logger = null)
         {
+            _privateKeySource = privateKeySource;
             Logger = logger ?? new NullLogger<TokenGenerator>();
         }
 
         public string GetToken()
         {
             var generator = new GitHubJwtFactory(
-                new FilePrivateKeySource("Resources\\private-key.pem"), 
+                _privateKeySource, 
                 new GitHubJwtFactoryOptions
                 {
                     AppIntegrationId = 1, // The GitHub App Id
