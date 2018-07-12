@@ -221,7 +221,6 @@
   <ItemGroup>
     <Compile Include="Interfaces\ITokenGenerator.cs" />
     <Compile Include="Interfaces\IParser.cs" />
-    <Compile Include="Models\StubAnnotation.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

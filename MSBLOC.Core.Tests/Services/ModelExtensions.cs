@@ -1,13 +1,13 @@
-using MSBLOC.Core.Models;
+using Octokit;
 using Shouldly;
 
 namespace MSBLOC.Core.Tests.Services
 {
     internal static class ShoudlyExtensions
     {
-        public static void ShouldBe(this StubAnnotation stubAnnotation, StubAnnotation expected)
+        public static void ShouldBe(this CheckRunAnnotation stubAnnotation, CheckRunAnnotation expected)
         {
-            stubAnnotation.FileName.ShouldBe(expected.FileName);
+            stubAnnotation.Filename.ShouldBe(expected.Filename);
             stubAnnotation.BlobHref.ShouldBe(expected.BlobHref);
             stubAnnotation.StartLine.ShouldBe(expected.StartLine);
             stubAnnotation.EndLine.ShouldBe(expected.EndLine);

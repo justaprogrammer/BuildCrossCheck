@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using MSBLOC.Core.Interfaces;
-using MSBLOC.Core.Models;
 using Octokit;
 
 namespace MSBLOC.Core.Services
@@ -18,7 +17,7 @@ namespace MSBLOC.Core.Services
             Logger = logger ?? new NullLogger<Submitter>();
         }
 
-        public async Task Submit(string owner, string name, string headSha, StubAnnotation[] annotations)
+        public async Task Submit(string owner, string name, string headSha, CheckRunAnnotation[] annotations)
         {
             var jwtToken = TokenGenerator.GetToken();
             var appClient = new GitHubClient(new ProductHeaderValue("MyApp"))

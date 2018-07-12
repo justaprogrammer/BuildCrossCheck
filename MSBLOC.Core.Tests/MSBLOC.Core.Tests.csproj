@@ -134,6 +134,10 @@
       <Project>{C3988407-AE03-4F82-B1BD-6ADF1587EDE2}</Project>
       <Name>MSBLOC.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\octokit.net\Octokit\Octokit.csproj">
+      <Project>{42CA5731-868A-442B-8355-F4FE177730F6}</Project>
+      <Name>Octokit</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

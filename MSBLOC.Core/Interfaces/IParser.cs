@@ -1,9 +1,9 @@
-﻿using MSBLOC.Core.Models;
+﻿using Octokit;
 
 namespace MSBLOC.Core.Interfaces
 {
     public interface IParser
     {
-        StubAnnotation[] Parse(string resourcePath);
+        CheckRunAnnotation[] Parse(string resourcePath);
     }
 }

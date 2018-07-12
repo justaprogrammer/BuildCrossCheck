@@ -4,7 +4,6 @@ using Microsoft.Build.Logging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using MSBLOC.Core.Interfaces;
-using MSBLOC.Core.Models;
 using Octokit;
 
 namespace MSBLOC.Core.Services
@@ -18,9 +17,9 @@ namespace MSBLOC.Core.Services
             Logger = logger ?? new NullLogger<Parser>();
         }
 
-        public StubAnnotation[] Parse(string resourcePath)
+        public CheckRunAnnotation[] Parse(string resourcePath)
         {
-            var stubAnnotations = new List<StubAnnotation>();
+            var annotations = new List<CheckRunAnnotation>();
             var binLogReader = new BinaryLogReplayEventSource();
             foreach (var record in binLogReader.ReadRecords(resourcePath))
             {
@@ -34,15 +33,7 @@ namespace MSBLOC.Core.Services
                         endLine = buildWarning.LineNumber;
                     }
 
-                    stubAnnotations.Add(new StubAnnotation
-                    {
-                        FileName = buildWarning.File,
-                        Title = buildWarning.Code,
-                        Message = buildWarning.Message,
-                        WarningLevel = "Warning",
-                        StartLine = buildWarning.LineNumber,
-                        EndLine = endLine
-                    });
+                    annotations.Add(CreateAnnotation(buildWarning.File, "", buildWarning.LineNumber, endLine, CheckWarningLevel.Warning, buildWarning.Code, buildWarning.Message, string.Empty));
                 }
 
                 if (buildEventArgs is BuildErrorEventArgs buildError)
@@ -54,19 +45,21 @@ namespace MSBLOC.Core.Services
                         endLine = buildError.LineNumber;
                     }
 
-                    stubAnnotations.Add(new StubAnnotation
-                    {
-                        FileName = buildError.File,
-                        Title = buildError.Code,
-                        Message = buildError.Message,
-                        WarningLevel = "Error",
-                        StartLine = buildError.LineNumber,
-                        EndLine = endLine
-                    });
+                    annotations.Add(CreateAnnotation(buildError.File, "", buildError.LineNumber, endLine, CheckWarningLevel.Failure, buildError.Code, buildError.Message, string.Empty));
                 }
             }
 
-            return stubAnnotations.ToArray();
+            return annotations.ToArray();
+        }
+
+        private static CheckRunAnnotation CreateAnnotation(string fileName, string blobHref, int startLine, int endLine,
+            CheckWarningLevel checkWarningLevel, string title, string message, string rawDetails)
+        {
+            return new CheckRunAnnotation(fileName, blobHref, startLine, endLine, checkWarningLevel, message)
+            {
+                Title = title,
+                RawDetails = rawDetails
+            };
         }
     }
 }
