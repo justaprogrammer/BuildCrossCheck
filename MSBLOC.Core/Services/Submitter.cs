@@ -17,7 +17,8 @@ namespace MSBLOC.Core.Services
             Logger = logger ?? new NullLogger<Submitter>();
         }
 
-        public async Task Submit(string owner, string name, string headSha, CheckRunAnnotation[] annotations)
+        public async Task Submit(string owner, string name, string headSha,
+            string checkRunName, CheckRunAnnotation[] annotations)
         {
             var jwtToken = TokenGenerator.GetToken();
             var appClient = new GitHubClient(new ProductHeaderValue("MyApp"))
@@ -26,6 +27,7 @@ namespace MSBLOC.Core.Services
             };
 
             var checkSuite = await appClient.Check.Suite.Create(owner, name, new NewCheckSuite(headSha));
+            var checkRun = await appClient.Check.Run.Create(owner, name, new NewCheckRun(checkRunName, headSha));
         }
     }
 }
