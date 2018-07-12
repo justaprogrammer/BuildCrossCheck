@@ -234,8 +234,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="..\private\msbuild-log-checker.2018-07-10.private-key.pem">
-      <Link>Resources\msbuild-log-checker.2018-07-10.private-key.pem</Link>
+    <None Include="..\private\msbuildlog-octokit-checker.2018-07-11.private-key.pem">
+      <Link>Resources\msbuildlog-octokit-checker.2018-07-11.private-key.pem</Link>
     </None>
     <None Include="packages.config" />
     <None Include="version.json" />

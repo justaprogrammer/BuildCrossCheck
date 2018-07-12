@@ -63,9 +63,9 @@ namespace MSBLOC.Core {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] msbuild_log_checker_2018_07_10_private_key {
+        internal static byte[] msbuildlog_octokit_checker_2018_07_11_private_key {
             get {
-                object obj = ResourceManager.GetObject("msbuild_log_checker_2018_07_10_private_key", resourceCulture);
+                object obj = ResourceManager.GetObject("msbuildlog_octokit_checker_2018_07_11_private_key", resourceCulture);
                 return ((byte[])(obj));
             }
         }

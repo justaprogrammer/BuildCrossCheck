@@ -33,7 +33,7 @@ namespace MSBLOC.Core.Services
         {
             public TextReader GetPrivateKeyReader()
             {
-                return new StreamReader(new MemoryStream(Resources.msbuild_log_checker_2018_07_10_private_key));
+                return new StreamReader(new MemoryStream(Resources.msbuildlog_octokit_checker_2018_07_11_private_key));
             }
         }
     }
