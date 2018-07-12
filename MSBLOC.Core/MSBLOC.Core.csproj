@@ -229,10 +229,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Condition="Exists('..\private\private-key.pem')" Include="..\private\private-key.pem">
-      <Link>Resources\private-key.pem</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
     <None Include="version.json" />
   </ItemGroup>
