@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MSBLOC.Core {
+namespace MSBLOC.Core.Tests {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace MSBLOC.Core {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MSBLOC.Core.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MSBLOC.Core.Tests.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,9 +63,9 @@ namespace MSBLOC.Core {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] msbuildlog_octokit_checker_2018_07_11_private_key {
+        internal static byte[] private_key {
             get {
-                object obj = ResourceManager.GetObject("msbuildlog_octokit_checker_2018_07_11_private_key", resourceCulture);
+                object obj = ResourceManager.GetObject("private_key", resourceCulture);
                 return ((byte[])(obj));
             }
         }

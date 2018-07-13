@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Services;
+using MSBLOC.Core.Tests.Util;
 using NUnit.Framework;
 using Octokit;
 
