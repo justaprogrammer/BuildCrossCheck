@@ -55,11 +55,8 @@ namespace MSBLOC.Core.Services
         private static CheckRunAnnotation CreateAnnotation(string fileName, string blobHref, int startLine, int endLine,
             CheckWarningLevel checkWarningLevel, string title, string message, string rawDetails)
         {
-            return new CheckRunAnnotation(fileName, blobHref, startLine, endLine, checkWarningLevel, message)
-            {
-                Title = title,
-                RawDetails = rawDetails
-            };
+            return new CheckRunAnnotation(fileName, blobHref, startLine, endLine, checkWarningLevel, message, title,
+                rawDetails);
         }
     }
 }

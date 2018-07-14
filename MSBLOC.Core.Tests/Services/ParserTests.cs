@@ -42,22 +42,14 @@ namespace MSBLOC.Core.Tests.Services
                 CreateTestCase("TestConsoleApp1: 1 Warning", "testconsoleapp1-1warning.binlog",
                     new[]
                     {
-                        new CheckRunAnnotation("Program.cs", "", 13, 13, CheckWarningLevel.Warning, "The variable 'hello' is assigned but its value is never used")
-                        {
-                            Title = "CS0219",
-                            RawDetails = String.Empty,
-                        }
+                        new CheckRunAnnotation("Program.cs", "", 13, 13, CheckWarningLevel.Warning, "The variable 'hello' is assigned but its value is never used", "CS0219", String.Empty)
                     });
 
             yield return
                 CreateTestCase("TestConsoleApp1: 1 Error", "testconsoleapp1-1error.binlog",
                     new[]
                     {
-                        new CheckRunAnnotation("Program.cs", "", 13, 13, CheckWarningLevel.Failure, "; expected")
-                        {
-                            Title = "CS1002",
-                            RawDetails = String.Empty,
-                        }
+                        new CheckRunAnnotation("Program.cs", "", 13, 13, CheckWarningLevel.Failure, "; expected", "CS1002", String.Empty)
                     });
         }
 
