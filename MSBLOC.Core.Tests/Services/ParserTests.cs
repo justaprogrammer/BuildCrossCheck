@@ -1,28 +1,32 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Models;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace MSBLOC.Core.Tests.Services
 {
-    [TestFixture]
     public class ParserTests
     {
         private static readonly ILogger<ParserTests> logger = TestLogger.Create<ParserTests>();
 
         private static string GetResourcePath(string file)
         {
-            return Path.Combine(TestContext.CurrentContext.TestDirectory, "Resources", file);
+            var location = typeof(ParserTests).GetTypeInfo().Assembly.Location;
+            var dirPath = Path.GetDirectoryName(location);
+            Assert.NotNull(dirPath);
+            return Path.Combine(dirPath, "Resources", file);
         }
 
-        [TestCaseSource(nameof(ShouldParseLogsCases))]
+        [Theory]
+        [MemberData(nameof(ShouldParseLogsCases))]
         public void ShouldParseLogs(string resourceName, StubAnnotation[] expectedAnnotations)
         {
             var resourcePath = GetResourcePath(resourceName);
-            FileAssert.Exists(resourcePath);
+            Assert.True(File.Exists(resourcePath));
 
             var parser = new Parser(TestLogger.Create<Parser>());
             var stubAnnotations = parser.Parse(resourcePath);
@@ -35,10 +39,13 @@ namespace MSBLOC.Core.Tests.Services
             }
         }
 
-        private static IEnumerable<TestCaseData> ShouldParseLogsCases()
+        public static IEnumerable<object[]> ShouldParseLogsCases
         {
-            yield return
-                CreateTestCase("TestConsoleApp1: 1 Warning", "testconsoleapp1-1warning.binlog",
+            get
+            {
+                yield return new object[]
+                {
+                    "testconsoleapp1-1warning.binlog",
                     new[]
                     {
                         new StubAnnotation
@@ -50,10 +57,12 @@ namespace MSBLOC.Core.Tests.Services
                             StartLine = 13,
                             EndLine = 13
                         }
-                    });
+                    }
+                };
 
-            yield return
-                CreateTestCase("TestConsoleApp1: 1 Error", "testconsoleapp1-1error.binlog",
+                yield return new object[]
+                {
+                    "testconsoleapp1-1error.binlog",
                     new[]
                     {
                         new StubAnnotation
@@ -65,16 +74,9 @@ namespace MSBLOC.Core.Tests.Services
                             StartLine = 13,
                             EndLine = 13
                         }
-                    });
-        }
-
-        private static TestCaseData CreateTestCase(string testName, string expectedAnnotations,
-            StubAnnotation[] stubAnnotations)
-        {
-            return new TestCaseData(expectedAnnotations, stubAnnotations)
-            {
-                TestName = testName
-            };
+                    }
+                };
+            }
         }
     }
 }
