@@ -221,6 +221,7 @@
   <ItemGroup>
     <Compile Include="Interfaces\ITokenGenerator.cs" />
     <Compile Include="Interfaces\IParser.cs" />
+    <Compile Include="Model\ParsedBinaryLog.cs" />
     <Compile Include="Services\TokenGenerator.cs" />
     <Compile Include="Services\Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

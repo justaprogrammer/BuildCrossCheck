@@ -1,3 +1,4 @@
+using Microsoft.Build.Framework;
 using Octokit;
 using Shouldly;
 
@@ -5,16 +6,34 @@ namespace MSBLOC.Core.Tests.Services
 {
     internal static class ShoudlyExtensions
     {
-        public static void ShouldBe(this CheckRunAnnotation stubAnnotation, CheckRunAnnotation expected)
+        public static void ShouldBe(this BuildErrorEventArgs buildErrorEventArgs, BuildErrorEventArgs expected)
         {
-            stubAnnotation.Filename.ShouldBe(expected.Filename);
-            stubAnnotation.BlobHref.ShouldBe(expected.BlobHref);
-            stubAnnotation.StartLine.ShouldBe(expected.StartLine);
-            stubAnnotation.EndLine.ShouldBe(expected.EndLine);
-            stubAnnotation.WarningLevel.ShouldBe(expected.WarningLevel);
-            stubAnnotation.Message.ShouldBe(expected.Message);
-            stubAnnotation.Title.ShouldBe(expected.Title);
-            stubAnnotation.RawDetails.ShouldBe(expected.RawDetails);
+            buildErrorEventArgs.Subcategory.ShouldBe(expected.Subcategory);
+            buildErrorEventArgs.Code.ShouldBe(expected.Code);
+            buildErrorEventArgs.File.ShouldBe(expected.File);
+            buildErrorEventArgs.LineNumber.ShouldBe(expected.LineNumber);
+            buildErrorEventArgs.ColumnNumber.ShouldBe(expected.ColumnNumber);
+            buildErrorEventArgs.EndLineNumber.ShouldBe(expected.EndLineNumber);
+            buildErrorEventArgs.EndColumnNumber.ShouldBe(expected.EndColumnNumber);
+            buildErrorEventArgs.Message.ShouldBe(expected.Message);
+            buildErrorEventArgs.HelpKeyword.ShouldBe(expected.HelpKeyword);
+            buildErrorEventArgs.SenderName.ShouldBe(expected.SenderName);
+            buildErrorEventArgs.ProjectFile.ShouldBe(expected.ProjectFile);
+        }
+
+        public static void ShouldBe(this BuildWarningEventArgs buildWarningEventArgs, BuildWarningEventArgs expected)
+        {
+            buildWarningEventArgs.Subcategory.ShouldBe(expected.Subcategory);
+            buildWarningEventArgs.Code.ShouldBe(expected.Code);
+            buildWarningEventArgs.File.ShouldBe(expected.File);
+            buildWarningEventArgs.LineNumber.ShouldBe(expected.LineNumber);
+            buildWarningEventArgs.ColumnNumber.ShouldBe(expected.ColumnNumber);
+            buildWarningEventArgs.EndLineNumber.ShouldBe(expected.EndLineNumber);
+            buildWarningEventArgs.EndColumnNumber.ShouldBe(expected.EndColumnNumber);
+            buildWarningEventArgs.Message.ShouldBe(expected.Message);
+            buildWarningEventArgs.HelpKeyword.ShouldBe(expected.HelpKeyword);
+            buildWarningEventArgs.SenderName.ShouldBe(expected.SenderName);
+            buildWarningEventArgs.ProjectFile.ShouldBe(expected.ProjectFile);
         }
     }
 }

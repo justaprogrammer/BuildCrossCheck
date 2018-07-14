@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
@@ -19,47 +20,55 @@ namespace MSBLOC.Core.Tests.Services
             return Path.Combine(TestContext.CurrentContext.TestDirectory, "Resources", file);
         }
 
-        [TestCaseSource(nameof(ShouldParseLogsCases))]
-        public void ShouldParseLogs(string resourceName, CheckRunAnnotation[] expectedAnnotations)
+        [Test]
+        public void ShouldTestConsoleApp1Warning()
+        {
+            ShouldParseLogs("testconsoleapp1-1warning.binlog",
+                new BuildErrorEventArgs[0],
+                new[]
+                {
+                    new BuildWarningEventArgs(string.Empty, "CS0219", "Program.cs", 13, 20, 0, 0, "The variable 'hello' is assigned but its value is never used", null, "Csc")
+                    {
+                        ProjectFile = "C:\\projects\\testconsoleapp1\\TestConsoleApp1\\TestConsoleApp1.csproj"
+                    },
+                });
+        }
+
+        [Test]
+        public void ShouldTestConsoleApp1Error()
+        {
+            ShouldParseLogs("testconsoleapp1-1error.binlog",
+                new[]
+                {
+                    new BuildErrorEventArgs(string.Empty, "CS1002", "Program.cs", 13, 34, 0, 0, "; expected", null, "Csc")
+                    {
+                        ProjectFile = "C:\\projects\\testconsoleapp1\\TestConsoleApp1\\TestConsoleApp1.csproj"
+                    }
+                },
+                new BuildWarningEventArgs[0]);
+        }
+
+        private void ShouldParseLogs(string resourceName, BuildErrorEventArgs[] expectedBuildErrorEventArgs, BuildWarningEventArgs[] expectedBuildWarningEventArgs)
         {
             var resourcePath = GetResourcePath(resourceName);
             FileAssert.Exists(resourcePath);
 
             var parser = new Parser(TestLogger.Create<Parser>());
-            var checkRunAnnotations = parser.Parse(resourcePath);
+            var parsedBinaryLog = parser.Parse(resourcePath);
 
-            for (var index = 0; index < checkRunAnnotations.Length; index++)
+            for (var index = 0; index < parsedBinaryLog.Errors.Count; index++)
             {
-                var checkRunAnnotation = checkRunAnnotations[index];
-                var expectedAnnotation = expectedAnnotations[index];
-                checkRunAnnotation.ShouldBe(expectedAnnotation);
+                var buildErrorEventArgs = parsedBinaryLog.Errors[index];
+                var expectedBuildErrorEventArg = expectedBuildErrorEventArgs[index];
+                buildErrorEventArgs.ShouldBe(expectedBuildErrorEventArg);
             }
-        }
 
-        private static IEnumerable<TestCaseData> ShouldParseLogsCases()
-        {
-            yield return
-                CreateTestCase("TestConsoleApp1: 1 Warning", "testconsoleapp1-1warning.binlog",
-                    new[]
-                    {
-                        new CheckRunAnnotation("Program.cs", "", 13, 13, CheckWarningLevel.Warning, "The variable 'hello' is assigned but its value is never used", "CS0219", String.Empty)
-                    });
-
-            yield return
-                CreateTestCase("TestConsoleApp1: 1 Error", "testconsoleapp1-1error.binlog",
-                    new[]
-                    {
-                        new CheckRunAnnotation("Program.cs", "", 13, 13, CheckWarningLevel.Failure, "; expected", "CS1002", String.Empty)
-                    });
-        }
-
-        private static TestCaseData CreateTestCase(string testName, string expectedAnnotations,
-            CheckRunAnnotation[] stubAnnotations)
-        {
-            return new TestCaseData(expectedAnnotations, stubAnnotations)
+            for (var index = 0; index < parsedBinaryLog.Warnings.Count; index++)
             {
-                TestName = testName
-            };
+                var buildWarningEventArgs = parsedBinaryLog.Warnings[index];
+                var expectedBuildWarningEventArg = expectedBuildWarningEventArgs[index];
+                buildWarningEventArgs.ShouldBe(expectedBuildWarningEventArg);
+            }
         }
     }
 }

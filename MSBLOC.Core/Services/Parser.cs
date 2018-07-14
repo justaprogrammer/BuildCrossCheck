@@ -4,7 +4,7 @@ using Microsoft.Build.Logging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using MSBLOC.Core.Interfaces;
-using Octokit;
+using MSBLOC.Core.Model;
 
 namespace MSBLOC.Core.Services
 {
@@ -17,9 +17,10 @@ namespace MSBLOC.Core.Services
             Logger = logger ?? new NullLogger<Parser>();
         }
 
-        public CheckRunAnnotation[] Parse(string resourcePath)
+        public ParsedBinaryLog Parse(string resourcePath)
         {
-            var annotations = new List<CheckRunAnnotation>();
+            var warnings = new List<BuildWarningEventArgs>();
+            var errors = new List<BuildErrorEventArgs>();
             var binLogReader = new BinaryLogReplayEventSource();
             foreach (var record in binLogReader.ReadRecords(resourcePath))
             {
@@ -27,36 +28,17 @@ namespace MSBLOC.Core.Services
                 if (buildEventArgs is BuildWarningEventArgs buildWarning)
                 {
                     Logger.LogInformation($"{buildWarning.File} {buildWarning.LineNumber}:{buildWarning.ColumnNumber} {buildWarning.Message}");
-                    var endLine = buildWarning.EndLineNumber;
-                    if (endLine == 0)
-                    {
-                        endLine = buildWarning.LineNumber;
-                    }
-
-                    annotations.Add(CreateAnnotation(buildWarning.File, "", buildWarning.LineNumber, endLine, CheckWarningLevel.Warning, buildWarning.Code, buildWarning.Message, string.Empty));
+                    warnings.Add(buildWarning);
                 }
 
                 if (buildEventArgs is BuildErrorEventArgs buildError)
                 {
                     Logger.LogInformation($"{buildError.File} {buildError.LineNumber}:{buildError.ColumnNumber} {buildError.Message}");
-                    var endLine = buildError.EndLineNumber;
-                    if (endLine == 0)
-                    {
-                        endLine = buildError.LineNumber;
-                    }
-
-                    annotations.Add(CreateAnnotation(buildError.File, "", buildError.LineNumber, endLine, CheckWarningLevel.Failure, buildError.Code, buildError.Message, string.Empty));
+                    errors.Add(buildError);
                 }
             }
 
-            return annotations.ToArray();
-        }
-
-        private static CheckRunAnnotation CreateAnnotation(string fileName, string blobHref, int startLine, int endLine,
-            CheckWarningLevel checkWarningLevel, string title, string message, string rawDetails)
-        {
-            return new CheckRunAnnotation(fileName, blobHref, startLine, endLine, checkWarningLevel, message, title,
-                rawDetails);
+            return new ParsedBinaryLog(warnings, errors);
         }
     }
 }

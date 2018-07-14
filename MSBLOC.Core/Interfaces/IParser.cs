@@ -1,9 +1,9 @@
-﻿using Octokit;
+﻿using MSBLOC.Core.Model;
 
 namespace MSBLOC.Core.Interfaces
 {
     public interface IParser
     {
-        CheckRunAnnotation[] Parse(string resourcePath);
+        ParsedBinaryLog Parse(string resourcePath);
     }
 }
