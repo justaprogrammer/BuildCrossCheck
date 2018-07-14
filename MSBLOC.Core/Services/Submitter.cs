@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -8,31 +10,36 @@ using Octokit;
 
 namespace MSBLOC.Core.Services
 {
-    public class Submitter
+    public class Submitter : ISubmitter
     {
-        private ITokenGenerator TokenGenerator { get; }
+        private ICheckRunsClient CheckRunsClient { get; }
         private ILogger<Submitter> Logger { get; }
 
-        public Submitter(ITokenGenerator tokenGenerator, ILogger<Submitter> logger = null)
+        public Submitter(ICheckRunsClient checkRunsClient, ILogger<Submitter> logger = null)
         {
-            TokenGenerator = tokenGenerator;
+            CheckRunsClient = checkRunsClient;
             Logger = logger ?? new NullLogger<Submitter>();
         }
 
-        public async Task Submit(string owner, string name, string headSha,
-            string checkRunName, ParsedBinaryLog parsedBinaryLog)
+        public async Task<CheckRun> SubmitCheckRun(string owner, string name, string headSha,
+            string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary)
         {
-            var jwtToken = TokenGenerator.GetToken();
-            var appClient = new GitHubClient(new ProductHeaderValue("MSBLOC"))
+            var newCheckRunAnnotations = new List<NewCheckRunAnnotation>();
+            newCheckRunAnnotations.AddRange(parsedBinaryLog.Errors.Select(CreateNewCheckRunAnnotation));
+            newCheckRunAnnotations.AddRange(parsedBinaryLog.Warnings.Select(CreateNewCheckRunAnnotation));
+
+            var newCheckRun = new NewCheckRun(checkRunName, headSha)
             {
-                Credentials = new Credentials(jwtToken, AuthenticationType.Bearer)
+                Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
+                {
+                    Annotations = newCheckRunAnnotations
+                }
             };
 
-            var checkSuite = await appClient.Check.Suite.Create(owner, name, new NewCheckSuite(headSha));
-            var checkRun = await appClient.Check.Run.Create(owner, name, new NewCheckRun(checkRunName, headSha));
+            return await CheckRunsClient.Create(owner, name, newCheckRun);
         }
 
-        private static CheckRunAnnotation CreateCheckRunAnnotation(BuildErrorEventArgs buildErrorEventArgs)
+        private static NewCheckRunAnnotation CreateNewCheckRunAnnotation(BuildErrorEventArgs buildErrorEventArgs)
         {
             var endLine = buildErrorEventArgs.EndLineNumber;
             if (endLine == 0)
@@ -40,12 +47,14 @@ namespace MSBLOC.Core.Services
                 endLine = buildErrorEventArgs.LineNumber;
             }
 
-            return new CheckRunAnnotation(buildErrorEventArgs.File, "", buildErrorEventArgs.LineNumber,
-                endLine, CheckWarningLevel.Failure, buildErrorEventArgs.Message, buildErrorEventArgs.Code,
-                string.Empty);
+            return new NewCheckRunAnnotation(buildErrorEventArgs.File, "", buildErrorEventArgs.LineNumber,
+                endLine, CheckWarningLevel.Failure, buildErrorEventArgs.Message)
+            {
+                Title = buildErrorEventArgs.Code
+            };
         }
 
-        private static CheckRunAnnotation CreateCheckRunAnnotation(BuildWarningEventArgs buildWarningEventArgs)
+        private static NewCheckRunAnnotation CreateNewCheckRunAnnotation(BuildWarningEventArgs buildWarningEventArgs)
         {
             var endLine = buildWarningEventArgs.EndLineNumber;
             if (endLine == 0)
@@ -53,9 +62,11 @@ namespace MSBLOC.Core.Services
                 endLine = buildWarningEventArgs.LineNumber;
             }
 
-            return new CheckRunAnnotation(buildWarningEventArgs.File, "", buildWarningEventArgs.LineNumber,
-                endLine, CheckWarningLevel.Warning, buildWarningEventArgs.Message, buildWarningEventArgs.Code,
-                string.Empty);
+            return new NewCheckRunAnnotation(buildWarningEventArgs.File, "", buildWarningEventArgs.LineNumber,
+                endLine, CheckWarningLevel.Warning, buildWarningEventArgs.Message)
+            {
+                Title = buildWarningEventArgs.Code
+            };
         }
     }
 }

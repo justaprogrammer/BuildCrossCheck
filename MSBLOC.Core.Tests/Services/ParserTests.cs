@@ -7,6 +7,7 @@ using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
 using NUnit.Framework;
 using Octokit;
+using Shouldly;
 
 namespace MSBLOC.Core.Tests.Services
 {
@@ -23,7 +24,7 @@ namespace MSBLOC.Core.Tests.Services
         [Test]
         public void ShouldTestConsoleApp1Warning()
         {
-            ShouldParseLogs("testconsoleapp1-1warning.binlog",
+            AssertParseLogs("testconsoleapp1-1warning.binlog",
                 new BuildErrorEventArgs[0],
                 new[]
                 {
@@ -37,7 +38,7 @@ namespace MSBLOC.Core.Tests.Services
         [Test]
         public void ShouldTestConsoleApp1Error()
         {
-            ShouldParseLogs("testconsoleapp1-1error.binlog",
+            AssertParseLogs("testconsoleapp1-1error.binlog",
                 new[]
                 {
                     new BuildErrorEventArgs(string.Empty, "CS1002", "Program.cs", 13, 34, 0, 0, "; expected", null, "Csc")
@@ -48,13 +49,16 @@ namespace MSBLOC.Core.Tests.Services
                 new BuildWarningEventArgs[0]);
         }
 
-        private void ShouldParseLogs(string resourceName, BuildErrorEventArgs[] expectedBuildErrorEventArgs, BuildWarningEventArgs[] expectedBuildWarningEventArgs)
+        private void AssertParseLogs(string resourceName, BuildErrorEventArgs[] expectedBuildErrorEventArgs, BuildWarningEventArgs[] expectedBuildWarningEventArgs)
         {
             var resourcePath = GetResourcePath(resourceName);
             FileAssert.Exists(resourcePath);
 
             var parser = new Parser(TestLogger.Create<Parser>());
             var parsedBinaryLog = parser.Parse(resourcePath);
+
+            parsedBinaryLog.Errors.Count.ShouldBe(expectedBuildErrorEventArgs.Length);
+            parsedBinaryLog.Warnings.Count.ShouldBe(expectedBuildWarningEventArgs.Length);
 
             for (var index = 0; index < parsedBinaryLog.Errors.Count; index++)
             {

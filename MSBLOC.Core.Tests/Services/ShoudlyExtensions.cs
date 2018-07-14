@@ -35,5 +35,22 @@ namespace MSBLOC.Core.Tests.Services
             buildWarningEventArgs.SenderName.ShouldBe(expected.SenderName);
             buildWarningEventArgs.ProjectFile.ShouldBe(expected.ProjectFile);
         }
+
+        public static void ShouldBe(this NewCheckRun newCheckRun, string checkRunTitle, string checkRunSummary,
+            NewCheckRunAnnotation[] expectedAnnotations, NewCheckRun expectedCheckRun)
+        {
+            newCheckRun.Name.ShouldBe(expectedCheckRun.Name);
+            newCheckRun.HeadSha.ShouldBe(expectedCheckRun.HeadSha);
+            newCheckRun.Output.Title.ShouldBe(checkRunTitle);
+            newCheckRun.Output.Summary.ShouldBe(checkRunSummary);
+
+            newCheckRun.Output.Annotations.Count.ShouldBe(expectedAnnotations.Length);
+
+            for (var index = 0; index < newCheckRun.Output.Annotations.Count; index++)
+            {
+                var newCheckRunAnnotation = newCheckRun.Output.Annotations[index];
+                var expectedAnnotation = expectedAnnotations[index];
+            }
+        }
     }
 }
