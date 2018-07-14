@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 
-namespace MSBLOC.Core.Tests
+namespace MSBLOC.Core.Tests.Util
 {
     public static class TestLogger
     {
