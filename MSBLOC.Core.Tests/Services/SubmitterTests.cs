@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Model;
@@ -53,7 +54,24 @@ namespace MSBLOC.Core.Tests.Services
 
             var newCheckRun = (NewCheckRun) firstCall.GetArguments().Last();
             var expectedCheckRun = new NewCheckRun(checkRunName, headSha);
-            newCheckRun.ShouldBe(checkRunTitle, checkRunSummary, expectedAnnotations, expectedCheckRun);
+            ShouldBe(newCheckRun, checkRunTitle, checkRunSummary, expectedAnnotations, expectedCheckRun);
+        }
+
+        private static void ShouldBe(NewCheckRun newCheckRun, string checkRunTitle, string checkRunSummary,
+            NewCheckRunAnnotation[] expectedAnnotations, NewCheckRun expectedCheckRun)
+        {
+            newCheckRun.Name.Should().Be(expectedCheckRun.Name);
+            newCheckRun.HeadSha.Should().Be(expectedCheckRun.HeadSha);
+            newCheckRun.Output.Title.Should().Be(checkRunTitle);
+            newCheckRun.Output.Summary.Should().Be(checkRunSummary);
+
+            newCheckRun.Output.Annotations.Count.Should().Be(expectedAnnotations.Length);
+
+            for (var index = 0; index < newCheckRun.Output.Annotations.Count; index++)
+            {
+                var newCheckRunAnnotation = newCheckRun.Output.Annotations[index];
+                var expectedAnnotation = expectedAnnotations[index];
+            }
         }
     }
 }
