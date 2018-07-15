@@ -6,12 +6,20 @@ using MSBLOC.Core.Models;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace MSBLOC.Core.Tests.Services
 {
     public class ParserTests
     {
-        private static readonly ILogger<ParserTests> logger = TestLogger.Create<ParserTests>();
+        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly ILogger<ParserTests> _logger;
+
+        public ParserTests(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+            _logger = TestLogger.Create<ParserTests>(testOutputHelper);
+        }
 
         private static string GetResourcePath(string file)
         {
@@ -28,7 +36,7 @@ namespace MSBLOC.Core.Tests.Services
             var resourcePath = GetResourcePath(resourceName);
             Assert.True(File.Exists(resourcePath));
 
-            var parser = new Parser(TestLogger.Create<Parser>());
+            var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
             var stubAnnotations = parser.Parse(resourcePath);
 
             for (var index = 0; index < stubAnnotations.Length; index++)
