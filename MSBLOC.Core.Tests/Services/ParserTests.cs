@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Models;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -39,12 +41,7 @@ namespace MSBLOC.Core.Tests.Services
             var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
             var stubAnnotations = parser.Parse(resourcePath);
 
-            for (var index = 0; index < stubAnnotations.Length; index++)
-            {
-                var stubAnnotation = stubAnnotations[index];
-                var expectedAnnotation = expectedAnnotations[index];
-                stubAnnotation.ShouldBe(expectedAnnotation);
-            }
+            stubAnnotations.ShouldBe(expectedAnnotations, false);
         }
 
         public static IEnumerable<object[]> ShouldParseLogsCases
