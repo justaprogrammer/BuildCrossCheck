@@ -22,5 +22,10 @@ before_build:
         nuget restore MSBuildLogOctokitChecker.sln
 build:
     project: MSBuildLogOctokitChecker.sln
-    publish_wap: true
     verbosity: minimal
+after_build:
+    - cmd: dotnet publish MSBLOC.Web --output %appveyor_build_folder%\dist
+artifacts:
+    - path: dist
+      name: dist.web
+      type: WebDeployPackage
