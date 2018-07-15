@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Models;
@@ -27,7 +26,7 @@ namespace MSBLOC.Core.Tests.Services
         {
             var location = typeof(ParserTests).GetTypeInfo().Assembly.Location;
             var dirPath = Path.GetDirectoryName(location);
-            Assert.NotNull(dirPath);
+            dirPath.ShouldNotBeNull();
             return Path.Combine(dirPath, "Resources", file);
         }
 
@@ -36,7 +35,7 @@ namespace MSBLOC.Core.Tests.Services
         public void ShouldParseLogs(string resourceName, StubAnnotation[] expectedAnnotations)
         {
             var resourcePath = GetResourcePath(resourceName);
-            Assert.True(File.Exists(resourcePath));
+            File.Exists(resourcePath).ShouldBe(true);
 
             var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
             var stubAnnotations = parser.Parse(resourcePath);
