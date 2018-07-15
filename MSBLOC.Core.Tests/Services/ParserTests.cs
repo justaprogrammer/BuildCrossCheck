@@ -1,11 +1,12 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Reflection;
+using FluentAssertions;
+using FluentAssertions.Equivalency;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
-using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -26,7 +27,7 @@ namespace MSBLOC.Core.Tests.Services
         {
             var location = typeof(ParserTests).GetTypeInfo().Assembly.Location;
             var dirPath = Path.GetDirectoryName(location);
-            dirPath.ShouldNotBeNull();
+            dirPath.Should().NotBeNull();
             return Path.Combine(dirPath, "Resources", file);
         }
 
@@ -61,30 +62,20 @@ namespace MSBLOC.Core.Tests.Services
         private void AssertParseLogs(string resourceName, BuildErrorEventArgs[] expectedBuildErrorEventArgs, BuildWarningEventArgs[] expectedBuildWarningEventArgs)
         {
             var resourcePath = GetResourcePath(resourceName);
-            File.Exists(resourcePath).ShouldBe(true);
+            File.Exists(resourcePath).Should().BeTrue();
 
             var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
             var parsedBinaryLog = parser.Parse(resourcePath);
 
-            parsedBinaryLog.Errors.Length.ShouldBe(expectedBuildErrorEventArgs.Length);
-            parsedBinaryLog.Warnings.Length.ShouldBe(expectedBuildWarningEventArgs.Length);
+            parsedBinaryLog.Errors.ToArray().Should().BeEquivalentTo(expectedBuildErrorEventArgs, 
+                options => options
+                    .Excluding(args => args.BuildEventContext)
+                    .Excluding(args => args.Timestamp));
 
-            for (var index = 0; index < parsedBinaryLog.Errors.Length; index++)
-            {
-                var buildErrorEventArgs = parsedBinaryLog.Errors[index];
-                var expectedBuildErrorEventArg = expectedBuildErrorEventArgs[index];
-                buildErrorEventArgs.ShouldBe(expectedBuildErrorEventArg);
-            }
-
-            for (var index = 0; index < parsedBinaryLog.Warnings.Length; index++)
-            {
-                var buildWarningEventArgs = parsedBinaryLog.Warnings[index];
-                var expectedBuildWarningEventArg = expectedBuildWarningEventArgs[index];
-                buildWarningEventArgs.ShouldBe(expectedBuildWarningEventArg);
-            }
-
-            parsedBinaryLog.Errors.ToArray().ShouldBe(expectedBuildErrorEventArgs, false);
-            parsedBinaryLog.Warnings.ToArray().ShouldBe(expectedBuildWarningEventArgs, false);
+            parsedBinaryLog.Warnings.ToArray().Should().BeEquivalentTo(expectedBuildWarningEventArgs, options => 
+                options
+                    .Excluding(args => args.BuildEventContext)
+                    .Excluding(args => args.Timestamp));
         }
     }
 }

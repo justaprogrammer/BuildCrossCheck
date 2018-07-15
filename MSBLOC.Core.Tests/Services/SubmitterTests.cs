@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
@@ -9,9 +6,7 @@ using MSBLOC.Core.Model;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
 using NSubstitute;
-using NUnit.Framework;
 using Octokit;
-using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
