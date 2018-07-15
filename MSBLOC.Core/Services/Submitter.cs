@@ -25,8 +25,23 @@ namespace MSBLOC.Core.Services
             string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary)
         {
             var newCheckRunAnnotations = new List<NewCheckRunAnnotation>();
-            newCheckRunAnnotations.AddRange(parsedBinaryLog.Errors.Select(CreateNewCheckRunAnnotation));
-            newCheckRunAnnotations.AddRange(parsedBinaryLog.Warnings.Select(CreateNewCheckRunAnnotation));
+            newCheckRunAnnotations.AddRange(parsedBinaryLog.Errors.Select(args => NewCheckRunAnnotation(
+                args.File, 
+                "", 
+                args.LineNumber,
+                args.EndLineNumber, 
+                CheckWarningLevel.Failure, 
+                args.Message, 
+                args.Code)));
+
+            newCheckRunAnnotations.AddRange(parsedBinaryLog.Warnings.Select(args => NewCheckRunAnnotation(
+                args.File,
+                "",
+                args.LineNumber,
+                args.EndLineNumber,
+                CheckWarningLevel.Warning,
+                args.Message,
+                args.Code)));
 
             var newCheckRun = new NewCheckRun(checkRunName, headSha)
             {
@@ -39,33 +54,18 @@ namespace MSBLOC.Core.Services
             return await CheckRunsClient.Create(owner, name, newCheckRun);
         }
 
-        private static NewCheckRunAnnotation CreateNewCheckRunAnnotation(BuildErrorEventArgs buildErrorEventArgs)
+        private static NewCheckRunAnnotation NewCheckRunAnnotation(string filename, string blobHref, int lineNumber,
+            int endLine, CheckWarningLevel checkWarningLevel, string message, string title)
         {
-            var endLine = buildErrorEventArgs.EndLineNumber;
             if (endLine == 0)
             {
-                endLine = buildErrorEventArgs.LineNumber;
+                endLine = lineNumber;
             }
 
-            return new NewCheckRunAnnotation(buildErrorEventArgs.File, "", buildErrorEventArgs.LineNumber,
-                endLine, CheckWarningLevel.Failure, buildErrorEventArgs.Message)
+            return new NewCheckRunAnnotation(filename, blobHref, lineNumber,
+                endLine, checkWarningLevel, message)
             {
-                Title = buildErrorEventArgs.Code
-            };
-        }
-
-        private static NewCheckRunAnnotation CreateNewCheckRunAnnotation(BuildWarningEventArgs buildWarningEventArgs)
-        {
-            var endLine = buildWarningEventArgs.EndLineNumber;
-            if (endLine == 0)
-            {
-                endLine = buildWarningEventArgs.LineNumber;
-            }
-
-            return new NewCheckRunAnnotation(buildWarningEventArgs.File, "", buildWarningEventArgs.LineNumber,
-                endLine, CheckWarningLevel.Warning, buildWarningEventArgs.Message)
-            {
-                Title = buildWarningEventArgs.Code
+                Title = title
             };
         }
     }
