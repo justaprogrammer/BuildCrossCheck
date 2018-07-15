@@ -1,44 +1,55 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Models;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace MSBLOC.Core.Tests.Services
 {
-    [TestFixture]
     public class ParserTests
     {
-        private static readonly ILogger<ParserTests> logger = TestLogger.Create<ParserTests>();
+        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly ILogger<ParserTests> _logger;
+
+        public ParserTests(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+            _logger = TestLogger.Create<ParserTests>(testOutputHelper);
+        }
 
         private static string GetResourcePath(string file)
         {
-            return Path.Combine(TestContext.CurrentContext.TestDirectory, "Resources", file);
+            var location = typeof(ParserTests).GetTypeInfo().Assembly.Location;
+            var dirPath = Path.GetDirectoryName(location);
+            dirPath.ShouldNotBeNull();
+            return Path.Combine(dirPath, "Resources", file);
         }
 
-        [TestCaseSource(nameof(ShouldParseLogsCases))]
+        [Theory]
+        [MemberData(nameof(ShouldParseLogsCases))]
         public void ShouldParseLogs(string resourceName, StubAnnotation[] expectedAnnotations)
         {
             var resourcePath = GetResourcePath(resourceName);
-            FileAssert.Exists(resourcePath);
+            File.Exists(resourcePath).ShouldBe(true);
 
-            var parser = new Parser(TestLogger.Create<Parser>());
+            var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
             var stubAnnotations = parser.Parse(resourcePath);
 
-            for (var index = 0; index < stubAnnotations.Length; index++)
-            {
-                var stubAnnotation = stubAnnotations[index];
-                var expectedAnnotation = expectedAnnotations[index];
-                stubAnnotation.ShouldBe(expectedAnnotation);
-            }
+            stubAnnotations.ShouldBe(expectedAnnotations, false);
         }
 
-        private static IEnumerable<TestCaseData> ShouldParseLogsCases()
+        public static IEnumerable<object[]> ShouldParseLogsCases
         {
-            yield return
-                CreateTestCase("TestConsoleApp1: 1 Warning", "testconsoleapp1-1warning.binlog",
+            get
+            {
+                yield return new object[]
+                {
+                    "testconsoleapp1-1warning.binlog",
                     new[]
                     {
                         new StubAnnotation
@@ -50,10 +61,12 @@ namespace MSBLOC.Core.Tests.Services
                             StartLine = 13,
                             EndLine = 13
                         }
-                    });
+                    }
+                };
 
-            yield return
-                CreateTestCase("TestConsoleApp1: 1 Error", "testconsoleapp1-1error.binlog",
+                yield return new object[]
+                {
+                    "testconsoleapp1-1error.binlog",
                     new[]
                     {
                         new StubAnnotation
@@ -65,16 +78,9 @@ namespace MSBLOC.Core.Tests.Services
                             StartLine = 13,
                             EndLine = 13
                         }
-                    });
-        }
-
-        private static TestCaseData CreateTestCase(string testName, string expectedAnnotations,
-            StubAnnotation[] stubAnnotations)
-        {
-            return new TestCaseData(expectedAnnotations, stubAnnotations)
-            {
-                TestName = testName
-            };
+                    }
+                };
+            }
         }
     }
 }
