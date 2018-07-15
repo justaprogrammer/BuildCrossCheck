@@ -38,7 +38,7 @@ namespace MSBLOC.Core.Services
                 }
             }
 
-            return new ParsedBinaryLog(warnings, errors);
+            return new ParsedBinaryLog(warnings.ToArray(), errors.ToArray());
         }
     }
 }

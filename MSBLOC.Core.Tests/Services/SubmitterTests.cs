@@ -12,18 +12,26 @@ using NSubstitute;
 using NUnit.Framework;
 using Octokit;
 using Shouldly;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace MSBLOC.Core.Tests.Services
 {
-    [TestFixture]
     public class SubmitterTests
     {
-        private static readonly ILogger<SubmitterTests> logger = TestLogger.Create<SubmitterTests>();
+        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly ILogger<SubmitterTests> _logger;
 
-        [Test]
+        public SubmitterTests(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+            _logger = TestLogger.Create<SubmitterTests>(testOutputHelper);
+        }
+
+        [Fact]
         public async Task ShouldSubmitEmptyLog()
         {
-            var parsedBinaryLog = new ParsedBinaryLog(new List<BuildWarningEventArgs>(), new List<BuildErrorEventArgs>());
+            var parsedBinaryLog = new ParsedBinaryLog(new BuildWarningEventArgs[0], new BuildErrorEventArgs[0]);
             await AssertSubmitLogs("JustAProgrammer", 
                 "TestRepo",
                 "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5", 
@@ -37,7 +45,7 @@ namespace MSBLOC.Core.Tests.Services
         private async Task AssertSubmitLogs(string owner, string name, string headSha, string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary, NewCheckRunAnnotation[] expectedAnnotations)
         {
             var checkRunsClient = NSubstitute.Substitute.For<ICheckRunsClient>();
-            var submitter = new Submitter(checkRunsClient, TestLogger.Create<Submitter>());
+            var submitter = new Submitter(checkRunsClient, TestLogger.Create<Submitter>(_testOutputHelper));
 
             var checkRun = await submitter.SubmitCheckRun(owner, name, headSha, checkRunName, parsedBinaryLog, checkRunTitle, checkRunSummary);
 
@@ -52,6 +60,5 @@ namespace MSBLOC.Core.Tests.Services
             var expectedCheckRun = new NewCheckRun(checkRunName, headSha);
             newCheckRun.ShouldBe(checkRunTitle, checkRunSummary, expectedAnnotations, expectedCheckRun);
         }
-
     }
 }

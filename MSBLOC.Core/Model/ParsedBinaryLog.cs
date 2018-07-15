@@ -5,11 +5,11 @@ namespace MSBLOC.Core.Model
 {
     public class ParsedBinaryLog
     {
-        public IList<BuildWarningEventArgs> Warnings { get; }
+        public BuildWarningEventArgs[] Warnings { get; }
 
-        public IList<BuildErrorEventArgs> Errors { get; }
+        public BuildErrorEventArgs[] Errors { get; }
 
-        public ParsedBinaryLog(IList<BuildWarningEventArgs> warnings, IList<BuildErrorEventArgs> errors)
+        public ParsedBinaryLog(BuildWarningEventArgs[] warnings, BuildErrorEventArgs[] errors)
         {
             Warnings = warnings;
             Errors = errors;
