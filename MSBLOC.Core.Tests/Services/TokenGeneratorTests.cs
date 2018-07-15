@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
-using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -23,7 +23,7 @@ namespace MSBLOC.Core.Tests.Services
         {
             var jwtTokenGenerator = new TokenGenerator(new TestPrivateKeySource(), TestLogger.Create<TokenGenerator>(_testOutputHelper));
             var token = jwtTokenGenerator.GetToken();
-            token.ShouldNotBeNull();
+            token.Should().NotBeNull();
 
             _logger.LogInformation($"Token: {token}");
         }

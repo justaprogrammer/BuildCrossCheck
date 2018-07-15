@@ -4,8 +4,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using MSBLOC.Core.Interfaces;
-using MSBLOC.Core.Models;
-
+using MSBLOC.Core.Model;
 
 namespace MSBLOC.Core.Services
 {
@@ -18,9 +17,10 @@ namespace MSBLOC.Core.Services
             Logger = logger ?? new NullLogger<Parser>();
         }
 
-        public StubAnnotation[] Parse(string resourcePath)
+        public ParsedBinaryLog Parse(string resourcePath)
         {
-            var stubAnnotations = new List<StubAnnotation>();
+            var warnings = new List<BuildWarningEventArgs>();
+            var errors = new List<BuildErrorEventArgs>();
             var binLogReader = new StructuredLogger::Microsoft.Build.Logging.BinaryLogReplayEventSource();
             foreach (var record in binLogReader.ReadRecords(resourcePath))
             {
@@ -28,45 +28,17 @@ namespace MSBLOC.Core.Services
                 if (buildEventArgs is BuildWarningEventArgs buildWarning)
                 {
                     Logger.LogInformation($"{buildWarning.File} {buildWarning.LineNumber}:{buildWarning.ColumnNumber} {buildWarning.Message}");
-                    var endLine = buildWarning.EndLineNumber;
-                    if (endLine == 0)
-                    {
-                        endLine = buildWarning.LineNumber;
-                    }
-
-                    stubAnnotations.Add(new StubAnnotation
-                    {
-                        FileName = buildWarning.File,
-                        Title = buildWarning.Code,
-                        Message = buildWarning.Message,
-                        WarningLevel = "Warning",
-                        StartLine = buildWarning.LineNumber,
-                        EndLine = endLine
-                    });
+                    warnings.Add(buildWarning);
                 }
 
                 if (buildEventArgs is BuildErrorEventArgs buildError)
                 {
                     Logger.LogInformation($"{buildError.File} {buildError.LineNumber}:{buildError.ColumnNumber} {buildError.Message}");
-                    var endLine = buildError.EndLineNumber;
-                    if (endLine == 0)
-                    {
-                        endLine = buildError.LineNumber;
-                    }
-
-                    stubAnnotations.Add(new StubAnnotation
-                    {
-                        FileName = buildError.File,
-                        Title = buildError.Code,
-                        Message = buildError.Message,
-                        WarningLevel = "Error",
-                        StartLine = buildError.LineNumber,
-                        EndLine = endLine
-                    });
+                    errors.Add(buildError);
                 }
             }
 
-            return stubAnnotations.ToArray();
+            return new ParsedBinaryLog(warnings.ToArray(), errors.ToArray());
         }
     }
 }
