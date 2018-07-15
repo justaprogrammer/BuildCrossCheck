@@ -3,4 +3,4 @@
 	url = git@github.com:JustAProgrammer/MSBuildLogOctokitCheckerPrivate.git
 [submodule "octokit.net"]
 	path = octokit.net
-	url = https://github.com/octokit/octokit.net.git
+	url = https://github.com/justaprogrammer/octokit.net.git
