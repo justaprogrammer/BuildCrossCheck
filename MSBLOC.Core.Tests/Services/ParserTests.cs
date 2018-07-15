@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
@@ -24,8 +25,9 @@ namespace MSBLOC.Core.Tests.Services
 
         private static string GetResourcePath(string file)
         {
-            var location = typeof(ParserTests).GetTypeInfo().Assembly.Location;
-            var dirPath = Path.GetDirectoryName(location);
+            var codeBaseUrl = new Uri(Assembly.GetExecutingAssembly().CodeBase);
+            var codeBasePath = Uri.UnescapeDataString(codeBaseUrl.AbsolutePath);
+            var dirPath = Path.GetDirectoryName(codeBasePath);
             dirPath.ShouldNotBeNull();
             return Path.Combine(dirPath, "Resources", file);
         }
