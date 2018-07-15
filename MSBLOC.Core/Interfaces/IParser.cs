@@ -1,9 +1,9 @@
-﻿using MSBLOC.Core.Models;
+﻿using MSBLOC.Core.Model;
 
 namespace MSBLOC.Core.Interfaces
 {
     public interface IParser
     {
-        StubAnnotation[] Parse(string resourcePath);
+        ParsedBinaryLog Parse(string resourcePath);
     }
 }

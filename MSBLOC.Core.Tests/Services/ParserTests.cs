@@ -1,79 +1,83 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using FluentAssertions;
+using FluentAssertions.Equivalency;
+using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
-using MSBLOC.Core.Models;
 using MSBLOC.Core.Services;
-using NUnit.Framework;
+using MSBLOC.Core.Tests.Util;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace MSBLOC.Core.Tests.Services
 {
-    [TestFixture]
     public class ParserTests
     {
-        private static readonly ILogger<ParserTests> logger = TestLogger.Create<ParserTests>();
+        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly ILogger<ParserTests> _logger;
+
+        public ParserTests(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+            _logger = TestLogger.Create<ParserTests>(testOutputHelper);
+        }
 
         private static string GetResourcePath(string file)
         {
-            return Path.Combine(TestContext.CurrentContext.TestDirectory, "Resources", file);
+            var codeBaseUrl = new Uri(Assembly.GetExecutingAssembly().CodeBase);
+            var codeBasePath = Uri.UnescapeDataString(codeBaseUrl.AbsolutePath);
+            var dirPath = Path.GetDirectoryName(codeBasePath);
+            dirPath.Should().NotBeNull();
+            return Path.Combine(dirPath, "Resources", file);
         }
 
-        [TestCaseSource(nameof(ShouldParseLogsCases))]
-        public void ShouldParseLogs(string resourceName, StubAnnotation[] expectedAnnotations)
+        [Fact]
+        public void ShouldTestConsoleApp1Warning()
+        {
+            AssertParseLogs("testconsoleapp1-1warning.binlog",
+                new BuildErrorEventArgs[0],
+                new[]
+                {
+                    new BuildWarningEventArgs(string.Empty, "CS0219", "Program.cs", 13, 20, 0, 0, "The variable 'hello' is assigned but its value is never used", null, "Csc")
+                    {
+                        ProjectFile = "C:\\projects\\testconsoleapp1\\TestConsoleApp1\\TestConsoleApp1.csproj"
+                    },
+                });
+        }
+
+        [Fact]
+        public void ShouldTestConsoleApp1Error()
+        {
+            AssertParseLogs("testconsoleapp1-1error.binlog",
+                new[]
+                {
+                    new BuildErrorEventArgs(string.Empty, "CS1002", "Program.cs", 13, 34, 0, 0, "; expected", null, "Csc")
+                    {
+                        ProjectFile = "C:\\projects\\testconsoleapp1\\TestConsoleApp1\\TestConsoleApp1.csproj"
+                    }
+                },
+                new BuildWarningEventArgs[0]);
+        }
+
+        private void AssertParseLogs(string resourceName, BuildErrorEventArgs[] expectedBuildErrorEventArgs, BuildWarningEventArgs[] expectedBuildWarningEventArgs)
         {
             var resourcePath = GetResourcePath(resourceName);
-            FileAssert.Exists(resourcePath);
+            File.Exists(resourcePath).Should().BeTrue();
 
-            var parser = new Parser(TestLogger.Create<Parser>());
-            var stubAnnotations = parser.Parse(resourcePath);
+            var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
+            var parsedBinaryLog = parser.Parse(resourcePath);
 
-            for (var index = 0; index < stubAnnotations.Length; index++)
-            {
-                var stubAnnotation = stubAnnotations[index];
-                var expectedAnnotation = expectedAnnotations[index];
-                stubAnnotation.ShouldBe(expectedAnnotation);
-            }
-        }
+            parsedBinaryLog.Errors.ToArray().Should().BeEquivalentTo(expectedBuildErrorEventArgs, 
+                options => options
+                    .Excluding(args => args.BuildEventContext)
+                    .Excluding(args => args.Timestamp));
 
-        private static IEnumerable<TestCaseData> ShouldParseLogsCases()
-        {
-            yield return
-                CreateTestCase("TestConsoleApp1: 1 Warning", "testconsoleapp1-1warning.binlog",
-                    new[]
-                    {
-                        new StubAnnotation
-                        {
-                            FileName = "Program.cs",
-                            Message = "The variable 'hello' is assigned but its value is never used",
-                            WarningLevel = "Warning",
-                            Title = "CS0219",
-                            StartLine = 13,
-                            EndLine = 13
-                        }
-                    });
-
-            yield return
-                CreateTestCase("TestConsoleApp1: 1 Error", "testconsoleapp1-1error.binlog",
-                    new[]
-                    {
-                        new StubAnnotation
-                        {
-                            FileName = "Program.cs",
-                            Message = "; expected",
-                            WarningLevel = "Error",
-                            Title = "CS1002",
-                            StartLine = 13,
-                            EndLine = 13
-                        }
-                    });
-        }
-
-        private static TestCaseData CreateTestCase(string testName, string expectedAnnotations,
-            StubAnnotation[] stubAnnotations)
-        {
-            return new TestCaseData(expectedAnnotations, stubAnnotations)
-            {
-                TestName = testName
-            };
+            parsedBinaryLog.Warnings.ToArray().Should().BeEquivalentTo(expectedBuildWarningEventArgs, options => 
+                options
+                    .Excluding(args => args.BuildEventContext)
+                    .Excluding(args => args.Timestamp));
         }
     }
 }
