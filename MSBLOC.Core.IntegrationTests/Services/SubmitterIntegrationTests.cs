@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using GitHubJwt;
+using Microsoft.Extensions.Logging;
 using MSBLOC.Core.IntegrationTests.Utilities;
+using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
 using Xunit.Abstractions;
 
@@ -19,7 +21,7 @@ namespace MSBLOC.Core.IntegrationTests.Services
         [IntegrationTest]
         public void ShouldSubmit()
         {
-
+            var tokenGenerator = new TokenGenerator(Helper.GitHubAppId, new EnvironmentVariablePrivateKeySource(Helper.GitHubAppPrivateKeyEnvironmentVariable));
         }
     }
 }
