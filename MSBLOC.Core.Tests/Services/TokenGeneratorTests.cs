@@ -21,7 +21,7 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public void ShouldGenerateToken()
         {
-            var jwtTokenGenerator = new TokenGenerator(new TestPrivateKeySource(), TestLogger.Create<TokenGenerator>(_testOutputHelper));
+            var jwtTokenGenerator = new TokenGenerator(1, new TestPrivateKeySource(), TestLogger.Create<TokenGenerator>(_testOutputHelper));
             var token = jwtTokenGenerator.GetToken();
             token.Should().NotBeNull();
 

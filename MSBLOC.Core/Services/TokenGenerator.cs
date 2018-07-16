@@ -9,12 +9,15 @@ namespace MSBLOC.Core.Services
     public class TokenGenerator : ITokenGenerator
     {
         private IPrivateKeySource _privateKeySource;
+        private int _appIntegrationId;
         private  ILogger<TokenGenerator> Logger { get; }
 
-        public TokenGenerator(IPrivateKeySource privateKeySource, ILogger<TokenGenerator> logger = null)
+        public TokenGenerator(int appIntegrationId, IPrivateKeySource privateKeySource,
+            ILogger<TokenGenerator> logger = null)
         {
             _privateKeySource = privateKeySource;
             Logger = logger ?? new NullLogger<TokenGenerator>();
+            _appIntegrationId = appIntegrationId;
         }
 
         public string GetToken()
@@ -23,7 +26,7 @@ namespace MSBLOC.Core.Services
                 _privateKeySource, 
                 new GitHubJwtFactoryOptions
                 {
-                    AppIntegrationId = 1,
+                    AppIntegrationId = _appIntegrationId,
                     ExpirationSeconds = 600
                 }
             );

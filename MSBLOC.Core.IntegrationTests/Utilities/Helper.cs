@@ -5,10 +5,10 @@ namespace MSBLOC.Core.IntegrationTests.Utilities
 {
     public static class Helper
     {
-        public static string Username => Environment.GetEnvironmentVariable("MSBLOC_GITHUBUSERNAME");
+        public static string GitHubAppIdString => Environment.GetEnvironmentVariable("MSBLOC_GITHUB_APPID");
 
-        public static string OAuthToken => Environment.GetEnvironmentVariable("MSBLOC_OAUTHTOKEN");
+        public static int GitHubAppId => Int32.Parse(GitHubAppIdString);
 
-        public static bool HasCredentials => true; //!Username.IsNullOrEmpty() && !OAuthToken.IsNullOrEmpty();
+        public static bool HasCredentials => !GitHubAppIdString.IsNullOrEmpty();
     }
 }
