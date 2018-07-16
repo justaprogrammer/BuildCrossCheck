@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Build.Framework;
@@ -28,22 +29,74 @@ namespace MSBLOC.Core.Tests.Services
         public async Task ShouldSubmitEmptyLog()
         {
             var parsedBinaryLog = new ParsedBinaryLog(new BuildWarningEventArgs[0], new BuildErrorEventArgs[0]);
-            await AssertSubmitLogs("JustAProgrammer", 
-                "TestRepo",
-                "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5", 
-                "SampleCheckRun",
-                parsedBinaryLog,
-                "Check Run Title",
-                "Check Run Summary",
-                new NewCheckRunAnnotation[0]);
+            await AssertSubmitLogs(
+                owner: "JustAProgrammer",
+                name: "TestRepo",
+                headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5",
+                checkRunName: "SampleCheckRun",
+                parsedBinaryLog: parsedBinaryLog,
+                checkRunTitle: "Check Run Title",
+                checkRunSummary: "Check Run Summary",
+                expectedAnnotations: new NewCheckRunAnnotation[0]);
+        }
+
+        [Fact]
+        public async Task ShouldSubmitLogWithWarning()
+        {
+            var parsedBinaryLog = new ParsedBinaryLog(
+                new[] { new BuildWarningEventArgs(string.Empty, "Code", "File", 9, 0, 0, 0, "Message", string.Empty, string.Empty, DateTime.Now, null) },
+                new BuildErrorEventArgs[0]);
+
+            await AssertSubmitLogs(
+                owner: "JustAProgrammer",
+                name: "TestRepo",
+                headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5",
+                checkRunName: "SampleCheckRun",
+                parsedBinaryLog: parsedBinaryLog,
+                checkRunTitle: "Check Run Title",
+                checkRunSummary: "Check Run Summary",
+                expectedAnnotations: new[]
+                {
+                    new NewCheckRunAnnotation("File", "", 9, 9, CheckWarningLevel.Warning, "Message")
+                    {
+                        Title = "Code"
+                    }
+                });
+        }
+
+        [Fact]
+        public async Task ShouldSubmitLogWithError()
+        {
+            var parsedBinaryLog = new ParsedBinaryLog(
+                new BuildWarningEventArgs[0],
+                new[] { new BuildErrorEventArgs(string.Empty, "Code", "File", 9, 0, 0, 0, "Message", string.Empty, string.Empty, DateTime.Now, null) });
+
+            await AssertSubmitLogs(
+                owner: "JustAProgrammer",
+                name: "TestRepo",
+                headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5",
+                checkRunName: "SampleCheckRun",
+                parsedBinaryLog: parsedBinaryLog,
+                checkRunTitle: "Check Run Title",
+                checkRunSummary: "Check Run Summary",
+                expectedAnnotations: new[]
+                {
+                    new NewCheckRunAnnotation("File", "", 9, 9, CheckWarningLevel.Failure, "Message")
+                    {
+                        Title = "Code"
+                    }
+                });
         }
 
         private async Task AssertSubmitLogs(string owner, string name, string headSha, string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary, NewCheckRunAnnotation[] expectedAnnotations)
         {
-            var checkRunsClient = NSubstitute.Substitute.For<ICheckRunsClient>();
+            var checkRunsClient = Substitute.For<ICheckRunsClient>();
+            checkRunsClient.Create(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<NewCheckRun>())
+                .ReturnsForAnyArgs(new CheckRun());
+
             var submitter = new Submitter(checkRunsClient, TestLogger.Create<Submitter>(_testOutputHelper));
 
-            var checkRun = await submitter.SubmitCheckRun(owner, name, headSha, checkRunName, parsedBinaryLog, checkRunTitle, checkRunSummary);
+            await submitter.SubmitCheckRun(owner, name, headSha, checkRunName, parsedBinaryLog, checkRunTitle, checkRunSummary);
 
             Received.InOrder(async () =>
             {
@@ -52,26 +105,16 @@ namespace MSBLOC.Core.Tests.Services
 
             var firstCall = checkRunsClient.ReceivedCalls().First();
 
-            var newCheckRun = (NewCheckRun) firstCall.GetArguments().Last();
-            var expectedCheckRun = new NewCheckRun(checkRunName, headSha);
-            ShouldBe(newCheckRun, checkRunTitle, checkRunSummary, expectedAnnotations, expectedCheckRun);
-        }
-
-        private static void ShouldBe(NewCheckRun newCheckRun, string checkRunTitle, string checkRunSummary,
-            NewCheckRunAnnotation[] expectedAnnotations, NewCheckRun expectedCheckRun)
-        {
-            newCheckRun.Name.Should().Be(expectedCheckRun.Name);
-            newCheckRun.HeadSha.Should().Be(expectedCheckRun.HeadSha);
-            newCheckRun.Output.Title.Should().Be(checkRunTitle);
-            newCheckRun.Output.Summary.Should().Be(checkRunSummary);
-
-            newCheckRun.Output.Annotations.Count.Should().Be(expectedAnnotations.Length);
-
-            for (var index = 0; index < newCheckRun.Output.Annotations.Count; index++)
+            var newCheckRun = (NewCheckRun)firstCall.GetArguments().Last();
+            var expectedCheckRun = new NewCheckRun(checkRunName, headSha)
             {
-                var newCheckRunAnnotation = newCheckRun.Output.Annotations[index];
-                var expectedAnnotation = expectedAnnotations[index];
-            }
+                Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
+                {
+                    Annotations = expectedAnnotations
+                }
+            };
+
+            newCheckRun.Should().BeEquivalentTo(expectedCheckRun);
         }
     }
 }
