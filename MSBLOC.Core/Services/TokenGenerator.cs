@@ -23,8 +23,8 @@ namespace MSBLOC.Core.Services
                 _privateKeySource, 
                 new GitHubJwtFactoryOptions
                 {
-                    AppIntegrationId = 1, // The GitHub App Id
-                    ExpirationSeconds = 600 // 10 minutes is the maximum time allowed
+                    AppIntegrationId = 1,
+                    ExpirationSeconds = 600
                 }
             );
 
