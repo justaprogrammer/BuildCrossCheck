@@ -94,7 +94,9 @@ namespace MSBLOC.Core.Tests.Services
             checkRunsClient.Create(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<NewCheckRun>())
                 .ReturnsForAnyArgs(new CheckRun());
 
-            var submitter = new Submitter(checkRunsClient, TestLogger.Create<Submitter>(_testOutputHelper));
+            var repositoryCommitsClient = Substitute.For<IRepositoryCommitsClient>();
+
+            var submitter = new Submitter(repositoryCommitsClient, checkRunsClient, TestLogger.Create<Submitter>(_testOutputHelper));
 
             await submitter.SubmitCheckRun(owner, name, headSha, checkRunName, parsedBinaryLog, checkRunTitle, checkRunSummary);
 

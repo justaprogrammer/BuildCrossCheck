@@ -24,15 +24,6 @@ namespace MSBLOC.Core.Tests.Services
             _logger = TestLogger.Create<ParserTests>(testOutputHelper);
         }
 
-        private static string GetResourcePath(string file)
-        {
-            var codeBaseUrl = new Uri(Assembly.GetExecutingAssembly().CodeBase);
-            var codeBasePath = Uri.UnescapeDataString(codeBaseUrl.AbsolutePath);
-            var dirPath = Path.GetDirectoryName(codeBasePath);
-            dirPath.Should().NotBeNull();
-            return Path.Combine(dirPath, "Resources", file);
-        }
-
         [Fact]
         public void ShouldTestConsoleApp1Warning()
         {
@@ -63,7 +54,7 @@ namespace MSBLOC.Core.Tests.Services
 
         private void AssertParseLogs(string resourceName, BuildErrorEventArgs[] expectedBuildErrorEventArgs, BuildWarningEventArgs[] expectedBuildWarningEventArgs)
         {
-            var resourcePath = GetResourcePath(resourceName);
+            var resourcePath = TestUtils.GetResourcePath(resourceName);
             File.Exists(resourcePath).Should().BeTrue();
 
             var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
