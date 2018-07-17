@@ -29,7 +29,7 @@ namespace MSBLOC.Web.Services
             {
                 await source.CopyToAsync(targetStream);
 
-                _logger.LogInformation($"Copied the uploaded file '{targetFilePath}'");
+                _logger.LogInformation($"Copied the uploaded file '{fileName}' to path: '{targetFilePath}'");
             }
 
             return targetFilePath;

@@ -52,10 +52,10 @@ namespace MSBLOC.Web.Tests.Controllers.api
             fileService.CreateFromStreamAsync(Arg.Any<string>(), Arg.Any<Stream>())
                 .Returns(ci =>
                 {
-                    var fileName = (string)ci[0];
-                    var stream = (Stream)ci[1];
+                    var fileName = (string) ci[0];
+                    var stream = (Stream) ci[1];
                     receivedFiles.Add(fileName, new StreamReader(stream, Encoding.UTF8).ReadToEnd());
-                    return $"temp/{ci[0]}";
+                    return $"temp/{fileName}";
                 });
 
             var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)
@@ -86,7 +86,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     var fileName = (string) ci[0];
                     var stream = (Stream) ci[1];
                     receivedFiles.Add(fileName ,new StreamReader(stream, Encoding.UTF8).ReadToEnd());
-                    return $"temp/{ci[0]}";
+                    return $"temp/{fileName}";
                 });
 
             var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)

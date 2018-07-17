@@ -14,15 +14,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using MSBLOC.Web.Interfaces;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace MSBLOC.Web.Controllers.api
 {
     [Route("api/[controller]")]
     public class FileController : Controller
     {
 
-        private static readonly FormOptions _defaultFormOptions = new FormOptions();
+        private static readonly FormOptions DefaultFormOptions = new FormOptions();
 
         private readonly ILogger<FileController> _logger;
         private readonly ITempFileService _tempFileService;
@@ -46,7 +44,7 @@ namespace MSBLOC.Web.Controllers.api
 
             var boundary = MultipartRequestHelper.GetBoundary(
                 MediaTypeHeaderValue.Parse(Request.ContentType),
-                _defaultFormOptions.MultipartBoundaryLengthLimit);
+                DefaultFormOptions.MultipartBoundaryLengthLimit);
             var reader = new MultipartReader(boundary, HttpContext.Request.Body);
 
             var section = await reader.ReadNextSectionAsync();
@@ -88,9 +86,9 @@ namespace MSBLOC.Web.Controllers.api
                             }
                             formAccumulator.Append(key.Value, value);
 
-                            if (formAccumulator.ValueCount > _defaultFormOptions.ValueCountLimit)
+                            if (formAccumulator.ValueCount > DefaultFormOptions.ValueCountLimit)
                             {
-                                throw new InvalidDataException($"Form key count limit {_defaultFormOptions.ValueCountLimit} exceeded.");
+                                throw new InvalidDataException($"Form key count limit {DefaultFormOptions.ValueCountLimit} exceeded.");
                             }
                         }
                     }
