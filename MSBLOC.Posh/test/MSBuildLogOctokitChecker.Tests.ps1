@@ -7,4 +7,3 @@ Describe 'Module Manifest Tests' {
         $? | Should Be $true
     }
 }
-

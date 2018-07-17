@@ -1,16 +1,26 @@
-# Implement your module commands in this script.
 
-function GetUploadUrl() {
+$script:BaseUrl = 'http://localhost:64952'
+
+function Get-OctoKitMsbuildLogBaseUrl{
+    [CmdletBinding()]
+    [OutputType([String])]
+    param()
+    $script:BaseUrl
+}
+
+function Set-OctoKitMsbuildLogBaseUrl{
     [CmdletBinding()]
     [OutputType([String])]
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [ValidateNotNullOrEmpty()]
-        [string] $BaseUrl
+        [string] $Url,
+        [switch] $Passthru
     )
-    $FullUrl = '{0}/api/File' -f $BaseUrl
-    Write-Verbose "Upload Url: $FullUrl"
-    return $FullUrl
+    $script:BaseUrl = $Url
+    if($Passthru) {
+        return $script:BaseUrl
+    }
 }
 
 function  Send-OctoKitMsbuildLog {
@@ -22,7 +32,7 @@ function  Send-OctoKitMsbuildLog {
         [string] $Path,
         # TODO: Add ValidateScript to ensure its a real URI
         [ValidateNotNullOrEmpty()]
-        [string] $BaseUri = 'http://localhost:64952', #TODO: Replace with production Url
+        [string] $BaseUri = $script:BaseUrl, #TODO: Replace with production Url
         [ValidateScript({ [System.IO.File]::Exists($_)})]
         [ValidateNotNullOrEmpty()]
         [string] $RepoName = $env:APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME,
@@ -69,3 +79,17 @@ function  Send-OctoKitMsbuildLog {
 # Be sure to list each exported functions in the FunctionsToExport field of the module manifest file.
 # This improves performance of command discovery in PowerShell.
 Export-ModuleMember -Function '*-*'
+
+# "Private" methods
+function GetUploadUrl() {
+    [CmdletBinding()]
+    [OutputType([String])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $BaseUrl
+    )
+    $FullUrl = '{0}/api/File' -f $BaseUrl
+    Write-Verbose "Upload Url: $FullUrl"
+    return $FullUrl
+}
