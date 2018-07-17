@@ -26,7 +26,8 @@ namespace MSBLOC.Core.Services
 
         public async Task<CheckRun> SubmitCheckRun(string owner, string name, string headSha,
             string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary,
-            DateTimeOffset? completedAt)
+            DateTimeOffset startedAt,
+            DateTimeOffset completedAt)
         {
 
             var newCheckRunAnnotations = new List<NewCheckRunAnnotation>();
@@ -55,6 +56,7 @@ namespace MSBLOC.Core.Services
                     Annotations = newCheckRunAnnotations
                 },
                 Status = CheckStatus.Completed,
+                StartedAt = startedAt,
                 CompletedAt = completedAt,
                 Conclusion = parsedBinaryLog.Errors.Any() ? CheckConclusion.Failure : CheckConclusion.Success
             };

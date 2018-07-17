@@ -37,8 +37,9 @@ namespace MSBLOC.Core.Tests.Services
                 parsedBinaryLog: parsedBinaryLog,
                 checkRunTitle: "Check Run Title",
                 checkRunSummary: "Check Run Summary", 
-                completedAt: DateTimeOffset.Now, 
-                expectedAnnotations: new NewCheckRunAnnotation[0], 
+                startedAt: DateTimeOffset.Now.Subtract(TimeSpan.FromMinutes(5)), 
+                completedAt: DateTimeOffset.Now,
+                expectedAnnotations: new NewCheckRunAnnotation[0],
                 expectedConclusion: CheckConclusion.Success);
         }
 
@@ -56,15 +57,17 @@ namespace MSBLOC.Core.Tests.Services
                 checkRunName: "SampleCheckRun",
                 parsedBinaryLog: parsedBinaryLog,
                 checkRunTitle: "Check Run Title",
-                checkRunSummary: "Check Run Summary",
-                completedAt: DateTimeOffset.Now, 
+                checkRunSummary: "Check Run Summary", 
+                startedAt: DateTimeOffset.Now.Subtract(TimeSpan.FromMinutes(5)), 
+                completedAt: DateTimeOffset.Now,
                 expectedAnnotations: new[]
                 {
                     new NewCheckRunAnnotation("File", "https://github.com/JustAProgrammer/TestRepo/blob/2d67ec600fc4ae8549b17c79acea1db1bc1dfad5/File", 9, 9, CheckWarningLevel.Warning, "Message")
                     {
                         Title = "Code"
                     }
-                }, expectedConclusion: CheckConclusion.Success);
+                }, 
+                expectedConclusion: CheckConclusion.Success);
         }
 
         [Fact]
@@ -81,21 +84,23 @@ namespace MSBLOC.Core.Tests.Services
                 checkRunName: "SampleCheckRun",
                 parsedBinaryLog: parsedBinaryLog,
                 checkRunTitle: "Check Run Title",
-                checkRunSummary: "Check Run Summary",
-                completedAt: DateTimeOffset.Now, 
+                checkRunSummary: "Check Run Summary", 
+                startedAt: DateTimeOffset.Now.Subtract(TimeSpan.FromMinutes(5)), 
+                completedAt: DateTimeOffset.Now,
                 expectedAnnotations: new[]
                 {
                     new NewCheckRunAnnotation("File", "https://github.com/JustAProgrammer/TestRepo/blob/2d67ec600fc4ae8549b17c79acea1db1bc1dfad5/File", 9, 9, CheckWarningLevel.Failure, "Message")
                     {
                         Title = "Code",
                     }
-                }, expectedConclusion: CheckConclusion.Failure);
+                }, 
+                expectedConclusion: CheckConclusion.Failure);
         }
 
         private async Task AssertSubmitLogs(string owner, string name, string headSha, string checkRunName,
             ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary,
-            DateTimeOffset? completedAt,
-            NewCheckRunAnnotation[] expectedAnnotations, CheckConclusion expectedConclusion)
+            DateTimeOffset startedAt, DateTimeOffset completedAt, NewCheckRunAnnotation[] expectedAnnotations, 
+            CheckConclusion expectedConclusion)
         {
             var checkRunsClient = Substitute.For<ICheckRunsClient>();
             checkRunsClient.Create(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<NewCheckRun>())
@@ -103,7 +108,7 @@ namespace MSBLOC.Core.Tests.Services
 
             var submitter = new Submitter(checkRunsClient, TestLogger.Create<Submitter>(_testOutputHelper));
 
-            await submitter.SubmitCheckRun(owner, name, headSha, checkRunName, parsedBinaryLog, checkRunTitle, checkRunSummary, completedAt);
+            await submitter.SubmitCheckRun(owner, name, headSha, checkRunName, parsedBinaryLog, checkRunTitle, checkRunSummary, startedAt, completedAt);
 
             Received.InOrder(async () =>
             {
@@ -120,6 +125,7 @@ namespace MSBLOC.Core.Tests.Services
                     Annotations = expectedAnnotations
                 },
                 Status = CheckStatus.Completed,
+                StartedAt = startedAt,
                 CompletedAt = completedAt,
                 Conclusion = expectedConclusion
             };

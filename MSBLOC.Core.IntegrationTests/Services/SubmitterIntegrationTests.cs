@@ -51,6 +51,7 @@ namespace MSBLOC.Core.IntegrationTests.Services
 
             var resourcePath = TestUtils.GetResourcePath(file);
 
+            var startedAt = DateTimeOffset.Now;
             var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
             var parsedBinaryLog = parser.Parse(resourcePath);
 
@@ -61,7 +62,7 @@ namespace MSBLOC.Core.IntegrationTests.Services
 
             var submitter = new Submitter(gitHubClient.Check.Run);
             var checkRun = await submitter.SubmitCheckRun(integrationTestAppOwner, integrationTestAppName, sha,
-                "MSBuildLog Analyzer", parsedBinaryLog, "MSBuildLog Anaysis", "", DateTimeOffset.Now);
+                "MSBuildLog Analyzer", parsedBinaryLog, "MSBuildLog Anaysis", "", startedAt, DateTimeOffset.Now);
 
             checkRun.Should().NotBeNull();
 
