@@ -36,8 +36,10 @@ namespace MSBLOC.Core.Tests.Services
                 checkRunName: "SampleCheckRun",
                 parsedBinaryLog: parsedBinaryLog,
                 checkRunTitle: "Check Run Title",
-                checkRunSummary: "Check Run Summary",
-                expectedAnnotations: new NewCheckRunAnnotation[0]);
+                checkRunSummary: "Check Run Summary", 
+                completedAt: DateTimeOffset.Now, 
+                expectedAnnotations: new NewCheckRunAnnotation[0], 
+                expectedConclusion: CheckConclusion.Success);
         }
 
         [Fact]
@@ -55,13 +57,14 @@ namespace MSBLOC.Core.Tests.Services
                 parsedBinaryLog: parsedBinaryLog,
                 checkRunTitle: "Check Run Title",
                 checkRunSummary: "Check Run Summary",
+                completedAt: DateTimeOffset.Now, 
                 expectedAnnotations: new[]
                 {
-                    new NewCheckRunAnnotation("File", "", 9, 9, CheckWarningLevel.Warning, "Message")
+                    new NewCheckRunAnnotation("File", "https://github.com/JustAProgrammer/TestRepo/blob/2d67ec600fc4ae8549b17c79acea1db1bc1dfad5/File", 9, 9, CheckWarningLevel.Warning, "Message")
                     {
                         Title = "Code"
                     }
-                });
+                }, expectedConclusion: CheckConclusion.Success);
         }
 
         [Fact]
@@ -79,26 +82,28 @@ namespace MSBLOC.Core.Tests.Services
                 parsedBinaryLog: parsedBinaryLog,
                 checkRunTitle: "Check Run Title",
                 checkRunSummary: "Check Run Summary",
+                completedAt: DateTimeOffset.Now, 
                 expectedAnnotations: new[]
                 {
-                    new NewCheckRunAnnotation("File", "", 9, 9, CheckWarningLevel.Failure, "Message")
+                    new NewCheckRunAnnotation("File", "https://github.com/JustAProgrammer/TestRepo/blob/2d67ec600fc4ae8549b17c79acea1db1bc1dfad5/File", 9, 9, CheckWarningLevel.Failure, "Message")
                     {
-                        Title = "Code"
+                        Title = "Code",
                     }
-                });
+                }, expectedConclusion: CheckConclusion.Failure);
         }
 
-        private async Task AssertSubmitLogs(string owner, string name, string headSha, string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary, NewCheckRunAnnotation[] expectedAnnotations)
+        private async Task AssertSubmitLogs(string owner, string name, string headSha, string checkRunName,
+            ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary,
+            DateTimeOffset? completedAt,
+            NewCheckRunAnnotation[] expectedAnnotations, CheckConclusion expectedConclusion)
         {
             var checkRunsClient = Substitute.For<ICheckRunsClient>();
             checkRunsClient.Create(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<NewCheckRun>())
                 .ReturnsForAnyArgs(new CheckRun());
 
-            var repositoryCommitsClient = Substitute.For<IRepositoryCommitsClient>();
+            var submitter = new Submitter(checkRunsClient, TestLogger.Create<Submitter>(_testOutputHelper));
 
-            var submitter = new Submitter(repositoryCommitsClient, checkRunsClient, TestLogger.Create<Submitter>(_testOutputHelper));
-
-            await submitter.SubmitCheckRun(owner, name, headSha, checkRunName, parsedBinaryLog, checkRunTitle, checkRunSummary);
+            await submitter.SubmitCheckRun(owner, name, headSha, checkRunName, parsedBinaryLog, checkRunTitle, checkRunSummary, completedAt);
 
             Received.InOrder(async () =>
             {
@@ -113,7 +118,10 @@ namespace MSBLOC.Core.Tests.Services
                 Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
                 {
                     Annotations = expectedAnnotations
-                }
+                },
+                Status = CheckStatus.Completed,
+                CompletedAt = completedAt,
+                Conclusion = expectedConclusion
             };
 
             newCheckRun.Should().BeEquivalentTo(expectedCheckRun);

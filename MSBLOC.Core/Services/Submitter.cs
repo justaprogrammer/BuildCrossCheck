@@ -14,52 +14,57 @@ namespace MSBLOC.Core.Services
 {
     public class Submitter : ISubmitter
     {
-        private IRepositoryCommitsClient RepositoryCommitsClient { get; }
         private ICheckRunsClient CheckRunsClient { get; }
         private ILogger<Submitter> Logger { get; }
 
-        public Submitter(IRepositoryCommitsClient repositoryCommitsClient, ICheckRunsClient checkRunsClient,
+        public Submitter(ICheckRunsClient checkRunsClient,
             ILogger<Submitter> logger = null)
         {
-            RepositoryCommitsClient = repositoryCommitsClient;
             CheckRunsClient = checkRunsClient;
             Logger = logger ?? new NullLogger<Submitter>();
         }
 
         public async Task<CheckRun> SubmitCheckRun(string owner, string name, string headSha,
-            string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary)
+            string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary,
+            DateTimeOffset? completedAt)
         {
-            var task = await RepositoryCommitsClient.Get(owner, name, headSha);
 
-            throw new NotImplementedException();
-//            var newCheckRunAnnotations = new List<NewCheckRunAnnotation>();
-//            newCheckRunAnnotations.AddRange(parsedBinaryLog.Errors.Select(args => NewCheckRunAnnotation(
-//                args.File, 
-//                "", 
-//                args.LineNumber,
-//                args.EndLineNumber, 
-//                CheckWarningLevel.Failure, 
-//                args.Message, 
-//                args.Code)));
-//
-//            newCheckRunAnnotations.AddRange(parsedBinaryLog.Warnings.Select(args => NewCheckRunAnnotation(
-//                args.File,
-//                "",
-//                args.LineNumber,
-//                args.EndLineNumber,
-//                CheckWarningLevel.Warning,
-//                args.Message,
-//                args.Code)));
-//
-//            var newCheckRun = new NewCheckRun(checkRunName, headSha)
-//            {
-//                Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
-//                {
-//                    Annotations = newCheckRunAnnotations
-//                }
-//            };
-//
-//            return await CheckRunsClient.Create(owner, name, newCheckRun);
+            var newCheckRunAnnotations = new List<NewCheckRunAnnotation>();
+            newCheckRunAnnotations.AddRange(parsedBinaryLog.Errors.Select(args => NewCheckRunAnnotation(
+                args.File,
+                BlobHref(owner, name, headSha, args.File),
+                args.LineNumber,
+                args.EndLineNumber,
+                CheckWarningLevel.Failure,
+                args.Message,
+                args.Code)));
+
+            newCheckRunAnnotations.AddRange(parsedBinaryLog.Warnings.Select(args => NewCheckRunAnnotation(
+                args.File,
+                BlobHref(owner, name, headSha, args.File),
+                args.LineNumber,
+                args.EndLineNumber,
+                CheckWarningLevel.Warning,
+                args.Message,
+                args.Code)));
+
+            var newCheckRun = new NewCheckRun(checkRunName, headSha)
+            {
+                Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
+                {
+                    Annotations = newCheckRunAnnotations
+                },
+                Status = CheckStatus.Completed,
+                CompletedAt = completedAt,
+                Conclusion = parsedBinaryLog.Errors.Any() ? CheckConclusion.Failure : CheckConclusion.Success
+            };
+
+            return await CheckRunsClient.Create(owner, name, newCheckRun);
+        }
+
+        private static string BlobHref(string owner, string repository, string sha, string file)
+        {
+            return $"https://github.com/{owner}/{repository}/blob/{sha}/{file}";
         }
 
         private static NewCheckRunAnnotation NewCheckRunAnnotation(string filename, string blobHref, int lineNumber,

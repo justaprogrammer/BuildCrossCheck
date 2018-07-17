@@ -20,14 +20,14 @@ namespace MSBLOC.Core.Services
             _appIntegrationId = appIntegrationId;
         }
 
-        public string GetToken()
+        public string GetToken(int expirationSeconds = 600)
         {
             var generator = new GitHubJwtFactory(
                 _privateKeySource, 
                 new GitHubJwtFactoryOptions
                 {
                     AppIntegrationId = _appIntegrationId,
-                    ExpirationSeconds = 600
+                    ExpirationSeconds = expirationSeconds
                 }
             );
 

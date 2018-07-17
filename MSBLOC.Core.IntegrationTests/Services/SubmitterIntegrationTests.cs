@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using FluentAssertions;
 using GitHubJwt;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.IntegrationTests.Utilities;
@@ -23,37 +25,42 @@ namespace MSBLOC.Core.IntegrationTests.Services
         }
 
         [IntegrationTest]
-        public async Task ShouldSubmit()
+        public async Task ShouldSubmitWarning()
         {
-            var environmentVariablePrivateKeySource = new EnvironmentVariablePrivateKeySource(Helper.GitHubAppPrivateKeyEnvironmentVariable);
-            var tokenGenerator = new TokenGenerator(Helper.GitHubAppId, environmentVariablePrivateKeySource);
-            var jwtToken = tokenGenerator.GetToken();
+            const string file = "testconsoleapp1-1warning.binlog";
+            const string sha = "9ebabb7dad7f93ebd947fb005175c57346bed21a";
 
-            var appClient = new GitHubClient(new ProductHeaderValue("MSBuildLogOctokitChecker"))
-            {
-                Credentials = new Credentials(jwtToken, AuthenticationType.Bearer)
-            };
+            await AssertSubmit(file, sha);
+        }
 
-            var gitHubAppsClient = appClient.GitHubApps;
-            var current = await gitHubAppsClient.GetCurrent();
+        [IntegrationTest]
+        public async Task ShouldSubmitError()
+        {
+            const string file = "testconsoleapp1-1error.binlog";
+            const string sha = "d12f68584e84d3e885079e322c8d8bd11cfa1f58";
 
-            var allInstallationsForCurrent = await gitHubAppsClient.GetAllInstallationsForCurrent();
-            var installation = allInstallationsForCurrent.First();
+            await AssertSubmit(file, sha);
+        }
 
-            appClient.GitHubApps.
+        private async Task AssertSubmit(string file, string sha)
+        {
+            var resourcePath = TestUtils.GetResourcePath(file);
 
-//            var gitHubCommit = await appClient.Repository.Commit.Get("justaprogrammer", "TestConsoleApp1", "9ebabb7dad7f93ebd947fb005175c57346bed21a");
+            var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
+            var parsedBinaryLog = parser.Parse(resourcePath);
 
-//            var resourcePath = TestUtils.GetResourcePath("testconsoleapp1-1warning.binlog");
-//
-//            var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
-//            var parsedBinaryLog = parser.Parse(resourcePath);
-//
-//            var submitter = new Submitter(appClient.Repository.Commit, appClient.Check.Run);
-//            var headSha = "9ebabb7dad7f93ebd947fb005175c57346bed21a";
-//
-//            await submitter.SubmitCheckRun(Helper.IntegrationTestAppOwner, Helper.IntegrationTestAppName, headSha: headSha, checkRunName: "MSBuildLog Analyzer",
-//                parsedBinaryLog: parsedBinaryLog, checkRunTitle: "MSBuildLog Anaysis", checkRunSummary: "");
+            var privateKeySource = new EnvironmentVariablePrivateKeySource(Helper.GitHubAppPrivateKeyEnvironmentVariable);
+            var tokenGenerator = new TokenGenerator(Helper.GitHubAppId, privateKeySource);
+            var gitHubClientFactory = new GitHubClientFactory(tokenGenerator);
+            var gitHubClient = await gitHubClientFactory.CreateClientForLogin(Helper.IntegrationTestAppOwner);
+
+            var submitter = new Submitter(gitHubClient.Check.Run);
+            var checkRun = await submitter.SubmitCheckRun(Helper.IntegrationTestAppOwner, Helper.IntegrationTestAppName, sha,
+                "MSBuildLog Analyzer", parsedBinaryLog, "MSBuildLog Anaysis", "", DateTimeOffset.Now);
+
+            checkRun.Should().NotBeNull();
+
+            _logger.LogInformation($"CheckRun Created - {checkRun.HtmlUrl}");
         }
     }
 }
