@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace MSBLOC.Web.Interfaces
 {
-    public interface ITempFileService
+    public interface ITempFileService : IDisposable
     {
-        Task<string> CreateFromStreamAsync(Stream source);
+        Task<string> CreateFromStreamAsync(string fileName, Stream source);
     }
 }

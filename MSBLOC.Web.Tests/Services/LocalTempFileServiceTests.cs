@@ -41,14 +41,19 @@ namespace MSBLOC.Web.Tests.Services
             var path = GetResourcePath(resourceFileName);
             File.Exists(path).Should().BeTrue();
 
-            var fileService = new LocalTempFileService(TestLogger.Create<LocalTempFileService>(_testOutputHelper));
+            string tempFilePath;
 
-            var tempName = await fileService.CreateFromStreamAsync(File.OpenRead(path));
-            tempName.Should().NotBeNullOrWhiteSpace();
+            using (var fileService = new LocalTempFileService(TestLogger.Create<LocalTempFileService>(_testOutputHelper)))
+            {
+                tempFilePath = await fileService.CreateFromStreamAsync(resourceFileName, File.OpenRead(path));
+                tempFilePath.Should().NotBeNullOrWhiteSpace();
 
-            var tempMd5 = ComputeFileMd5(tempName);
+                var tempMd5 = ComputeFileMd5(tempFilePath);
 
-            tempMd5.Should().Be(md5);
+                tempMd5.Should().Be(md5);
+            }
+
+            File.Exists(tempFilePath).Should().BeFalse();
         }
 
         private static string ComputeFileMd5(string fileName)

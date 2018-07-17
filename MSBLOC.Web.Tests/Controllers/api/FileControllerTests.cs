@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
@@ -39,42 +40,54 @@ namespace MSBLOC.Web.Tests.Controllers.api
         [Fact]
         public async Task UploadFileTest()
         {
+            var name = "dummyFileName.txt";
             var fileContent = "This is some dummy file contents";
+
+            var fileDictionary = new Dictionary<string, string>{{name, fileContent}};
 
             var fileService = Substitute.For<ITempFileService>();
 
-            string receiveFileContent = null;
+            var receivedFiles = new Dictionary<string, string>();
 
-            fileService.CreateFromStreamAsync(Arg.Do<Stream>(stream =>
-            {
-                receiveFileContent = new StreamReader(stream, Encoding.UTF8).ReadToEnd();
-            })).ReturnsForAnyArgs("dummyFileName.txt");
+            fileService.CreateFromStreamAsync(Arg.Any<string>(), Arg.Any<Stream>())
+                .Returns(ci =>
+                {
+                    var fileName = (string)ci[0];
+                    var stream = (Stream)ci[1];
+                    receivedFiles.Add(fileName, new StreamReader(stream, Encoding.UTF8).ReadToEnd());
+                    return $"temp/{ci[0]}";
+                });
 
             var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)
             {
-                ControllerContext = await RequestWithFiles(fileContent)
+                ControllerContext = await RequestWithFiles(fileDictionary)
             };
 
             await fileController.Upload();
 
-            await fileService.Received(1).CreateFromStreamAsync(Arg.Any<Stream>());
+            await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
 
-            receiveFileContent.Should().Be(fileContent);
+            receivedFiles.Should().BeEquivalentTo(fileDictionary);
         }
 
         [Fact]
         public async Task UploadFilesTest()
         {
-            var fileContents = new Faker<string>().CustomInstantiator(f => f.Lorem.Paragraphs(3, 10)).Generate(4).ToArray();
+            var fileContents = new Faker<string>().CustomInstantiator(f => f.Lorem.Paragraphs(3, 10)).Generate(4)
+                .ToDictionary(f => $"{string.Join("_", new Faker().Lorem.Words(4))}.txt", f => f);
 
             var fileService = Substitute.For<ITempFileService>();
 
-            var receivedFileContents = new List<string>();
+            var receivedFiles = new Dictionary<string, string>();
 
-            fileService.CreateFromStreamAsync(Arg.Do<Stream>(stream =>
-            {
-                receivedFileContents.Add(new StreamReader(stream, Encoding.UTF8).ReadToEnd());
-            })).ReturnsForAnyArgs("dummyFileName.txt");
+            fileService.CreateFromStreamAsync(Arg.Any<string>(), Arg.Any<Stream>())
+                .Returns(ci =>
+                {
+                    var fileName = (string) ci[0];
+                    var stream = (Stream) ci[1];
+                    receivedFiles.Add(fileName ,new StreamReader(stream, Encoding.UTF8).ReadToEnd());
+                    return $"temp/{ci[0]}";
+                });
 
             var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)
             {
@@ -83,22 +96,22 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             await fileController.Upload();
 
-            await fileService.Received(fileContents.Length).CreateFromStreamAsync(Arg.Any<Stream>());
+            await fileService.Received(fileContents.Count).CreateFromStreamAsync(Arg.Any<string>(), Arg.Any<Stream>());
 
-            receivedFileContents.Should().BeEquivalentTo(fileContents);
+            receivedFiles.Should().BeEquivalentTo(fileContents);
         }
 
-        private static async Task<ControllerContext> RequestWithFiles(params string[] fileContents)
+        private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary)
         {
             var boundary = "---9908908098";
 
             using (var formDataContent = new MultipartFormDataContent(boundary))
             {
-                for (var x = 0; x < fileContents.Length; x++)
+                foreach (var kvp in fileDictionary)
                 {
-                    formDataContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes(fileContents[x])), "files", $"dummy.{x}.txt");
+                    formDataContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes(kvp.Value)), "files", kvp.Key);
                 }
-                
+
                 var httpContext = new DefaultHttpContext();
                 httpContext.Request.Headers.Add("Content-Type", $"multipart/form-data; boundary={boundary}");
 

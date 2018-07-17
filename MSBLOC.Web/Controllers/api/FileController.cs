@@ -58,9 +58,10 @@ namespace MSBLOC.Web.Controllers.api
                 {
                     if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
                     {
-                        var fileName = await _tempFileService.CreateFromStreamAsync(section.Body);
+                        var fileName = contentDisposition.FileName.Value;
+                        var path = await _tempFileService.CreateFromStreamAsync(fileName, section.Body);
 
-                        _logger.LogInformation($"Copied the uploaded file '{fileName}'");
+                        _logger.LogInformation($"Copied the uploaded file '{fileName}' to path: '{path}'");
                     }
                     else if (MultipartRequestHelper.HasFormDataContentDisposition(contentDisposition))
                     {
