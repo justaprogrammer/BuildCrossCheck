@@ -16,9 +16,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBLOC.Web", "MSBLOC.Web\MS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBLOC.Web.Tests", "MSBLOC.Web.Tests\MSBLOC.Web.Tests.csproj", "{B14902B1-FEDA-4134-B9D3-99F5B0D76CCC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBLOC.Core.Tests", "MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj", "{F173BCB1-26C7-4688-B517-AA03740762DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBLOC.Core.Tests", "MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj", "{F173BCB1-26C7-4688-B517-AA03740762DB}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3F926502-1D86-45B8-B222-056C1E766440} = {3F926502-1D86-45B8-B222-056C1E766440}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DEC73CC3-0764-4CE8-A344-3F665AB78FF2}"
+	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
 	EndProjectSection
 EndProject
 Global
