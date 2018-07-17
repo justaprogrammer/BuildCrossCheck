@@ -44,18 +44,23 @@ namespace MSBLOC.Core.IntegrationTests.Services
 
         private async Task AssertSubmit(string file, string sha)
         {
+            var gitHubAppId = Helper.GitHubAppId;
+            var integrationTestAppOwner = Helper.IntegrationTestAppOwner;
+            var integrationTestAppName = Helper.IntegrationTestAppName;
+            var privateKeyEnvironmentVariableName = Helper.GitHubAppPrivateKeyEnvironmentVariable;
+
             var resourcePath = TestUtils.GetResourcePath(file);
 
             var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
             var parsedBinaryLog = parser.Parse(resourcePath);
 
-            var privateKeySource = new EnvironmentVariablePrivateKeySource(Helper.GitHubAppPrivateKeyEnvironmentVariable);
-            var tokenGenerator = new TokenGenerator(Helper.GitHubAppId, privateKeySource);
+            var privateKeySource = new EnvironmentVariablePrivateKeySource(privateKeyEnvironmentVariableName);
+            var tokenGenerator = new TokenGenerator(gitHubAppId, privateKeySource);
             var gitHubClientFactory = new GitHubClientFactory(tokenGenerator);
-            var gitHubClient = await gitHubClientFactory.CreateClientForLogin(Helper.IntegrationTestAppOwner);
+            var gitHubClient = await gitHubClientFactory.CreateClientForLogin(integrationTestAppOwner);
 
             var submitter = new Submitter(gitHubClient.Check.Run);
-            var checkRun = await submitter.SubmitCheckRun(Helper.IntegrationTestAppOwner, Helper.IntegrationTestAppName, sha,
+            var checkRun = await submitter.SubmitCheckRun(integrationTestAppOwner, integrationTestAppName, sha,
                 "MSBuildLog Analyzer", parsedBinaryLog, "MSBuildLog Anaysis", "", DateTimeOffset.Now);
 
             checkRun.Should().NotBeNull();
