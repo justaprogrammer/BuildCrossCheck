@@ -1,23 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Bogus;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
 using MSBLOC.Web.Controllers.api;
 using MSBLOC.Web.Interfaces;
-using MSBLOC.Web.Tests.Services;
+using MSBLOC.Web.Models;
 using MSBLOC.Web.Tests.Util;
 using Newtonsoft.Json;
 using NSubstitute;
@@ -60,7 +60,10 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)
             {
-                ControllerContext = await RequestWithFiles(fileDictionary)
+                ControllerContext = await RequestWithFiles(fileDictionary),
+                MetadataProvider = new EmptyModelMetadataProvider(),
+                ModelBinderFactory = Substitute.For<IModelBinderFactory>(),
+                ObjectValidator = Substitute.For<IObjectModelValidator>()
             };
 
             await fileController.Upload();
@@ -91,7 +94,10 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)
             {
-                ControllerContext = await RequestWithFiles(fileContents)
+                ControllerContext = await RequestWithFiles(fileContents),
+                MetadataProvider = new EmptyModelMetadataProvider(),
+                ModelBinderFactory = Substitute.For<IModelBinderFactory>(),
+                ObjectValidator = Substitute.For<IObjectModelValidator>()
             };
 
             await fileController.Upload();
@@ -101,8 +107,83 @@ namespace MSBLOC.Web.Tests.Controllers.api
             receivedFiles.Should().BeEquivalentTo(fileContents);
         }
 
-        private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary)
+        [Fact]
+        public async Task UploadBadRequestTest()
         {
+            var fileService = Substitute.For<ITempFileService>();
+
+            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = new DefaultHttpContext()
+                },
+                MetadataProvider = new EmptyModelMetadataProvider(),
+                ModelBinderFactory = Substitute.For<IModelBinderFactory>(),
+                ObjectValidator = Substitute.For<IObjectModelValidator>()
+            };
+
+            var result = await fileController.Upload() as BadRequestObjectResult;
+
+            result.Should().NotBeNull();
+            result.StatusCode.Should().Be(400);
+        }
+
+        [Fact]
+        public async Task UploadFileWithFormData()
+        {
+            var name = "dummyFileName.txt";
+            var fileContent = "This is some dummy file contents";
+
+            var fileDictionary = new Dictionary<string, string> { { name, fileContent } };
+
+            var fileService = Substitute.For<ITempFileService>();
+
+            var receivedFiles = new Dictionary<string, string>();
+
+            fileService.CreateFromStreamAsync(Arg.Any<string>(), Arg.Any<Stream>())
+                .Returns(ci =>
+                {
+                    var fileName = (string)ci[0];
+                    var stream = (Stream)ci[1];
+                    receivedFiles.Add(fileName, new StreamReader(stream, Encoding.UTF8).ReadToEnd());
+                    return $"temp/{fileName}";
+                });
+
+            var formData = new UploadFormData
+            {
+                Id = 12345
+            };
+
+            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)
+            {
+                ControllerContext = await RequestWithFiles(fileDictionary, formData),
+                MetadataProvider = new EmptyModelMetadataProvider(),
+                ModelBinderFactory = Substitute.For<IModelBinderFactory>(),
+                ObjectValidator = Substitute.For<IObjectModelValidator>()
+            };
+
+            var result = await fileController.Upload() as JsonResult;
+
+            await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
+
+            receivedFiles.Should().BeEquivalentTo(fileDictionary);
+
+            var resultFormData = result.Value as UploadFormData;
+
+            resultFormData.Should().NotBeNull();
+        }
+
+        private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary, UploadFormData formData = null)
+        {
+            if (formData == null)
+            {
+                formData = new UploadFormData()
+                {
+                    Id = 123
+                };
+            }
+
             var boundary = "---9908908098";
 
             using (var formDataContent = new MultipartFormDataContent(boundary))
@@ -112,6 +193,8 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     formDataContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes(kvp.Value)), "files", kvp.Key);
                 }
 
+                formDataContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes(formData.Id.ToString())), "Id");
+                
                 var httpContext = new DefaultHttpContext();
                 httpContext.Request.Headers.Add("Content-Type", $"multipart/form-data; boundary={boundary}");
 
