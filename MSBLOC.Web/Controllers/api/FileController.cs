@@ -12,7 +12,9 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
+using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Interfaces;
+using MSBLOC.Web.Models;
 
 namespace MSBLOC.Web.Controllers.api
 {
@@ -32,6 +34,7 @@ namespace MSBLOC.Web.Controllers.api
         }
 
         [HttpPost]
+        [DisableFormValueModelBinding]
         public async Task<IActionResult> Upload()
         {
             if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
@@ -99,7 +102,20 @@ namespace MSBLOC.Web.Controllers.api
                 section = await reader.ReadNextSectionAsync();
             }
 
-            return new OkResult();
+            // Bind form data to a model
+            var formData = new UploadFormData();
+            var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(formAccumulator.GetResults()), CultureInfo.CurrentCulture);
+
+            var bindingSuccessful = await TryUpdateModelAsync(formData, "", formValueProvider);
+            if (!bindingSuccessful)
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+            }
+
+            return Json(formData);
         }
 
         private static Encoding GetEncoding(MultipartSection section)
@@ -113,49 +129,49 @@ namespace MSBLOC.Web.Controllers.api
             }
             return mediaType.Encoding;
         }
-    }
 
-    public class MultipartRequestHelper
-    {
-        public static string GetBoundary(MediaTypeHeaderValue contentType, int lengthLimit)
+        private static class MultipartRequestHelper
         {
-            var boundary = HeaderUtilities.RemoveQuotes(contentType.Boundary).Value;
-            if (string.IsNullOrWhiteSpace(boundary))
+            public static string GetBoundary(MediaTypeHeaderValue contentType, int lengthLimit)
             {
-                throw new InvalidDataException("Missing content-type boundary.");
+                var boundary = HeaderUtilities.RemoveQuotes(contentType.Boundary).Value;
+                if (string.IsNullOrWhiteSpace(boundary))
+                {
+                    throw new InvalidDataException("Missing content-type boundary.");
+                }
+
+                if (boundary.Length > lengthLimit)
+                {
+                    throw new InvalidDataException(
+                        $"Multipart boundary length limit {lengthLimit} exceeded.");
+                }
+
+                return boundary;
             }
 
-            if (boundary.Length > lengthLimit)
+            public static bool IsMultipartContentType(string contentType)
             {
-                throw new InvalidDataException(
-                    $"Multipart boundary length limit {lengthLimit} exceeded.");
+                return !string.IsNullOrEmpty(contentType)
+                       && contentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) >= 0;
             }
 
-            return boundary;
-        }
+            public static bool HasFormDataContentDisposition(ContentDispositionHeaderValue contentDisposition)
+            {
+                // Content-Disposition: form-data; name="key";
+                return contentDisposition != null
+                       && contentDisposition.DispositionType.Equals("form-data")
+                       && string.IsNullOrEmpty(contentDisposition.FileName.Value)
+                       && string.IsNullOrEmpty(contentDisposition.FileNameStar.Value);
+            }
 
-        public static bool IsMultipartContentType(string contentType)
-        {
-            return !string.IsNullOrEmpty(contentType)
-                   && contentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) >= 0;
-        }
-
-        public static bool HasFormDataContentDisposition(ContentDispositionHeaderValue contentDisposition)
-        {
-            // Content-Disposition: form-data; name="key";
-            return contentDisposition != null
-                   && contentDisposition.DispositionType.Equals("form-data")
-                   && string.IsNullOrEmpty(contentDisposition.FileName.Value)
-                   && string.IsNullOrEmpty(contentDisposition.FileNameStar.Value);
-        }
-
-        public static bool HasFileContentDisposition(ContentDispositionHeaderValue contentDisposition)
-        {
-            // Content-Disposition: form-data; name="myfile1"; filename="Misc 002.jpg"
-            return contentDisposition != null
-                   && contentDisposition.DispositionType.Equals("form-data")
-                   && (!string.IsNullOrEmpty(contentDisposition.FileName.Value)
-                       || !string.IsNullOrEmpty(contentDisposition.FileNameStar.Value));
+            public static bool HasFileContentDisposition(ContentDispositionHeaderValue contentDisposition)
+            {
+                // Content-Disposition: form-data; name="myfile1"; filename="Misc 002.jpg"
+                return contentDisposition != null
+                       && contentDisposition.DispositionType.Equals("form-data")
+                       && (!string.IsNullOrEmpty(contentDisposition.FileName.Value)
+                           || !string.IsNullOrEmpty(contentDisposition.FileNameStar.Value));
+            }
         }
     }
 }
