@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -35,6 +36,21 @@ namespace MSBLOC.Core.Tests.Services
                     {
                         ProjectFile = "C:\\projects\\testconsoleapp1\\TestConsoleApp1\\TestConsoleApp1.csproj"
                     },
+                }, 
+                new Dictionary<string, Dictionary<string, string>>
+                {
+                    {
+                        @"C:\projects\testconsoleapp1\TestConsoleApp1.sln",
+                        new Dictionary<string, string>()
+                    },
+                    {
+                        @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj",
+                        new Dictionary<string, string>
+                        {
+                            {"Program.cs", @"C:\projects\testconsoleapp1\TestConsoleApp1\Program.cs"},
+                            {@"Properties\AssemblyInfo.cs", @"C:\projects\testconsoleapp1\TestConsoleApp1\Properties\AssemblyInfo.cs"}
+                        }
+                    }
                 });
         }
 
@@ -49,10 +65,25 @@ namespace MSBLOC.Core.Tests.Services
                         ProjectFile = "C:\\projects\\testconsoleapp1\\TestConsoleApp1\\TestConsoleApp1.csproj"
                     }
                 },
-                new BuildWarningEventArgs[0]);
+                new BuildWarningEventArgs[0],
+                new Dictionary<string, Dictionary<string, string>>
+                {
+                    {
+                        @"C:\projects\testconsoleapp1\TestConsoleApp1.sln",
+                        new Dictionary<string, string>()
+                    },
+                    {
+                        @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj",
+                        new Dictionary<string, string>
+                        {
+                            {"Program.cs", @"C:\projects\testconsoleapp1\TestConsoleApp1\Program.cs"},
+                            {@"Properties\AssemblyInfo.cs", @"C:\projects\testconsoleapp1\TestConsoleApp1\Properties\AssemblyInfo.cs"}
+                        }
+                    }
+                });
         }
 
-        private void AssertParseLogs(string resourceName, BuildErrorEventArgs[] expectedBuildErrorEventArgs, BuildWarningEventArgs[] expectedBuildWarningEventArgs)
+        private void AssertParseLogs(string resourceName, BuildErrorEventArgs[] expectedBuildErrorEventArgs, BuildWarningEventArgs[] expectedBuildWarningEventArgs, Dictionary<string, Dictionary<string, string>> expectedProjectFileLookup)
         {
             var resourcePath = TestUtils.GetResourcePath(resourceName);
             File.Exists(resourcePath).Should().BeTrue();
@@ -69,6 +100,8 @@ namespace MSBLOC.Core.Tests.Services
                 options
                     .Excluding(args => args.BuildEventContext)
                     .Excluding(args => args.Timestamp));
+
+            parsedBinaryLog.ProjectFileLookup.Should().BeEquivalentTo(expectedProjectFileLookup);
         }
     }
 }
