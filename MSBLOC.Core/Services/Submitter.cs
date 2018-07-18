@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
@@ -22,21 +23,19 @@ namespace MSBLOC.Core.Services
         }
 
         public async Task<CheckRun> SubmitCheckRun(string owner, string name, string headSha,
-            string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary)
+            string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary, string cloneRoot)
         {
             var newCheckRunAnnotations = new List<NewCheckRunAnnotation>();
             newCheckRunAnnotations.AddRange(parsedBinaryLog.Errors.Select(args => NewCheckRunAnnotation(
-                args.File, 
-                "", 
+                parsedBinaryLog.ProjectFileLookup[args.ProjectFile][args.File].Split(new[] { cloneRoot }, StringSplitOptions.RemoveEmptyEntries).First(),
                 args.LineNumber,
-                args.EndLineNumber, 
-                CheckWarningLevel.Failure, 
-                args.Message, 
+                args.EndLineNumber,
+                CheckWarningLevel.Failure,
+                args.Message,
                 args.Code)));
 
             newCheckRunAnnotations.AddRange(parsedBinaryLog.Warnings.Select(args => NewCheckRunAnnotation(
-                args.File,
-                "",
+                parsedBinaryLog.ProjectFileLookup[args.ProjectFile][args.File].Split(new[] { cloneRoot }, StringSplitOptions.RemoveEmptyEntries).First(),
                 args.LineNumber,
                 args.EndLineNumber,
                 CheckWarningLevel.Warning,
@@ -54,7 +53,7 @@ namespace MSBLOC.Core.Services
             return await CheckRunsClient.Create(owner, name, newCheckRun);
         }
 
-        private static NewCheckRunAnnotation NewCheckRunAnnotation(string filename, string blobHref, int lineNumber,
+        private static NewCheckRunAnnotation NewCheckRunAnnotation(string filename, int lineNumber,
             int endLine, CheckWarningLevel checkWarningLevel, string message, string title)
         {
             if (endLine == 0)
@@ -62,7 +61,7 @@ namespace MSBLOC.Core.Services
                 endLine = lineNumber;
             }
 
-            return new NewCheckRunAnnotation(filename, blobHref, lineNumber,
+            return new NewCheckRunAnnotation(filename, "", lineNumber,
                 endLine, checkWarningLevel, message)
             {
                 Title = title

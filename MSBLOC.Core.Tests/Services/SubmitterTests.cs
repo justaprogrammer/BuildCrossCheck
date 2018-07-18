@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -28,15 +29,16 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public async Task ShouldSubmitEmptyLog()
         {
-            var parsedBinaryLog = new ParsedBinaryLog(new BuildWarningEventArgs[0], new BuildErrorEventArgs[0]);
+            var parsedBinaryLog = new ParsedBinaryLog(new BuildWarningEventArgs[0], new BuildErrorEventArgs[0], new Dictionary<string, Dictionary<string, string>>());
             await AssertSubmitLogs(
-                owner: "JustAProgrammer",
+                cloneRoot: @"c:\Project\", 
+                owner: "JustAProgrammer", 
                 name: "TestRepo",
                 headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5",
                 checkRunName: "SampleCheckRun",
-                parsedBinaryLog: parsedBinaryLog,
-                checkRunTitle: "Check Run Title",
-                checkRunSummary: "Check Run Summary",
+                parsedBinaryLog: parsedBinaryLog, 
+                checkRunTitle: "Check Run Title", 
+                checkRunSummary: "Check Run Summary", 
                 expectedAnnotations: new NewCheckRunAnnotation[0]);
         }
 
@@ -44,24 +46,33 @@ namespace MSBLOC.Core.Tests.Services
         public async Task ShouldSubmitLogWithWarning()
         {
             var parsedBinaryLog = new ParsedBinaryLog(
-                new[] { new BuildWarningEventArgs(string.Empty, "Code", "File", 9, 0, 0, 0, "Message", string.Empty, string.Empty, DateTime.Now, null) },
-                new BuildErrorEventArgs[0]);
-
-            await AssertSubmitLogs(
-                owner: "JustAProgrammer",
-                name: "TestRepo",
-                headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5",
-                checkRunName: "SampleCheckRun",
-                parsedBinaryLog: parsedBinaryLog,
-                checkRunTitle: "Check Run Title",
-                checkRunSummary: "Check Run Summary",
-                expectedAnnotations: new[]
-                {
-                    new NewCheckRunAnnotation("File", "", 9, 9, CheckWarningLevel.Warning, "Message")
+                new[] {
+                    new BuildWarningEventArgs(string.Empty, "Code", "File.cs", 9, 0, 0, 0, "Message", string.Empty, string.Empty, DateTime.Now, null)
                     {
-                        Title = "Code"
+                        ProjectFile = @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj"
+                    }
+                },
+                new BuildErrorEventArgs[0],
+                new Dictionary<string, Dictionary<string, string>>
+                {
+                    {
+                        @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj",
+                        new Dictionary<string, string>
+                        {
+                            {
+                                "File.cs", @"c:\Project\TestConsoleApp1\File.cs"
+                            }
+                        }
                     }
                 });
+
+            await AssertSubmitLogs(cloneRoot: @"c:\Project\", owner: "JustAProgrammer", name: "TestRepo", headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5", checkRunName: "SampleCheckRun", parsedBinaryLog: parsedBinaryLog, checkRunTitle: "Check Run Title", checkRunSummary: "Check Run Summary", expectedAnnotations: new[]
+            {
+                new NewCheckRunAnnotation(@"TestConsoleApp1\File.cs", "", 9, 9, CheckWarningLevel.Warning, "Message")
+                {
+                    Title = "Code"
+                }
+            });
         }
 
         [Fact]
@@ -69,9 +80,27 @@ namespace MSBLOC.Core.Tests.Services
         {
             var parsedBinaryLog = new ParsedBinaryLog(
                 new BuildWarningEventArgs[0],
-                new[] { new BuildErrorEventArgs(string.Empty, "Code", "File", 9, 0, 0, 0, "Message", string.Empty, string.Empty, DateTime.Now, null) });
+                new[] {
+                    new BuildErrorEventArgs(string.Empty, "Code", "File.cs", 9, 0, 0, 0, "Message", string.Empty, string.Empty, DateTime.Now, null)
+                    {
+                        ProjectFile = @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj"
+                    }
+                },
+                new Dictionary<string, Dictionary<string, string>>
+                {
+                    {
+                        @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj",
+                        new Dictionary<string, string>
+                        {
+                            {
+                                "File.cs", @"c:\Project\TestConsoleApp1\File.cs"
+                            }
+                        }
+                    }
+                });
 
             await AssertSubmitLogs(
+                cloneRoot: "c:\\Project\\",
                 owner: "JustAProgrammer",
                 name: "TestRepo",
                 headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5",
@@ -81,14 +110,16 @@ namespace MSBLOC.Core.Tests.Services
                 checkRunSummary: "Check Run Summary",
                 expectedAnnotations: new[]
                 {
-                    new NewCheckRunAnnotation("File", "", 9, 9, CheckWarningLevel.Failure, "Message")
+                    new NewCheckRunAnnotation(@"TestConsoleApp1\File.cs", "", 9, 9, CheckWarningLevel.Failure, "Message")
                     {
                         Title = "Code"
                     }
                 });
         }
 
-        private async Task AssertSubmitLogs(string owner, string name, string headSha, string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary, NewCheckRunAnnotation[] expectedAnnotations)
+        private async Task AssertSubmitLogs(string cloneRoot, string owner, string name, string headSha,
+            string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary,
+            NewCheckRunAnnotation[] expectedAnnotations)
         {
             var checkRunsClient = Substitute.For<ICheckRunsClient>();
             checkRunsClient.Create(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<NewCheckRun>())
@@ -96,7 +127,7 @@ namespace MSBLOC.Core.Tests.Services
 
             var submitter = new Submitter(checkRunsClient, TestLogger.Create<Submitter>(_testOutputHelper));
 
-            await submitter.SubmitCheckRun(owner, name, headSha, checkRunName, parsedBinaryLog, checkRunTitle, checkRunSummary);
+            await submitter.SubmitCheckRun(owner, name, headSha, checkRunName, parsedBinaryLog, checkRunTitle, checkRunSummary, cloneRoot);
 
             Received.InOrder(async () =>
             {

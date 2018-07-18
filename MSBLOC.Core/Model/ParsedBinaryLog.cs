@@ -9,10 +9,14 @@ namespace MSBLOC.Core.Model
 
         public BuildErrorEventArgs[] Errors { get; }
 
-        public ParsedBinaryLog(BuildWarningEventArgs[] warnings, BuildErrorEventArgs[] errors)
+        public Dictionary<string, Dictionary<string, string>> ProjectFileLookup { get; }
+
+        public ParsedBinaryLog(BuildWarningEventArgs[] warnings, BuildErrorEventArgs[] errors,
+            Dictionary<string, Dictionary<string, string>> projectFileLookup)
         {
             Warnings = warnings;
             Errors = errors;
+            ProjectFileLookup = projectFileLookup;
         }
     }
 }
