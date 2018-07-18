@@ -62,7 +62,7 @@ namespace MSBLOC.Core.IntegrationTests.Services
 
             var submitter = new Submitter(gitHubClient.Check.Run);
             var checkRun = await submitter.SubmitCheckRun(integrationTestAppOwner, integrationTestAppName, sha,
-                "MSBuildLog Analyzer", parsedBinaryLog, "MSBuildLog Anaysis", "", startedAt, DateTimeOffset.Now);
+                "MSBuildLog Analyzer", parsedBinaryLog, "MSBuildLog Anaysis", "", startedAt, DateTimeOffset.Now, @"C:\projects\testconsoleapp1\");
 
             checkRun.Should().NotBeNull();
 

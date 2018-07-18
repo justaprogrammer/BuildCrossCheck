@@ -37,7 +37,7 @@ namespace MSBLOC.Core.Services
                 args.EndLineNumber,
                 CheckWarningLevel.Failure,
                 args.Message,
-                args.Code)));
+                args.Code, headSha, owner, name)));
 
             newCheckRunAnnotations.AddRange(parsedBinaryLog.Warnings.Select(args => NewCheckRunAnnotation(
                 parsedBinaryLog.ProjectFileLookup[args.ProjectFile][args.File].Split(new[] { cloneRoot }, StringSplitOptions.RemoveEmptyEntries).First(),
@@ -45,7 +45,7 @@ namespace MSBLOC.Core.Services
                 args.EndLineNumber,
                 CheckWarningLevel.Warning,
                 args.Message,
-                args.Code)));
+                args.Code, headSha, owner, name)));
 
             var newCheckRun = new NewCheckRun(checkRunName, headSha)
             {
@@ -64,18 +64,19 @@ namespace MSBLOC.Core.Services
 
         private static string BlobHref(string owner, string repository, string sha, string file)
         {
-            return $"https://github.com/{owner}/{repository}/blob/{sha}/{file}";
+            return $"https://github.com/{owner}/{repository}/blob/{sha}/{file.Replace(@"\", "/")}";
         }
 
         private static NewCheckRunAnnotation NewCheckRunAnnotation(string file, int lineNumber,
-            int endLine, CheckWarningLevel checkWarningLevel, string message, string title)
+            int endLine, CheckWarningLevel checkWarningLevel, string message, string title, string sha, string owner,
+            string repository)
         {
             if (endLine == 0)
             {
                 endLine = lineNumber;
             }
 
-            return new NewCheckRunAnnotation(filename, BlobHref(owner, repository, sha, file), lineNumber,
+            return new NewCheckRunAnnotation(file.Replace(@"\", "/"), BlobHref(owner, repository, sha, file), lineNumber,
                 endLine, checkWarningLevel, message)
             {
                 Title = title

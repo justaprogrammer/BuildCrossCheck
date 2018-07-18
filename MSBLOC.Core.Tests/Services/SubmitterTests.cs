@@ -82,7 +82,7 @@ namespace MSBLOC.Core.Tests.Services
                 completedAt: DateTimeOffset.Now,
                 expectedAnnotations: new[]
                 {
-                    new NewCheckRunAnnotation(@"TestConsoleApp1\File.cs", "https://github.com/JustAProgrammer/TestRepo/blob/2d67ec600fc4ae8549b17c79acea1db1bc1dfad5/TestConsoleApp1/File.cs", 9, 9, CheckWarningLevel.Warning, "Message")
+                    new NewCheckRunAnnotation(@"TestConsoleApp1/File.cs", "https://github.com/JustAProgrammer/TestRepo/blob/2d67ec600fc4ae8549b17c79acea1db1bc1dfad5/TestConsoleApp1/File.cs", 9, 9, CheckWarningLevel.Warning, "Message")
                     {
                         Title = "Code"
                     }
@@ -127,7 +127,7 @@ namespace MSBLOC.Core.Tests.Services
                 completedAt: DateTimeOffset.Now,
                 expectedAnnotations: new[]
                 {
-                    new NewCheckRunAnnotation("TestConsoleApp1\File.cs", "https://github.com/JustAProgrammer/TestRepo/blob/2d67ec600fc4ae8549b17c79acea1db1bc1dfad5/TestConsoleApp1/File.cs", 9, 9, CheckWarningLevel.Failure, "Message")
+                    new NewCheckRunAnnotation(@"TestConsoleApp1/File.cs", "https://github.com/JustAProgrammer/TestRepo/blob/2d67ec600fc4ae8549b17c79acea1db1bc1dfad5/TestConsoleApp1/File.cs", 9, 9, CheckWarningLevel.Failure, "Message")
                     {
                         Title = "Code",
                     }

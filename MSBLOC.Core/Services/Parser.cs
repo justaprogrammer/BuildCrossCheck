@@ -21,7 +21,7 @@ namespace MSBLOC.Core.Services
             Logger = logger ?? new NullLogger<Parser>();
         }
 
-        public ParsedBinaryLog Parse(string filePath)
+        public ParsedBinaryLog Parse(string resourcePath)
         {
             var warnings = new List<BuildWarningEventArgs>();
             var errors = new List<BuildErrorEventArgs>();
