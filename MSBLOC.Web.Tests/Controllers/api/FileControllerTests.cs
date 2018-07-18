@@ -152,7 +152,9 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             var formData = new UploadFormData
             {
-                Id = 12345
+                RepoName = "SomeRepo",
+                Branch = "SomeBranch",
+                Sha = "12345"
             };
 
             var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)
@@ -176,13 +178,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
         private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary, UploadFormData formData = null)
         {
-            if (formData == null)
-            {
-                formData = new UploadFormData()
-                {
-                    Id = 123
-                };
-            }
+            
 
             var boundary = "---9908908098";
 
@@ -193,8 +189,16 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     formDataContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes(kvp.Value)), "files", kvp.Key);
                 }
 
-                formDataContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes(formData.Id.ToString())), "Id");
-                
+                if (formData != null)
+                {
+                    var formDataDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(formData));
+
+                    foreach (var kvp in formDataDictionary)
+                    {
+                        formDataContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes(kvp.Value)), kvp.Key);
+                    }
+                }
+
                 var httpContext = new DefaultHttpContext();
                 httpContext.Request.Headers.Add("Content-Type", $"multipart/form-data; boundary={boundary}");
 
