@@ -66,13 +66,22 @@ namespace MSBLOC.Core.Tests.Services
                     }
                 });
 
-            await AssertSubmitLogs(cloneRoot: @"c:\Project\", owner: "JustAProgrammer", name: "TestRepo", headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5", checkRunName: "SampleCheckRun", parsedBinaryLog: parsedBinaryLog, checkRunTitle: "Check Run Title", checkRunSummary: "Check Run Summary", expectedAnnotations: new[]
-            {
-                new NewCheckRunAnnotation(@"TestConsoleApp1\File.cs", "", 9, 9, CheckWarningLevel.Warning, "Message")
+            await AssertSubmitLogs(
+                cloneRoot: @"c:\Project\",
+                owner: "JustAProgrammer", 
+                name: "TestRepo", 
+                headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5",
+                checkRunName: "SampleCheckRun",
+                parsedBinaryLog: parsedBinaryLog, 
+                checkRunTitle: "Check Run Title", 
+                checkRunSummary: "Check Run Summary", 
+                expectedAnnotations: new[]
                 {
-                    Title = "Code"
-                }
-            });
+                    new NewCheckRunAnnotation(@"TestConsoleApp1\File.cs", "", 9, 9, CheckWarningLevel.Warning, "Message")
+                    {
+                        Title = "Code"
+                    }
+                });
         }
 
         [Fact]
