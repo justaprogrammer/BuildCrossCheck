@@ -1,5 +1,9 @@
 ﻿extern alias StructuredLogger;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -22,9 +26,26 @@ namespace MSBLOC.Core.Services
             var warnings = new List<BuildWarningEventArgs>();
             var errors = new List<BuildErrorEventArgs>();
             var binLogReader = new StructuredLogger::Microsoft.Build.Logging.BinaryLogReplayEventSource();
-            foreach (var record in binLogReader.ReadRecords(filePath))
+
+            var projectFileLookup = new Dictionary<string, Dictionary<string, string>>();
+
+            foreach (var record in binLogReader.ReadRecords(resourcePath))
             {
                 var buildEventArgs = record.Args;
+                if (buildEventArgs is ProjectStartedEventArgs startedEventArgs)
+                {
+                    var projectDirectory = Path.GetDirectoryName(startedEventArgs.ProjectFile)
+                                           ?? throw new InvalidOperationException("Path.GetDirectoryName(startedEventArgs.ProjectFile) is null");
+
+                    var items = startedEventArgs.Items.Cast<DictionaryEntry>()
+                        .Where(entry => (string) entry.Key == "Compile")
+                        .Select(entry => entry.Value)
+                        .Cast<ITaskItem> ()
+                        .ToDictionary(item => item.ItemSpec, item => Path.Combine(projectDirectory, item.ItemSpec));
+
+                    projectFileLookup.Add(startedEventArgs.ProjectFile, items);
+                }
+
                 if (buildEventArgs is BuildWarningEventArgs buildWarning)
                 {
                     Logger.LogInformation($"{buildWarning.File} {buildWarning.LineNumber}:{buildWarning.ColumnNumber} {buildWarning.Message}");
@@ -38,7 +59,7 @@ namespace MSBLOC.Core.Services
                 }
             }
 
-            return new ParsedBinaryLog(warnings.ToArray(), errors.ToArray());
+            return new ParsedBinaryLog(warnings.ToArray(), errors.ToArray(), projectFileLookup);
         }
     }
 }

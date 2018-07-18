@@ -27,13 +27,12 @@ namespace MSBLOC.Core.Services
         public async Task<CheckRun> SubmitCheckRun(string owner, string name, string headSha,
             string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary,
             DateTimeOffset startedAt,
-            DateTimeOffset completedAt)
+            DateTimeOffset completedAt, string cloneRoot)
         {
 
             var newCheckRunAnnotations = new List<NewCheckRunAnnotation>();
             newCheckRunAnnotations.AddRange(parsedBinaryLog.Errors.Select(args => NewCheckRunAnnotation(
-                args.File,
-                BlobHref(owner, name, headSha, args.File),
+                parsedBinaryLog.ProjectFileLookup[args.ProjectFile][args.File].Split(new[] { cloneRoot }, StringSplitOptions.RemoveEmptyEntries).First(),
                 args.LineNumber,
                 args.EndLineNumber,
                 CheckWarningLevel.Failure,
@@ -41,8 +40,7 @@ namespace MSBLOC.Core.Services
                 args.Code)));
 
             newCheckRunAnnotations.AddRange(parsedBinaryLog.Warnings.Select(args => NewCheckRunAnnotation(
-                args.File,
-                BlobHref(owner, name, headSha, args.File),
+                parsedBinaryLog.ProjectFileLookup[args.ProjectFile][args.File].Split(new[] { cloneRoot }, StringSplitOptions.RemoveEmptyEntries).First(),
                 args.LineNumber,
                 args.EndLineNumber,
                 CheckWarningLevel.Warning,
@@ -69,7 +67,7 @@ namespace MSBLOC.Core.Services
             return $"https://github.com/{owner}/{repository}/blob/{sha}/{file}";
         }
 
-        private static NewCheckRunAnnotation NewCheckRunAnnotation(string filename, string blobHref, int lineNumber,
+        private static NewCheckRunAnnotation NewCheckRunAnnotation(string file, int lineNumber,
             int endLine, CheckWarningLevel checkWarningLevel, string message, string title)
         {
             if (endLine == 0)
@@ -77,7 +75,7 @@ namespace MSBLOC.Core.Services
                 endLine = lineNumber;
             }
 
-            return new NewCheckRunAnnotation(filename, blobHref, lineNumber,
+            return new NewCheckRunAnnotation(filename, BlobHref(owner, repository, sha, file), lineNumber,
                 endLine, checkWarningLevel, message)
             {
                 Title = title

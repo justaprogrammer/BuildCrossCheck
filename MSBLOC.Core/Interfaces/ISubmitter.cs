@@ -10,6 +10,6 @@ namespace MSBLOC.Core.Interfaces
         Task<CheckRun> SubmitCheckRun(string owner, string name, string headSha,
             string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary,
             DateTimeOffset startedAt,
-            DateTimeOffset completedAt);
+            DateTimeOffset completedAt, string cloneRoot);
     }
 }
