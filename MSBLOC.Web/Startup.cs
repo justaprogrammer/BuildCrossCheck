@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MSBLOC.Web.Interfaces;
+using MSBLOC.Web.Services;
 
 namespace MSBLOC.Web
 {
@@ -22,6 +24,8 @@ namespace MSBLOC.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
+            services.AddScoped<ITempFileService, LocalTempFileService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
