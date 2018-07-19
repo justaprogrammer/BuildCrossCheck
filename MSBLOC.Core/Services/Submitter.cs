@@ -76,7 +76,8 @@ namespace MSBLOC.Core.Services
                 endLine = lineNumber;
             }
 
-            return new NewCheckRunAnnotation(file.Replace(@"\", "/"), BlobHref(owner, repository, sha, file), lineNumber,
+            var blobHref = BlobHref(owner, repository, sha, file);
+            return new NewCheckRunAnnotation(file.Replace(@"\", "/"), blobHref, lineNumber,
                 endLine, checkWarningLevel, message)
             {
                 Title = title

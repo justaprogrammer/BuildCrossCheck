@@ -59,10 +59,20 @@ namespace MSBLOC.Core.IntegrationTests.Services
             var tokenGenerator = new TokenGenerator(gitHubAppId, privateKeySource);
             var gitHubClientFactory = new GitHubClientFactory(tokenGenerator);
             var gitHubClient = await gitHubClientFactory.CreateClientForLogin(integrationTestAppOwner);
+            var checkRunsClient = gitHubClient.Check.Run;
 
-            var submitter = new Submitter(gitHubClient.Check.Run);
-            var checkRun = await submitter.SubmitCheckRun(integrationTestAppOwner, integrationTestAppName, sha,
-                "MSBuildLog Analyzer", parsedBinaryLog, "MSBuildLog Anaysis", "", startedAt, DateTimeOffset.Now, @"C:\projects\testconsoleapp1\");
+            var submitter = new Submitter(checkRunsClient);
+            var checkRun = await submitter.SubmitCheckRun(
+                owner: integrationTestAppOwner,
+                name: integrationTestAppName,
+                headSha: sha,
+                checkRunName: "MSBuildLog Analyzer",
+                parsedBinaryLog: parsedBinaryLog,
+                checkRunTitle: "MSBuildLog Analysis",
+                checkRunSummary: "",
+                startedAt: startedAt,
+                completedAt: DateTimeOffset.Now,
+                cloneRoot: @"C:\projects\testconsoleapp1\");
 
             checkRun.Should().NotBeNull();
 
