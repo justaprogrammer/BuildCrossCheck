@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Build.Framework;
+using MSBLOC.Core.Services;
 
 namespace MSBLOC.Core.Model
 {
@@ -9,14 +10,14 @@ namespace MSBLOC.Core.Model
 
         public BuildErrorEventArgs[] Errors { get; }
 
-        public Dictionary<string, Dictionary<string, string>> ProjectFileLookup { get; }
+        public SolutionDetails SolutionDetails { get; }
 
         public ParsedBinaryLog(BuildWarningEventArgs[] warnings, BuildErrorEventArgs[] errors,
-            Dictionary<string, Dictionary<string, string>> projectFileLookup)
+            SolutionDetails solutionDetails)
         {
             Warnings = warnings;
             Errors = errors;
-            ProjectFileLookup = projectFileLookup;
+            SolutionDetails = solutionDetails;
         }
     }
 }

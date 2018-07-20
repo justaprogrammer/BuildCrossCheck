@@ -110,7 +110,7 @@ namespace MSBLOC.Core.Tests.Services
                     .Excluding(args => args.BuildEventContext)
                     .Excluding(args => args.Timestamp));
 
-            parsedBinaryLog.ProjectFileLookup.Should().BeEquivalentTo(expectedProjectFileLookup);
+            parsedBinaryLog.SolutionDetails.Should().BeEquivalentTo(expectedProjectFileLookup);
         }
     }
 }

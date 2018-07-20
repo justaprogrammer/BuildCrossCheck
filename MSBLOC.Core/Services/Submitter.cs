@@ -26,21 +26,37 @@ namespace MSBLOC.Core.Services
             string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary, string cloneRoot)
         {
             var newCheckRunAnnotations = new List<NewCheckRunAnnotation>();
-            newCheckRunAnnotations.AddRange(parsedBinaryLog.Errors.Select(args => NewCheckRunAnnotation(
-                parsedBinaryLog.ProjectFileLookup[args.ProjectFile][args.File].Split(new[] { cloneRoot }, StringSplitOptions.RemoveEmptyEntries).First(),
-                args.LineNumber,
-                args.EndLineNumber,
-                CheckWarningLevel.Failure,
-                args.Message,
-                args.Code)));
+            newCheckRunAnnotations.AddRange(parsedBinaryLog.Errors.Select(args =>
+            {
+                var filename = parsedBinaryLog
+                    .SolutionDetails
+                    .GetProject(args.ProjectFile)
+                    .GetClonePath(args.File);
 
-            newCheckRunAnnotations.AddRange(parsedBinaryLog.Warnings.Select(args => NewCheckRunAnnotation(
-                parsedBinaryLog.ProjectFileLookup[args.ProjectFile][args.File].Split(new[] { cloneRoot }, StringSplitOptions.RemoveEmptyEntries).First(),
-                args.LineNumber,
-                args.EndLineNumber,
-                CheckWarningLevel.Warning,
-                args.Message,
-                args.Code)));
+                return NewCheckRunAnnotation(
+                    filename,
+                    args.LineNumber,
+                    args.EndLineNumber,
+                    CheckWarningLevel.Failure,
+                    args.Message,
+                    args.Code);
+            }));
+
+            newCheckRunAnnotations.AddRange(parsedBinaryLog.Warnings.Select(args =>
+            {
+                var filename = parsedBinaryLog
+                    .SolutionDetails
+                    .GetProject(args.ProjectFile)
+                    .GetClonePath(args.File);
+
+                return NewCheckRunAnnotation(
+                    filename,
+                    args.LineNumber,
+                    args.EndLineNumber,
+                    CheckWarningLevel.Warning,
+                    args.Message,
+                    args.Code);
+            }));
 
             var newCheckRun = new NewCheckRun(checkRunName, headSha)
             {

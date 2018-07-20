@@ -29,9 +29,10 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public async Task ShouldSubmitEmptyLog()
         {
-            var parsedBinaryLog = new ParsedBinaryLog(new BuildWarningEventArgs[0], new BuildErrorEventArgs[0], new Dictionary<string, Dictionary<string, string>>());
+            var cloneRoot = @"c:\Project\";
+            var parsedBinaryLog = new ParsedBinaryLog(new BuildWarningEventArgs[0], new BuildErrorEventArgs[0], new SolutionDetails(cloneRoot));
             await AssertSubmitLogs(
-                cloneRoot: @"c:\Project\", 
+                cloneRoot: cloneRoot, 
                 owner: "JustAProgrammer", 
                 name: "TestRepo",
                 headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5",
@@ -45,14 +46,10 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public async Task ShouldSubmitLogWithWarning()
         {
-            var parsedBinaryLog = new ParsedBinaryLog(
-                new[] {
-                    new BuildWarningEventArgs(string.Empty, "Code", "File.cs", 9, 0, 0, 0, "Message", string.Empty, string.Empty, DateTime.Now, null)
-                    {
-                        ProjectFile = @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj"
-                    }
-                },
-                new BuildErrorEventArgs[0],
+            var cloneRoot = @"c:\Project\";
+            var solutionDetails = new SolutionDetails(cloneRoot);
+
+            /*
                 new Dictionary<string, Dictionary<string, string>>
                 {
                     {
@@ -64,10 +61,23 @@ namespace MSBLOC.Core.Tests.Services
                             }
                         }
                     }
-                });
+                }
+             */
+
+            var parsedBinaryLog = new ParsedBinaryLog(
+                new[] {
+                    new BuildWarningEventArgs(string.Empty, "Code", "File.cs", 9, 0, 0, 0, "Message", string.Empty, string.Empty, DateTime.Now, null)
+                    {
+                        ProjectFile = @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj"
+                    }
+                },
+                new BuildErrorEventArgs[0], solutionDetails
+                );
+
+
 
             await AssertSubmitLogs(
-                cloneRoot: @"c:\Project\",
+                cloneRoot: cloneRoot,
                 owner: "JustAProgrammer", 
                 name: "TestRepo", 
                 headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5",

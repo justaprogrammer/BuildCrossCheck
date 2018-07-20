@@ -12,6 +12,59 @@ using MSBLOC.Core.Model;
 
 namespace MSBLOC.Core.Services
 {
+    public class SolutionDetails
+    {
+        private Dictionary<string, ProjectDetails> Projects { get; }
+        private string CloneRoot { get; }
+
+        public SolutionDetails(string cloneRoot)
+        {
+            CloneRoot = cloneRoot;
+            Projects = new Dictionary<string, ProjectDetails>();
+        }
+
+        public void AddProject(ProjectDetails projectDetails)
+        {
+            Projects.Add(projectDetails.ProjectFile, projectDetails);
+        }
+
+        public ProjectDetails GetProject(string projectFile)
+        {
+            return Projects[projectFile];
+        }
+    }
+
+    public class ProjectDetails
+    {
+        public string ProjectFile { get; }
+        private string CloneRoot { get; }
+        private string ProjectDirectory { get; }
+
+        private Dictionary<string, string> _taskItemPaths;
+
+        public ProjectDetails(string cloneRoot, string projectFile)
+        {
+            CloneRoot = cloneRoot;
+            ProjectFile = projectFile;
+
+            ProjectDirectory = Path.GetDirectoryName(projectFile)
+                                   ?? throw new InvalidOperationException("Path.GetDirectoryName(startedEventArgs.ProjectFile) is null");
+
+            _taskItemPaths = new Dictionary<string, string>();
+        }
+
+        public void AddTaskItems(IEnumerable<ITaskItem> taskItems)
+        {
+            _taskItemPaths = taskItems
+                .ToDictionary(item => item.ItemSpec, item => Path.Combine(ProjectDirectory, item.ItemSpec));
+        }
+
+        public string GetClonePath(string taskItems)
+        {
+            return _taskItemPaths[taskItems];
+        }
+    }
+
     public class Parser : IParser
     {
         private ILogger<Parser> Logger { get; }
@@ -21,7 +74,7 @@ namespace MSBLOC.Core.Services
             Logger = logger ?? new NullLogger<Parser>();
         }
 
-        public ParsedBinaryLog Parse(string resourcePath)
+        public ParsedBinaryLog Parse(string resourcePath, string cloneRoot = "")
         {
             var warnings = new List<BuildWarningEventArgs>();
             var errors = new List<BuildErrorEventArgs>();
@@ -29,23 +82,22 @@ namespace MSBLOC.Core.Services
 
             var readRecords = binLogReader.ReadRecords(resourcePath).ToList();
 
-            var projectFileLookup = new Dictionary<string, Dictionary<string, string>>();
+            var solutionDetails = new SolutionDetails(cloneRoot);
 
             foreach (var record in readRecords)
             {
                 var buildEventArgs = record.Args;
                 if (buildEventArgs is ProjectStartedEventArgs startedEventArgs)
                 {
-                    var projectDirectory = Path.GetDirectoryName(startedEventArgs.ProjectFile)
-                                           ?? throw new InvalidOperationException("Path.GetDirectoryName(startedEventArgs.ProjectFile) is null");
+                    var projectDetails = new ProjectDetails(cloneRoot, startedEventArgs.ProjectFile);
+                    solutionDetails.AddProject(projectDetails);
 
-                    var items = startedEventArgs.Items.Cast<DictionaryEntry>()
-                        .Where(entry => (string) entry.Key == "Compile")
+                    var taskItems = startedEventArgs.Items.Cast<DictionaryEntry>()
+                        .Where(entry => (string)entry.Key == "Compile")
                         .Select(entry => entry.Value)
-                        .Cast<ITaskItem> ()
-                        .ToDictionary(item => item.ItemSpec, item => Path.Combine(projectDirectory, item.ItemSpec));
+                        .Cast<ITaskItem>();
 
-                    projectFileLookup.Add(startedEventArgs.ProjectFile, items);
+                    projectDetails.AddTaskItems(taskItems);
                 }
 
                 if (buildEventArgs is BuildWarningEventArgs buildWarning)
@@ -61,7 +113,7 @@ namespace MSBLOC.Core.Services
                 }
             }
 
-            return new ParsedBinaryLog(warnings.ToArray(), errors.ToArray(), projectFileLookup);
+            return new ParsedBinaryLog(warnings.ToArray(), errors.ToArray(), solutionDetails);
         }
     }
 }
