@@ -152,9 +152,10 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             var formData = new UploadFormData
             {
-                RepoName = "SomeRepo",
-                Branch = "SomeBranch",
-                Sha = "12345"
+                ApplicationName = "SomeApplicationName",
+                ApplicationOwner = "SomeApplicationOwner",
+                CommitSha = "12345",
+                CloneRoot = "c:/cloneRoot"
             };
 
             var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)
