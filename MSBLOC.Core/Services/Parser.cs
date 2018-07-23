@@ -1,6 +1,5 @@
 ﻿extern alias StructuredLogger;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
@@ -21,16 +20,12 @@ namespace MSBLOC.Core.Services
 
         public BuildDetails Parse(string resourcePath, string cloneRoot)
         {
-            var warnings = new List<BuildWarningEventArgs>();
-            var errors = new List<BuildErrorEventArgs>();
             var binLogReader = new StructuredLogger::Microsoft.Build.Logging.BinaryLogReplayEventSource();
-
-            var readRecords = binLogReader.ReadRecords(resourcePath).ToList();
 
             var solutionDetails = new SolutionDetails(cloneRoot);
             var buildDetails = new BuildDetails(solutionDetails);
 
-            foreach (var record in readRecords)
+            foreach (var record in binLogReader.ReadRecords(resourcePath))
             {
                 var buildEventArgs = record.Args;
                 if (buildEventArgs is ProjectStartedEventArgs startedEventArgs)
