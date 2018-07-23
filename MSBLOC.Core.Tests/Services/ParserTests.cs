@@ -43,11 +43,11 @@ namespace MSBLOC.Core.Tests.Services
             var solutionDetails = new SolutionDetails(cloneRoot);
 
             var project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
-            solutionDetails.AddProject(project);
+            solutionDetails.Add(project);
 
             project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj");
             project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
-            solutionDetails.AddProject(project);
+            solutionDetails.Add(project);
 
             AssertParseLogs("testconsoleapp1-1warning.binlog",
                 solutionDetails, new[]
@@ -64,11 +64,11 @@ namespace MSBLOC.Core.Tests.Services
             var solutionDetails = new SolutionDetails(cloneRoot);
 
             var project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
-            solutionDetails.AddProject(project);
+            solutionDetails.Add(project);
 
             project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj");
             project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
-            solutionDetails.AddProject(project);
+            solutionDetails.Add(project);
 
             AssertParseLogs("testconsoleapp1-1error.binlog",
                 solutionDetails, new[]

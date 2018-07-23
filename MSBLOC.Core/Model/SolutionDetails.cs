@@ -1,34 +1,26 @@
 ﻿using System.Collections.Generic;
+using MSBLOC.Core.Services;
 
-namespace MSBLOC.Core.Services
+namespace MSBLOC.Core.Model
 {
-    public class SolutionDetails
+    public class SolutionDetails: Dictionary<string, ProjectDetails>
     {
         public string CloneRoot { get; }
-        public IReadOnlyDictionary<string, ProjectDetails> Paths => _projects;
-
-        private Dictionary<string, ProjectDetails> _projects;
 
         public SolutionDetails(string cloneRoot)
         {
             CloneRoot = cloneRoot;
-            _projects = new Dictionary<string, ProjectDetails>();
-        }
-
-        public void AddProject(ProjectDetails projectDetails)
-        {
-            _projects.Add(projectDetails.ProjectFile, projectDetails);
-        }
-
-        public ProjectDetails GetProject(string projectFile)
-        {
-            return _projects[projectFile];
         }
 
         public string GetProjectItemPath(string projectFile, string item)
         {
-            var projectDetails = _projects[projectFile];
+            var projectDetails = this[projectFile];
             return projectDetails.GetPath(item);
+        }
+
+        public void Add(ProjectDetails projectDetails)
+        {
+            Add(projectDetails.ProjectFile, projectDetails);
         }
     }
 }

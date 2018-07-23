@@ -27,12 +27,14 @@ namespace MSBLOC.Core.Tests.Services
         public async Task ShouldSubmitEmptyLog()
         {
             var cloneRoot = "c:\\Project\\";
-
-            var project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
-            project.AddItems("File.cs");
-
             var solutionDetails = new SolutionDetails(cloneRoot);
-            solutionDetails.AddProject(project);
+
+            var project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
+            solutionDetails.Add(project);
+
+            project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
+            project.AddItems("File.cs");
+            solutionDetails.Add(project);
 
             var parsedBinaryLog = new BuildDetails(solutionDetails);
             await AssertSubmitLogs(
@@ -51,12 +53,14 @@ namespace MSBLOC.Core.Tests.Services
         public async Task ShouldSubmitLogWithWarning()
         {
             var cloneRoot = "c:\\Project\\";
-
-            var project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
-            project.AddItems("File.cs");
-
             var solutionDetails = new SolutionDetails(cloneRoot);
-            solutionDetails.AddProject(project);
+
+            var project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
+            solutionDetails.Add(project);
+
+            project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
+            project.AddItems("File.cs");
+            solutionDetails.Add(project);
 
             var buildDetails = new BuildDetails(
                 solutionDetails,
@@ -86,12 +90,14 @@ namespace MSBLOC.Core.Tests.Services
         public async Task ShouldSubmitLogWithError()
         {
             var cloneRoot = "c:\\Project\\";
-
-            var project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
-            project.AddItems("File.cs");
-
             var solutionDetails = new SolutionDetails(cloneRoot);
-            solutionDetails.AddProject(project);
+
+            var project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
+            solutionDetails.Add(project);
+
+            project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
+            project.AddItems("File.cs");
+            solutionDetails.Add(project);
 
             var buildDetails = new BuildDetails(
                 solutionDetails,

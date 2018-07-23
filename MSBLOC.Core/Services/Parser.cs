@@ -36,7 +36,7 @@ namespace MSBLOC.Core.Services
                 if (buildEventArgs is ProjectStartedEventArgs startedEventArgs)
                 {
                     var projectDetails = new ProjectDetails(cloneRoot, startedEventArgs.ProjectFile);
-                    solutionDetails.AddProject(projectDetails);
+                    solutionDetails.Add(projectDetails);
 
                     var items = startedEventArgs.Items.Cast<DictionaryEntry>()
                         .Where(entry => (string) entry.Key == "Compile")
