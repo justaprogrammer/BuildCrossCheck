@@ -23,40 +23,31 @@ namespace MSBLOC.Core.Services
         }
 
         public async Task<CheckRun> SubmitCheckRun(string owner, string name, string headSha,
-            string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary, string cloneRoot)
+            string checkRunName, BuildDetails buildDetails, string checkRunTitle, string checkRunSummary, string cloneRoot)
         {
-            var newCheckRunAnnotations = new List<NewCheckRunAnnotation>();
-            newCheckRunAnnotations.AddRange(parsedBinaryLog.Errors.Select(args =>
+            var newCheckRunAnnotations = buildDetails.Annotations.Select(annotation =>
             {
-                var filename = parsedBinaryLog
-                    .SolutionDetails
-                    .GetProject(args.ProjectFile)
-                    .GetClonePath(args.File);
+                CheckWarningLevel warningLevel;
+                if (annotation.AnnotationWarningLevel == AnnotationWarningLevel.Warning)
+                {
+                    warningLevel = CheckWarningLevel.Warning;
+                }
+                else if (annotation.AnnotationWarningLevel == AnnotationWarningLevel.Notice)
+                {
+                    warningLevel = CheckWarningLevel.Notice;
+                }
+                else
+                {
+                    warningLevel = CheckWarningLevel.Failure;
+                }
 
-                return NewCheckRunAnnotation(
-                    filename,
-                    args.LineNumber,
-                    args.EndLineNumber,
-                    CheckWarningLevel.Failure,
-                    args.Message,
-                    args.Code);
-            }));
+                var newCheckRunAnnotation = new NewCheckRunAnnotation(annotation.Filename, "", annotation.LineNumber, annotation.EndLine, warningLevel, annotation.Message)
+                {
+                    Title = annotation.Title
+                };
 
-            newCheckRunAnnotations.AddRange(parsedBinaryLog.Warnings.Select(args =>
-            {
-                var filename = parsedBinaryLog
-                    .SolutionDetails
-                    .GetProject(args.ProjectFile)
-                    .GetClonePath(args.File);
-
-                return NewCheckRunAnnotation(
-                    filename,
-                    args.LineNumber,
-                    args.EndLineNumber,
-                    CheckWarningLevel.Warning,
-                    args.Message,
-                    args.Code);
-            }));
+                return newCheckRunAnnotation;
+            }).ToList();
 
             var newCheckRun = new NewCheckRun(checkRunName, headSha)
             {

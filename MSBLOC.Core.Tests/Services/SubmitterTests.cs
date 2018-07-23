@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Model;
 using MSBLOC.Core.Services;
@@ -29,15 +26,22 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public async Task ShouldSubmitEmptyLog()
         {
-            var cloneRoot = @"c:\Project\";
-            var parsedBinaryLog = new ParsedBinaryLog(new BuildWarningEventArgs[0], new BuildErrorEventArgs[0], new SolutionDetails(cloneRoot));
+            var cloneRoot = "c:\\Project\\";
+
+            var project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
+            project.AddItems("File.cs");
+
+            var solutionDetails = new SolutionDetails(cloneRoot);
+            solutionDetails.AddProject(project);
+
+            var parsedBinaryLog = new BuildDetails(solutionDetails);
             await AssertSubmitLogs(
                 cloneRoot: cloneRoot, 
                 owner: "JustAProgrammer", 
                 name: "TestRepo",
                 headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5",
                 checkRunName: "SampleCheckRun",
-                parsedBinaryLog: parsedBinaryLog, 
+                buildDetails: parsedBinaryLog, 
                 checkRunTitle: "Check Run Title", 
                 checkRunSummary: "Check Run Summary", 
                 expectedAnnotations: new NewCheckRunAnnotation[0]);
@@ -46,35 +50,19 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public async Task ShouldSubmitLogWithWarning()
         {
-            var cloneRoot = @"c:\Project\";
+            var cloneRoot = "c:\\Project\\";
+
+            var project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
+            project.AddItems("File.cs");
+
             var solutionDetails = new SolutionDetails(cloneRoot);
+            solutionDetails.AddProject(project);
 
-            /*
-                new Dictionary<string, Dictionary<string, string>>
-                {
-                    {
-                        @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj",
-                        new Dictionary<string, string>
-                        {
-                            {
-                                "File.cs", @"c:\Project\TestConsoleApp1\File.cs"
-                            }
-                        }
-                    }
-                }
-             */
-
-            var parsedBinaryLog = new ParsedBinaryLog(
+            var buildDetails = new BuildDetails(
+                solutionDetails,
                 new[] {
-                    new BuildWarningEventArgs(string.Empty, "Code", "File.cs", 9, 0, 0, 0, "Message", string.Empty, string.Empty, DateTime.Now, null)
-                    {
-                        ProjectFile = @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj"
-                    }
-                },
-                new BuildErrorEventArgs[0], solutionDetails
-                );
-
-
+                    new Annotation(@"TestConsoleApp1\File.cs", AnnotationWarningLevel.Warning, "Title", "Message", 9, 9)
+                });
 
             await AssertSubmitLogs(
                 cloneRoot: cloneRoot,
@@ -82,14 +70,14 @@ namespace MSBLOC.Core.Tests.Services
                 name: "TestRepo", 
                 headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5",
                 checkRunName: "SampleCheckRun",
-                parsedBinaryLog: parsedBinaryLog, 
+                buildDetails: buildDetails, 
                 checkRunTitle: "Check Run Title", 
                 checkRunSummary: "Check Run Summary", 
                 expectedAnnotations: new[]
                 {
                     new NewCheckRunAnnotation(@"TestConsoleApp1\File.cs", "", 9, 9, CheckWarningLevel.Warning, "Message")
                     {
-                        Title = "Code"
+                        Title = "Title"
                     }
                 });
         }
@@ -97,47 +85,40 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public async Task ShouldSubmitLogWithError()
         {
-            var parsedBinaryLog = new ParsedBinaryLog(
-                new BuildWarningEventArgs[0],
+            var cloneRoot = "c:\\Project\\";
+
+            var project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
+            project.AddItems("File.cs");
+
+            var solutionDetails = new SolutionDetails(cloneRoot);
+            solutionDetails.AddProject(project);
+
+            var buildDetails = new BuildDetails(
+                solutionDetails,
                 new[] {
-                    new BuildErrorEventArgs(string.Empty, "Code", "File.cs", 9, 0, 0, 0, "Message", string.Empty, string.Empty, DateTime.Now, null)
-                    {
-                        ProjectFile = @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj"
-                    }
-                },
-                new Dictionary<string, Dictionary<string, string>>
-                {
-                    {
-                        @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj",
-                        new Dictionary<string, string>
-                        {
-                            {
-                                "File.cs", @"c:\Project\TestConsoleApp1\File.cs"
-                            }
-                        }
-                    }
+                    new Annotation(@"TestConsoleApp1\File.cs", AnnotationWarningLevel.Failure, "Title", "Message", 9, 9)
                 });
 
             await AssertSubmitLogs(
-                cloneRoot: "c:\\Project\\",
+                cloneRoot: cloneRoot,
                 owner: "JustAProgrammer",
                 name: "TestRepo",
                 headSha: "2d67ec600fc4ae8549b17c79acea1db1bc1dfad5",
                 checkRunName: "SampleCheckRun",
-                parsedBinaryLog: parsedBinaryLog,
+                buildDetails: buildDetails,
                 checkRunTitle: "Check Run Title",
                 checkRunSummary: "Check Run Summary",
                 expectedAnnotations: new[]
                 {
                     new NewCheckRunAnnotation(@"TestConsoleApp1\File.cs", "", 9, 9, CheckWarningLevel.Failure, "Message")
                     {
-                        Title = "Code"
+                        Title = "Title"
                     }
                 });
         }
 
         private async Task AssertSubmitLogs(string cloneRoot, string owner, string name, string headSha,
-            string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary,
+            string checkRunName, BuildDetails buildDetails, string checkRunTitle, string checkRunSummary,
             NewCheckRunAnnotation[] expectedAnnotations)
         {
             var checkRunsClient = Substitute.For<ICheckRunsClient>();
@@ -146,7 +127,7 @@ namespace MSBLOC.Core.Tests.Services
 
             var submitter = new Submitter(checkRunsClient, TestLogger.Create<Submitter>(_testOutputHelper));
 
-            await submitter.SubmitCheckRun(owner, name, headSha, checkRunName, parsedBinaryLog, checkRunTitle, checkRunSummary, cloneRoot);
+            await submitter.SubmitCheckRun(owner, name, headSha, checkRunName, buildDetails, checkRunTitle, checkRunSummary, cloneRoot);
 
             Received.InOrder(async () =>
             {

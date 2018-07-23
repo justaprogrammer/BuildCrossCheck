@@ -7,6 +7,7 @@ using FluentAssertions;
 using FluentAssertions.Equivalency;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
+using MSBLOC.Core.Model;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
 using Xunit;
@@ -37,80 +38,57 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public void ShouldTestConsoleApp1Warning()
         {
+            var cloneRoot = "C:\\projects\\testconsoleapp1\\";
+
+            var solutionDetails = new SolutionDetails(cloneRoot);
+
+            var project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
+            solutionDetails.AddProject(project);
+
+            project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj");
+            project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
+            solutionDetails.AddProject(project);
+
             AssertParseLogs("testconsoleapp1-1warning.binlog",
-                new BuildErrorEventArgs[0],
-                new[]
+                solutionDetails, new[]
                 {
-                    new BuildWarningEventArgs(string.Empty, "CS0219", "Program.cs", 13, 20, 0, 0, "The variable 'hello' is assigned but its value is never used", null, "Csc")
-                    {
-                        ProjectFile = "C:\\projects\\testconsoleapp1\\TestConsoleApp1\\TestConsoleApp1.csproj"
-                    },
-                }, 
-                new Dictionary<string, Dictionary<string, string>>
-                {
-                    {
-                        @"C:\projects\testconsoleapp1\TestConsoleApp1.sln",
-                        new Dictionary<string, string>()
-                    },
-                    {
-                        @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj",
-                        new Dictionary<string, string>
-                        {
-                            {"Program.cs", @"C:\projects\testconsoleapp1\TestConsoleApp1\Program.cs"},
-                            {@"Properties\AssemblyInfo.cs", @"C:\projects\testconsoleapp1\TestConsoleApp1\Properties\AssemblyInfo.cs"}
-                        }
-                    }
-                });
+                    new Annotation(@"TestConsoleApp1\Program.cs", AnnotationWarningLevel.Warning, "CS0219", "The variable 'hello' is assigned but its value is never used", 13, 13),
+                }, cloneRoot);
         }
 
         [Fact]
         public void ShouldTestConsoleApp1Error()
         {
+            var cloneRoot = "C:\\projects\\testconsoleapp1\\";
+
+            var solutionDetails = new SolutionDetails(cloneRoot);
+
+            var project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
+            solutionDetails.AddProject(project);
+
+            project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj");
+            project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
+            solutionDetails.AddProject(project);
+
             AssertParseLogs("testconsoleapp1-1error.binlog",
-                new[]
+                solutionDetails, new[]
                 {
-                    new BuildErrorEventArgs(string.Empty, "CS1002", "Program.cs", 13, 34, 0, 0, "; expected", null, "Csc")
-                    {
-                        ProjectFile = "C:\\projects\\testconsoleapp1\\TestConsoleApp1\\TestConsoleApp1.csproj"
-                    }
-                },
-                new BuildWarningEventArgs[0],
-                new Dictionary<string, Dictionary<string, string>>
-                {
-                    {
-                        @"C:\projects\testconsoleapp1\TestConsoleApp1.sln",
-                        new Dictionary<string, string>()
-                    },
-                    {
-                        @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj",
-                        new Dictionary<string, string>
-                        {
-                            {"Program.cs", @"C:\projects\testconsoleapp1\TestConsoleApp1\Program.cs"},
-                            {@"Properties\AssemblyInfo.cs", @"C:\projects\testconsoleapp1\TestConsoleApp1\Properties\AssemblyInfo.cs"}
-                        }
-                    }
-                });
+                    new Annotation(@"TestConsoleApp1\Program.cs", AnnotationWarningLevel.Failure, "CS1002", "; expected", 13, 13),
+                }, cloneRoot);
         }
 
-        private void AssertParseLogs(string resourceName, BuildErrorEventArgs[] expectedBuildErrorEventArgs, BuildWarningEventArgs[] expectedBuildWarningEventArgs, Dictionary<string, Dictionary<string, string>> expectedProjectFileLookup)
+        private void AssertParseLogs(string resourceName, SolutionDetails expectedSolutionDetails, Annotation[] expectedAnnotations,
+            string cloneRoot)
         {
             var resourcePath = GetResourcePath(resourceName);
             File.Exists(resourcePath).Should().BeTrue();
 
             var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
-            var parsedBinaryLog = parser.Parse(resourcePath);
+            var parsedBinaryLog = parser.Parse(resourcePath, cloneRoot);
 
-            parsedBinaryLog.Errors.ToArray().Should().BeEquivalentTo(expectedBuildErrorEventArgs, 
-                options => options
-                    .Excluding(args => args.BuildEventContext)
-                    .Excluding(args => args.Timestamp));
+            parsedBinaryLog.Annotations.ToArray().Should().BeEquivalentTo(expectedAnnotations);
 
-            parsedBinaryLog.Warnings.ToArray().Should().BeEquivalentTo(expectedBuildWarningEventArgs, options => 
-                options
-                    .Excluding(args => args.BuildEventContext)
-                    .Excluding(args => args.Timestamp));
-
-            parsedBinaryLog.SolutionDetails.Should().BeEquivalentTo(expectedProjectFileLookup);
+            parsedBinaryLog.SolutionDetails.Should().BeEquivalentTo(expectedSolutionDetails, options => options.IncludingNestedObjects().IncludingProperties());
         }
     }
 }

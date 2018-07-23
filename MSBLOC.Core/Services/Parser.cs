@@ -1,8 +1,6 @@
 ﻿extern alias StructuredLogger;
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
@@ -12,59 +10,6 @@ using MSBLOC.Core.Model;
 
 namespace MSBLOC.Core.Services
 {
-    public class SolutionDetails
-    {
-        private Dictionary<string, ProjectDetails> Projects { get; }
-        private string CloneRoot { get; }
-
-        public SolutionDetails(string cloneRoot)
-        {
-            CloneRoot = cloneRoot;
-            Projects = new Dictionary<string, ProjectDetails>();
-        }
-
-        public void AddProject(ProjectDetails projectDetails)
-        {
-            Projects.Add(projectDetails.ProjectFile, projectDetails);
-        }
-
-        public ProjectDetails GetProject(string projectFile)
-        {
-            return Projects[projectFile];
-        }
-    }
-
-    public class ProjectDetails
-    {
-        public string ProjectFile { get; }
-        private string CloneRoot { get; }
-        private string ProjectDirectory { get; }
-
-        private Dictionary<string, string> _taskItemPaths;
-
-        public ProjectDetails(string cloneRoot, string projectFile)
-        {
-            CloneRoot = cloneRoot;
-            ProjectFile = projectFile;
-
-            ProjectDirectory = Path.GetDirectoryName(projectFile)
-                                   ?? throw new InvalidOperationException("Path.GetDirectoryName(startedEventArgs.ProjectFile) is null");
-
-            _taskItemPaths = new Dictionary<string, string>();
-        }
-
-        public void AddTaskItems(IEnumerable<ITaskItem> taskItems)
-        {
-            _taskItemPaths = taskItems
-                .ToDictionary(item => item.ItemSpec, item => Path.Combine(ProjectDirectory, item.ItemSpec));
-        }
-
-        public string GetClonePath(string taskItems)
-        {
-            return _taskItemPaths[taskItems];
-        }
-    }
-
     public class Parser : IParser
     {
         private ILogger<Parser> Logger { get; }
@@ -74,7 +19,7 @@ namespace MSBLOC.Core.Services
             Logger = logger ?? new NullLogger<Parser>();
         }
 
-        public ParsedBinaryLog Parse(string resourcePath, string cloneRoot = "")
+        public BuildDetails Parse(string resourcePath, string cloneRoot)
         {
             var warnings = new List<BuildWarningEventArgs>();
             var errors = new List<BuildErrorEventArgs>();
@@ -83,6 +28,7 @@ namespace MSBLOC.Core.Services
             var readRecords = binLogReader.ReadRecords(resourcePath).ToList();
 
             var solutionDetails = new SolutionDetails(cloneRoot);
+            var buildDetails = new BuildDetails(solutionDetails);
 
             foreach (var record in readRecords)
             {
@@ -92,28 +38,42 @@ namespace MSBLOC.Core.Services
                     var projectDetails = new ProjectDetails(cloneRoot, startedEventArgs.ProjectFile);
                     solutionDetails.AddProject(projectDetails);
 
-                    var taskItems = startedEventArgs.Items.Cast<DictionaryEntry>()
-                        .Where(entry => (string)entry.Key == "Compile")
+                    var items = startedEventArgs.Items.Cast<DictionaryEntry>()
+                        .Where(entry => (string) entry.Key == "Compile")
                         .Select(entry => entry.Value)
-                        .Cast<ITaskItem>();
+                        .Cast<ITaskItem>()
+                        .Select(item => item.ItemSpec)
+                        .ToArray();
 
-                    projectDetails.AddTaskItems(taskItems);
+                    projectDetails.AddItems(items);
                 }
 
                 if (buildEventArgs is BuildWarningEventArgs buildWarning)
                 {
-                    Logger.LogInformation($"{buildWarning.File} {buildWarning.LineNumber}:{buildWarning.ColumnNumber} {buildWarning.Message}");
-                    warnings.Add(buildWarning);
+                    var endLine = buildWarning.EndLineNumber;
+                    if (endLine == 0)
+                    {
+                        endLine = buildWarning.LineNumber;
+                    }
+
+                    var projectItemPath = solutionDetails.GetProjectItemPath(buildWarning.ProjectFile, buildWarning.File);
+                    buildDetails.AddAnnotation(projectItemPath, buildWarning.LineNumber, endLine, AnnotationWarningLevel.Warning, buildWarning.Message, buildWarning.Code);
                 }
 
                 if (buildEventArgs is BuildErrorEventArgs buildError)
                 {
-                    Logger.LogInformation($"{buildError.File} {buildError.LineNumber}:{buildError.ColumnNumber} {buildError.Message}");
-                    errors.Add(buildError);
+                    var endLine = buildError.EndLineNumber;
+                    if (endLine == 0)
+                    {
+                        endLine = buildError.LineNumber;
+                    }
+
+                    var projectItemPath = solutionDetails.GetProjectItemPath(buildError.ProjectFile, buildError.File);
+                    buildDetails.AddAnnotation(projectItemPath, buildError.LineNumber, endLine, AnnotationWarningLevel.Failure, buildError.Message, buildError.Code);
                 }
             }
 
-            return new ParsedBinaryLog(warnings.ToArray(), errors.ToArray(), solutionDetails);
+            return buildDetails;
         }
     }
 }
