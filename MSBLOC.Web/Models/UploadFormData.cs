@@ -7,6 +7,8 @@ namespace MSBLOC.Web.Models
 {
     public class UploadFormData
     {
-        public int Id { get; set; }
+        public string RepoName { get; set; }
+        public string Branch { get; set; }
+        public string Sha { get; set; }
     }
 }
