@@ -28,8 +28,10 @@ namespace MSBLOC.Core.Model
 
         public void AddOrReplaceItems(params string[] itemProjectPaths)
         {
-            _paths = itemProjectPaths
-                .ToDictionary(item => item, GetClonePath);
+            foreach (var itemProjectPath in itemProjectPaths)
+            {
+                _paths[itemProjectPath] = GetClonePath(itemProjectPath);
+            }
         }
 
         private string GetClonePath(string itemProjectPath)
