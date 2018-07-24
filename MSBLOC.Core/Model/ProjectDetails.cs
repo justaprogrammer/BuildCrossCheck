@@ -26,12 +26,22 @@ namespace MSBLOC.Core.Model
             _paths = new Dictionary<string, string>();
         }
 
-        public void AddOrReplaceItems(params string[] itemProjectPaths)
+        public void AddItems(params string[] itemProjectPaths)
         {
             foreach (var itemProjectPath in itemProjectPaths)
             {
-                _paths[itemProjectPath] = GetClonePath(itemProjectPath);
+                AddItem(itemProjectPath);
             }
+        }
+
+        private void AddItem(string itemProjectPath)
+        {
+            if (_paths.ContainsKey(itemProjectPath))
+            {
+                throw new ArgumentException(nameof(itemProjectPath));
+            }
+
+            _paths[itemProjectPath] = GetClonePath(itemProjectPath);
         }
 
         private string GetClonePath(string itemProjectPath)
