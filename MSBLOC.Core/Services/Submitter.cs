@@ -31,20 +31,7 @@ namespace MSBLOC.Core.Services
         {
             var newCheckRunAnnotations = buildDetails.Annotations.Select(annotation =>
             {
-                CheckWarningLevel warningLevel;
-                if (annotation.AnnotationWarningLevel == AnnotationWarningLevel.Warning)
-                {
-                    warningLevel = CheckWarningLevel.Warning;
-                }
-                else if (annotation.AnnotationWarningLevel == AnnotationWarningLevel.Notice)
-                {
-                    warningLevel = CheckWarningLevel.Notice;
-                }
-                else
-                {
-                    warningLevel = CheckWarningLevel.Failure;
-                }
-
+                var warningLevel = GetCheckWarningLevel(annotation.AnnotationWarningLevel);
                 var blobHref = BlobHref(owner, name, headSha, annotation.Filename);
                 var newCheckRunAnnotation = new NewCheckRunAnnotation(annotation.Filename, blobHref, annotation.LineNumber, annotation.EndLine, warningLevel, annotation.Message)
                 {
@@ -73,6 +60,27 @@ namespace MSBLOC.Core.Services
         private static string BlobHref(string owner, string repository, string sha, string file)
         {
             return $"https://github.com/{owner}/{repository}/blob/{sha}/{file.Replace(@"\", "/")}";
+        }
+        
+        private static CheckWarningLevel GetCheckWarningLevel(AnnotationWarningLevel annotationWarningLevel)
+        {
+            CheckWarningLevel warningLevel;
+            switch (annotationWarningLevel)
+            {
+                case AnnotationWarningLevel.Warning:
+                    warningLevel = CheckWarningLevel.Warning;
+                    break;
+                case AnnotationWarningLevel.Notice:
+                    warningLevel = CheckWarningLevel.Notice;
+                    break;
+                case AnnotationWarningLevel.Failure:
+                    warningLevel = CheckWarningLevel.Failure;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(annotationWarningLevel));
+            }
+
+            return warningLevel;
         }
     }
 }
