@@ -1,24 +1,7 @@
 version: 1.0.{build}
 image: Visual Studio 2017
-environment:
-  MSBLOC_KEY:
-    secure: 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
 before_build:
     - ps: |
-        $full_build = Test-Path env:MSBLOC_KEY
-        git submodule sync
-        git submodule init
-
-        if ($full_build) {
-            $fileContent = "-----BEGIN RSA PRIVATE KEY-----`n"
-            $fileContent += $env:MSBLOC_KEY.Replace(' ', "`n")
-            $fileContent += "`n-----END RSA PRIVATE KEY-----`n"
-            Set-Content c:\users\appveyor\.ssh\id_rsa $fileContent
-        } else {
-            git submodule deinit private
-        }
-
-        git submodule update
         nuget restore MSBuildLogOctokitChecker.sln
 build:
     project: MSBuildLogOctokitChecker.sln
