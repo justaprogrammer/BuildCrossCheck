@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 
@@ -10,7 +11,7 @@ namespace MSBLOC.Core.Model
         public string ProjectFile { get; }
         public string CloneRoot { get; }
         public string ProjectDirectory { get; }
-        public IReadOnlyDictionary<string, string> Paths => _paths;
+        public IReadOnlyDictionary<string, string> Paths => new ReadOnlyDictionary<string, string>(_paths);
 
         private Dictionary<string, string> _paths;
 
