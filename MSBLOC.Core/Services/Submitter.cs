@@ -45,7 +45,8 @@ namespace MSBLOC.Core.Services
                     warningLevel = CheckWarningLevel.Failure;
                 }
 
-                var newCheckRunAnnotation = new NewCheckRunAnnotation(annotation.Filename, "", annotation.LineNumber, annotation.EndLine, warningLevel, annotation.Message)
+                var blobHref = BlobHref(owner, name, headSha, annotation.Filename);
+                var newCheckRunAnnotation = new NewCheckRunAnnotation(annotation.Filename, blobHref, annotation.LineNumber, annotation.EndLine, warningLevel, annotation.Message)
                 {
                     Title = annotation.Title
                 };
@@ -72,23 +73,6 @@ namespace MSBLOC.Core.Services
         private static string BlobHref(string owner, string repository, string sha, string file)
         {
             return $"https://github.com/{owner}/{repository}/blob/{sha}/{file.Replace(@"\", "/")}";
-        }
-
-        private static NewCheckRunAnnotation NewCheckRunAnnotation(string file, int lineNumber,
-            int endLine, CheckWarningLevel checkWarningLevel, string message, string title, string sha, string owner,
-            string repository)
-        {
-            if (endLine == 0)
-            {
-                endLine = lineNumber;
-            }
-
-            var blobHref = BlobHref(owner, repository, sha, file);
-            return new NewCheckRunAnnotation(file.Replace(@"\", "/"), blobHref, lineNumber,
-                endLine, checkWarningLevel, message)
-            {
-                Title = title
-            };
         }
     }
 }

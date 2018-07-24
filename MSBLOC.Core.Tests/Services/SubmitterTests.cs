@@ -69,7 +69,7 @@ namespace MSBLOC.Core.Tests.Services
             var buildDetails = new BuildDetails(
                 solutionDetails,
                 new[] {
-                    new Annotation(@"TestConsoleApp1\File.cs", AnnotationWarningLevel.Warning, "Title", "Message", 9, 9)
+                    new Annotation(@"TestConsoleApp1/File.cs", AnnotationWarningLevel.Warning, "Title", "Message", 9, 9)
                 });
 
             await AssertSubmitLogs(
@@ -109,7 +109,7 @@ namespace MSBLOC.Core.Tests.Services
             var buildDetails = new BuildDetails(
                 solutionDetails,
                 new[] {
-                    new Annotation(@"TestConsoleApp1\File.cs", AnnotationWarningLevel.Failure, "Title", "Message", 9, 9)
+                    new Annotation(@"TestConsoleApp1/File.cs", AnnotationWarningLevel.Failure, "Title", "Message", 9, 9)
                 });
 
             await AssertSubmitLogs(
