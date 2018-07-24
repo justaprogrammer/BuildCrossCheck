@@ -25,11 +25,10 @@ namespace MSBLOC.Core.Services
         }
 
         public async Task<CheckRun> SubmitCheckRun(string owner, string name, string headSha,
-            string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary,
+            string checkRunName, BuildDetails buildDetails, string checkRunTitle, string checkRunSummary,
             DateTimeOffset startedAt,
             DateTimeOffset completedAt, string cloneRoot)
         {
-
             var newCheckRunAnnotations = buildDetails.Annotations.Select(annotation =>
             {
                 CheckWarningLevel warningLevel;
@@ -63,7 +62,8 @@ namespace MSBLOC.Core.Services
                 Status = CheckStatus.Completed,
                 StartedAt = startedAt,
                 CompletedAt = completedAt,
-                Conclusion = parsedBinaryLog.Errors.Any() ? CheckConclusion.Failure : CheckConclusion.Success
+                Conclusion = buildDetails.Annotations
+                    .Any(annotation => annotation.AnnotationWarningLevel == AnnotationWarningLevel.Failure) ? CheckConclusion.Failure : CheckConclusion.Success
             };
 
             return await CheckRunsClient.Create(owner, name, newCheckRun);
