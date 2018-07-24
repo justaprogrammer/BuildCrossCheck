@@ -22,11 +22,11 @@ namespace MSBLOC.Web
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration(MSBLOCConfigureAppConfiguration)
+                .ConfigureAppConfiguration(new Program().MSBLOCConfigureAppConfiguration)
                 .UseStartup<Startup>()
                 .Build();
 
-        public static void MSBLOCConfigureAppConfiguration(WebHostBuilderContext context, IConfigurationBuilder config)
+        public void MSBLOCConfigureAppConfiguration(WebHostBuilderContext context, IConfigurationBuilder config)
         {
             config.AddEnvironmentVariables("MSBLOC_");
 
@@ -36,19 +36,27 @@ namespace MSBLOC.Web
 
             if (!string.IsNullOrEmpty(azureKeyVault))
             {
-                var keyVaultConfigBuilder = new ConfigurationBuilder();
+                var keyVaultConfigBuilder = GetConfigurationBuilder();
 
-                var azureServiceTokenProvider = new AzureServiceTokenProvider();
+                var keyVaultClient = GetKeyVaultClient();
 
-                var keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
-
-                keyVaultConfigBuilder.AddAzureKeyVault($"https://{azureKeyVault}.vault.azure.net/",
-                    keyVaultClient, new DefaultKeyVaultSecretManager());
+                keyVaultConfigBuilder.AddAzureKeyVault($"https://{azureKeyVault}.vault.azure.net/", keyVaultClient, new DefaultKeyVaultSecretManager());
 
                 var keyVaultConfig = keyVaultConfigBuilder.Build();
 
                 config.AddConfiguration(keyVaultConfig);
             }
+        }
+
+        protected virtual KeyVaultClient GetKeyVaultClient()
+        {
+            var azureServiceTokenProvider = new AzureServiceTokenProvider();
+            return new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
+        }
+
+        protected virtual IConfigurationBuilder GetConfigurationBuilder()
+        {
+            return new ConfigurationBuilder();
         }
     }
 }
