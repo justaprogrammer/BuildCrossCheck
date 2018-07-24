@@ -33,7 +33,7 @@ namespace MSBLOC.Core.Tests.Services
             solutionDetails.Add(project);
 
             project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
-            project.AddItems("File.cs");
+            project.AddOrReplaceItems("File.cs");
             solutionDetails.Add(project);
 
             var parsedBinaryLog = new BuildDetails(solutionDetails);
@@ -59,7 +59,7 @@ namespace MSBLOC.Core.Tests.Services
             solutionDetails.Add(project);
 
             project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
-            project.AddItems("File.cs");
+            project.AddOrReplaceItems("File.cs");
             solutionDetails.Add(project);
 
             var buildDetails = new BuildDetails(
@@ -96,7 +96,7 @@ namespace MSBLOC.Core.Tests.Services
             solutionDetails.Add(project);
 
             project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
-            project.AddItems("File.cs");
+            project.AddOrReplaceItems("File.cs");
             solutionDetails.Add(project);
 
             var buildDetails = new BuildDetails(

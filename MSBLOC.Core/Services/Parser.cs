@@ -40,7 +40,7 @@ namespace MSBLOC.Core.Services
                         .Select(item => item.ItemSpec)
                         .ToArray();
 
-                    projectDetails.AddItems(items);
+                    projectDetails.AddOrReplaceItems(items);
                 }
 
                 if (buildEventArgs is BuildWarningEventArgs buildWarning)

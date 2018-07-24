@@ -7,7 +7,7 @@ namespace MSBLOC.Core.Model
 {
     public class BuildDetails
     {
-        public List<Annotation> Annotations { get; }
+        public IList<Annotation> Annotations { get; }
 
         public SolutionDetails SolutionDetails { get; }
 
@@ -47,8 +47,8 @@ namespace MSBLOC.Core.Model
 
     public enum AnnotationWarningLevel
     {
-        Notice,
-        Warning,
-        Failure,
+        Notice = 0,
+        Warning = 1,
+        Failure = 2,
     }
 }

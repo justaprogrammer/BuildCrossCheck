@@ -27,20 +27,7 @@ namespace MSBLOC.Core.Services
         {
             var newCheckRunAnnotations = buildDetails.Annotations.Select(annotation =>
             {
-                CheckWarningLevel warningLevel;
-                if (annotation.AnnotationWarningLevel == AnnotationWarningLevel.Warning)
-                {
-                    warningLevel = CheckWarningLevel.Warning;
-                }
-                else if (annotation.AnnotationWarningLevel == AnnotationWarningLevel.Notice)
-                {
-                    warningLevel = CheckWarningLevel.Notice;
-                }
-                else
-                {
-                    warningLevel = CheckWarningLevel.Failure;
-                }
-
+                var warningLevel = GetCheckWarningLevel(annotation.AnnotationWarningLevel);
                 var newCheckRunAnnotation = new NewCheckRunAnnotation(annotation.Filename, "", annotation.LineNumber, annotation.EndLine, warningLevel, annotation.Message)
                 {
                     Title = annotation.Title
@@ -60,19 +47,25 @@ namespace MSBLOC.Core.Services
             return await CheckRunsClient.Create(owner, name, newCheckRun);
         }
 
-        private static NewCheckRunAnnotation NewCheckRunAnnotation(string filename, int lineNumber,
-            int endLine, CheckWarningLevel checkWarningLevel, string message, string title)
+        private static CheckWarningLevel GetCheckWarningLevel(AnnotationWarningLevel annotationWarningLevel)
         {
-            if (endLine == 0)
+            CheckWarningLevel warningLevel;
+            switch (annotationWarningLevel)
             {
-                endLine = lineNumber;
+                case AnnotationWarningLevel.Warning:
+                    warningLevel = CheckWarningLevel.Warning;
+                    break;
+                case AnnotationWarningLevel.Notice:
+                    warningLevel = CheckWarningLevel.Notice;
+                    break;
+                case AnnotationWarningLevel.Failure:
+                    warningLevel = CheckWarningLevel.Failure;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(annotationWarningLevel));
             }
 
-            return new NewCheckRunAnnotation(filename, "", lineNumber,
-                endLine, checkWarningLevel, message)
-            {
-                Title = title
-            };
+            return warningLevel;
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace MSBLOC.Core.Services
+namespace MSBLOC.Core.Model
 {
     public class ProjectDetails
     {
@@ -26,7 +26,7 @@ namespace MSBLOC.Core.Services
             _paths = new Dictionary<string, string>();
         }
 
-        public void AddItems(params string[] itemProjectPaths)
+        public void AddOrReplaceItems(params string[] itemProjectPaths)
         {
             _paths = itemProjectPaths
                 .ToDictionary(item => item, GetClonePath);
@@ -41,7 +41,12 @@ namespace MSBLOC.Core.Services
 
         public string GetPath(string itemProjectPath)
         {
-            return _paths[itemProjectPath];
+            if (_paths.TryGetValue(itemProjectPath, out var result))
+            {
+                return result;
+            }
+
+            throw new ProjectPathNotFoundException(this, itemProjectPath);
         }
     }
 }
