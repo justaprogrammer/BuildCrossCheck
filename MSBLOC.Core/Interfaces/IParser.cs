@@ -4,6 +4,6 @@ namespace MSBLOC.Core.Interfaces
 {
     public interface IParser
     {
-        ParsedBinaryLog Parse(string filePath);
+        BuildDetails Parse(string filePath, string cloneRoot = "");
     }
 }

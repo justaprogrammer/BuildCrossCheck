@@ -30,22 +30,29 @@ namespace MSBLOC.Core.Services
             DateTimeOffset completedAt, string cloneRoot)
         {
 
-            var newCheckRunAnnotations = new List<NewCheckRunAnnotation>();
-            newCheckRunAnnotations.AddRange(parsedBinaryLog.Errors.Select(args => NewCheckRunAnnotation(
-                parsedBinaryLog.ProjectFileLookup[args.ProjectFile][args.File].Split(new[] { cloneRoot }, StringSplitOptions.RemoveEmptyEntries).First(),
-                args.LineNumber,
-                args.EndLineNumber,
-                CheckWarningLevel.Failure,
-                args.Message,
-                args.Code, headSha, owner, name)));
+            var newCheckRunAnnotations = buildDetails.Annotations.Select(annotation =>
+            {
+                CheckWarningLevel warningLevel;
+                if (annotation.AnnotationWarningLevel == AnnotationWarningLevel.Warning)
+                {
+                    warningLevel = CheckWarningLevel.Warning;
+                }
+                else if (annotation.AnnotationWarningLevel == AnnotationWarningLevel.Notice)
+                {
+                    warningLevel = CheckWarningLevel.Notice;
+                }
+                else
+                {
+                    warningLevel = CheckWarningLevel.Failure;
+                }
 
-            newCheckRunAnnotations.AddRange(parsedBinaryLog.Warnings.Select(args => NewCheckRunAnnotation(
-                parsedBinaryLog.ProjectFileLookup[args.ProjectFile][args.File].Split(new[] { cloneRoot }, StringSplitOptions.RemoveEmptyEntries).First(),
-                args.LineNumber,
-                args.EndLineNumber,
-                CheckWarningLevel.Warning,
-                args.Message,
-                args.Code, headSha, owner, name)));
+                var newCheckRunAnnotation = new NewCheckRunAnnotation(annotation.Filename, "", annotation.LineNumber, annotation.EndLine, warningLevel, annotation.Message)
+                {
+                    Title = annotation.Title
+                };
+
+                return newCheckRunAnnotation;
+            }).ToList();
 
             var newCheckRun = new NewCheckRun(checkRunName, headSha)
             {
