@@ -3,20 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Octokit.Net", "Octokit.Net", "{4C9CF0E8-D88F-461B-A53B-DD702D39AE47}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Octokit", "octokit.net\Octokit\Octokit.csproj", "{42CA5731-868A-442B-8355-F4FE177730F6}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBLOC.Core", "MSBLOC.Core\MSBLOC.Core.csproj", "{3F926502-1D86-45B8-B222-056C1E766440}"
-	ProjectSection(ProjectDependencies) = postProject
-		{42CA5731-868A-442B-8355-F4FE177730F6} = {42CA5731-868A-442B-8355-F4FE177730F6}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBLOC.Web", "MSBLOC.Web\MSBLOC.Web.csproj", "{AE876DF7-7EB1-4461-B9EE-CB294EFE06F0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBLOC.Web.Tests", "MSBLOC.Web.Tests\MSBLOC.Web.Tests.csproj", "{B14902B1-FEDA-4134-B9D3-99F5B0D76CCC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBLOC.Core.Tests", "MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj", "{F173BCB1-26C7-4688-B517-AA03740762DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBLOC.Core.Tests", "MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj", "{F173BCB1-26C7-4688-B517-AA03740762DB}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3F926502-1D86-45B8-B222-056C1E766440} = {3F926502-1D86-45B8-B222-056C1E766440}
 	EndProjectSection
@@ -32,10 +25,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{42CA5731-868A-442B-8355-F4FE177730F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42CA5731-868A-442B-8355-F4FE177730F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42CA5731-868A-442B-8355-F4FE177730F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42CA5731-868A-442B-8355-F4FE177730F6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3F926502-1D86-45B8-B222-056C1E766440}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3F926502-1D86-45B8-B222-056C1E766440}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F926502-1D86-45B8-B222-056C1E766440}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -59,9 +48,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{42CA5731-868A-442B-8355-F4FE177730F6} = {4C9CF0E8-D88F-461B-A53B-DD702D39AE47}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {05191D52-B17D-4449-BE8F-26B3F4F081A5}
