@@ -22,31 +22,33 @@ namespace MSBLOC.Web
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration((context, config) =>
-                {
-                    config.AddEnvironmentVariables("MSBLOC_");
-
-                    var builtConfig = config.Build();
-
-                    var azureKeyVault = builtConfig["Azure:KeyVault"];
-
-                    if (!string.IsNullOrEmpty(azureKeyVault))
-                    {
-                        var keyVaultConfigBuilder = new ConfigurationBuilder();
-
-                        var azureServiceTokenProvider = new AzureServiceTokenProvider();
-
-                        var keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
-
-                        keyVaultConfigBuilder.AddAzureKeyVault($"https://{azureKeyVault}.vault.azure.net/",
-                            keyVaultClient, new DefaultKeyVaultSecretManager());
-
-                        var keyVaultConfig = keyVaultConfigBuilder.Build();
-
-                        config.AddConfiguration(keyVaultConfig);
-                    }
-                })
+                .ConfigureAppConfiguration(MSBLOCConfigureAppConfiguration)
                 .UseStartup<Startup>()
                 .Build();
+
+        public static void MSBLOCConfigureAppConfiguration(WebHostBuilderContext context, IConfigurationBuilder config)
+        {
+            config.AddEnvironmentVariables("MSBLOC_");
+
+            var builtConfig = config.Build();
+
+            var azureKeyVault = builtConfig["Azure:KeyVault"];
+
+            if (!string.IsNullOrEmpty(azureKeyVault))
+            {
+                var keyVaultConfigBuilder = new ConfigurationBuilder();
+
+                var azureServiceTokenProvider = new AzureServiceTokenProvider();
+
+                var keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
+
+                keyVaultConfigBuilder.AddAzureKeyVault($"https://{azureKeyVault}.vault.azure.net/",
+                    keyVaultClient, new DefaultKeyVaultSecretManager());
+
+                var keyVaultConfig = keyVaultConfigBuilder.Build();
+
+                config.AddConfiguration(keyVaultConfig);
+            }
+        }
     }
 }
