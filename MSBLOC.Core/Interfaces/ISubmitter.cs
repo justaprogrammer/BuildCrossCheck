@@ -7,6 +7,6 @@ namespace MSBLOC.Core.Interfaces
     public interface ISubmitter
     {
         Task<CheckRun> SubmitCheckRun(string owner, string name, string headSha,
-            string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary);
+            string checkRunName, BuildDetails buildDetails, string checkRunTitle, string checkRunSummary, string cloneRoot);
     }
 }
