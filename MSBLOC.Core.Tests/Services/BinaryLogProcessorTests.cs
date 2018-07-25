@@ -90,7 +90,7 @@ namespace MSBLOC.Core.Tests.Services
                     }, "C:\\projects\\testconsoleapp2\\");
             });
 
-            projectDetailsException.Message.Should().Be("Project file path is not a subpath of clone root");
+            projectDetailsException.Message.Should().Be(@"Project file path ""C:\projects\testconsoleapp1\TestConsoleApp1.sln"" is not a subpath of ""C:\projects\testconsoleapp2\""");
         }
 
         private void AssertParseLogs(string resourceName, SolutionDetails expectedSolutionDetails, Annotation[] expectedAnnotations,
