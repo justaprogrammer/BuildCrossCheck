@@ -8,6 +8,25 @@ function Get-OctoKitMsbuildLogBaseUrl{
     $script:BaseUrl
 }
 
+<#
+.SYNOPSIS
+Sets the base url
+
+.DESCRIPTION
+
+.PARAMETER Url
+Parameter description
+
+.PARAMETER Passthru
+Setting this causes $Url to be returned.
+
+.EXAMPLE
+Set-OctoKitMsbuildLogBaseUrl http://msbloc.localtest.me:64952
+Set-OctoKitMsbuildLogBaseUrl http://localhost:64952
+
+.NOTES
+General notes
+#>
 function Set-OctoKitMsbuildLogBaseUrl{
     [CmdletBinding()]
     [OutputType([String])]
@@ -33,13 +52,10 @@ function  Send-OctoKitMsbuildLog {
         # TODO: Add ValidateScript to ensure its a real URI
         [ValidateNotNullOrEmpty()]
         [string] $BaseUri = $script:BaseUrl, #TODO: Replace with production Url
-        [ValidateScript({ [System.IO.File]::Exists($_)})]
         [ValidateNotNullOrEmpty()]
         [string] $RepoName = $env:APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME,
-        [ValidateScript({ [System.IO.File]::Exists($_)})]
         [ValidateNotNullOrEmpty()]
         [string] $Branch = $env:APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH,
-        [ValidateScript({ [System.IO.File]::Exists($_)})]
         [ValidateNotNullOrEmpty()]
         [Alias('Sha', 'CommitHash')]
         [string] $HeadCommit = $env:APPVEYOR_PULL_REQUEST_HEAD_COMMIT
@@ -49,6 +65,7 @@ function  Send-OctoKitMsbuildLog {
     $FileEnc = [System.Text.Encoding]::GetEncoding('UTF-8').GetString($FileBytes);
     $FileInfo = New-Object System.IO.FileInfo @($Path)
     $Boundary = [System.Guid]::NewGuid().ToString();
+    $LF = "`r`n";
     $Body = @(
         "--$Boundary",
         "Content-Disposition: form-data; name=`"MsbuildLog`"; filename=`"$($FileInfo.Name)`"",
@@ -64,7 +81,7 @@ function  Send-OctoKitMsbuildLog {
         "Content-Disposition: form-data; name=`"SHA`"",
         $HeadCommit
         "--$Boundary--$LF"
-    )
+    ) -join $LF
 
     $Uri = GetUploadUrl $BaseUri
     Invoke-RestMethod `

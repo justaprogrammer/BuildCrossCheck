@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
@@ -37,6 +38,7 @@ namespace MSBLOC.Web.Controllers.api
         [DisableFormValueModelBinding]
         public async Task<IActionResult> Upload()
         {
+            Request.EnableRewind();
             if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
             {
                 return BadRequest($"Expected a multipart request, but got {Request.ContentType}");
@@ -44,62 +46,75 @@ namespace MSBLOC.Web.Controllers.api
 
             // Used to accumulate all the form url encoded key value pairs in the request
             var formAccumulator = new KeyValueAccumulator();
-
+            
             var boundary = MultipartRequestHelper.GetBoundary(
                 MediaTypeHeaderValue.Parse(Request.ContentType),
                 DefaultFormOptions.MultipartBoundaryLengthLimit);
             var reader = new MultipartReader(boundary, HttpContext.Request.Body);
 
-            var section = await reader.ReadNextSectionAsync();
-            while (section != null)
+            using (_logger.BeginScope(new
             {
-                var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var contentDisposition);
-
-                if (hasContentDispositionHeader)
+                Boundary = boundary,
+                Request.ContentType
+            }))
+            {
+                _logger.LogTrace("Reading next section");
+                var section = await reader.ReadNextSectionAsync();
+                while (section != null)
                 {
-                    if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
-                    {
-                        var fileName = contentDisposition.FileName.Value;
-                        var path = await _tempFileService.CreateFromStreamAsync(fileName, section.Body);
+                    var hasContentDispositionHeader =
+                        ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var contentDisposition);
 
-                        _logger.LogInformation($"Copied the uploaded file '{fileName}' to path: '{path}'");
-                    }
-                    else if (MultipartRequestHelper.HasFormDataContentDisposition(contentDisposition))
+                    if (hasContentDispositionHeader)
                     {
-                        // Content-Disposition: form-data; name="key"
-                        //
-                        // value
-
-                        // Do not limit the key name length here because the 
-                        // multipart headers length limit is already in effect.
-                        var key = HeaderUtilities.RemoveQuotes(contentDisposition.Name);
-                        var encoding = GetEncoding(section);
-                        using (var streamReader = new StreamReader(
-                            section.Body,
-                            encoding,
-                            detectEncodingFromByteOrderMarks: true,
-                            bufferSize: 1024,
-                            leaveOpen: true))
+                        _logger.LogTrace("Content Disposition Header: {0}", section.ContentDisposition);
+                        if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
                         {
-                            // The value length limit is enforced by MultipartBodyLengthLimit
-                            var value = await streamReader.ReadToEndAsync();
-                            if (String.Equals(value, "undefined", StringComparison.OrdinalIgnoreCase))
-                            {
-                                value = String.Empty;
-                            }
-                            formAccumulator.Append(key.Value, value);
+                            var fileName = contentDisposition.FileName.Value;
+                            var path = await _tempFileService.CreateFromStreamAsync(fileName, section.Body);
 
-                            if (formAccumulator.ValueCount > DefaultFormOptions.ValueCountLimit)
+                            _logger.LogInformation($"Copied the uploaded file '{fileName}' to path: '{path}'");
+                        }
+                        else if (MultipartRequestHelper.HasFormDataContentDisposition(contentDisposition))
+                        {
+                            // Content-Disposition: form-data; name="key"
+                            //
+                            // value
+
+                            // Do not limit the key name length here because the 
+                            // multipart headers length limit is already in effect.
+                            var key = HeaderUtilities.RemoveQuotes(contentDisposition.Name);
+                            _logger.LogDebug("Retrieving value for {0}", key);
+                            var encoding = GetEncoding(section);
+                            using (var streamReader = new StreamReader(
+                                section.Body,
+                                encoding,
+                                detectEncodingFromByteOrderMarks: true,
+                                bufferSize: 1024,
+                                leaveOpen: true))
                             {
-                                throw new InvalidDataException($"Form key count limit {DefaultFormOptions.ValueCountLimit} exceeded.");
+                                // The value length limit is enforced by MultipartBodyLengthLimit
+                                var value = await streamReader.ReadToEndAsync();
+                                if (String.Equals(value, "undefined", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    value = String.Empty;
+                                }
+
+                                formAccumulator.Append(key.Value, value);
+
+                                if (formAccumulator.ValueCount > DefaultFormOptions.ValueCountLimit)
+                                {
+                                    throw new InvalidDataException(
+                                        $"Form key count limit {DefaultFormOptions.ValueCountLimit} exceeded.");
+                                }
                             }
                         }
                     }
-                }
 
-                // Drains any remaining section body that has not been consumed and
-                // reads the headers for the next section.
-                section = await reader.ReadNextSectionAsync();
+                    // Drains any remaining section body that has not been consumed and
+                    // reads the headers for the next section.
+                    section = await reader.ReadNextSectionAsync();
+                }
             }
 
             // Bind form data to a model
