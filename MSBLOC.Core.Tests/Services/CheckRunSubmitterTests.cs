@@ -13,27 +13,27 @@ using Xunit.Abstractions;
 
 namespace MSBLOC.Core.Tests.Services
 {
-    public class SubmitterTests
+    public class CheckRunSubmitterTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly ILogger<SubmitterTests> _logger;
+        private readonly ILogger<CheckRunSubmitterTests> _logger;
 
-        public SubmitterTests(ITestOutputHelper testOutputHelper)
+        public CheckRunSubmitterTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
-            _logger = TestLogger.Create<SubmitterTests>(testOutputHelper);
+            _logger = TestLogger.Create<CheckRunSubmitterTests>(testOutputHelper);
         }
 
         [Fact]
         public async Task ShouldSubmitEmptyLog()
         {
-            var cloneRoot = "c:\\Project\\";
+            var cloneRoot = "c:\\Projects\\";
             var solutionDetails = new SolutionDetails(cloneRoot);
 
             var project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
             solutionDetails.Add(project);
 
-            project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
+            project = new ProjectDetails(cloneRoot, @"c:\Projects\TestConsoleApp1\TestConsoleApp1.csproj");
             project.AddItems("File.cs");
             solutionDetails.Add(project);
 
@@ -56,13 +56,13 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public async Task ShouldSubmitLogWithWarning()
         {
-            var cloneRoot = "c:\\Project\\";
+            var cloneRoot = "c:\\Projects\\";
             var solutionDetails = new SolutionDetails(cloneRoot);
 
             var project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
             solutionDetails.Add(project);
 
-            project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
+            project = new ProjectDetails(cloneRoot, @"c:\Projects\TestConsoleApp1\TestConsoleApp1.csproj");
             project.AddItems("File.cs");
             solutionDetails.Add(project);
 
@@ -96,13 +96,13 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public async Task ShouldSubmitLogWithError()
         {
-            var cloneRoot = "c:\\Project\\";
+            var cloneRoot = "c:\\Projects\\";
             var solutionDetails = new SolutionDetails(cloneRoot);
 
             var project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
             solutionDetails.Add(project);
 
-            project = new ProjectDetails(cloneRoot, @"c:\Project\TestConsoleApp1\TestConsoleApp1.csproj");
+            project = new ProjectDetails(cloneRoot, @"c:\Projects\TestConsoleApp1\TestConsoleApp1.csproj");
             project.AddItems("File.cs");
             solutionDetails.Add(project);
 
@@ -142,9 +142,9 @@ namespace MSBLOC.Core.Tests.Services
             checkRunsClient.Create(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<NewCheckRun>())
                 .ReturnsForAnyArgs(new CheckRun());
 
-            var submitter = new Submitter(checkRunsClient, TestLogger.Create<Submitter>(_testOutputHelper));
+            var submitter = new CheckRunSubmitter(checkRunsClient, TestLogger.Create<CheckRunSubmitter>(_testOutputHelper));
 
-            await submitter.SubmitCheckRun(owner, name, headSha, checkRunName, buildDetails, checkRunTitle, checkRunSummary, startedAt, completedAt, cloneRoot);
+            await submitter.SubmitCheckRun(buildDetails, owner, name, headSha, checkRunName, checkRunTitle, checkRunSummary, startedAt, completedAt);
 
             Received.InOrder(async () =>
             {

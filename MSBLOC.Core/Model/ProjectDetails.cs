@@ -20,6 +20,11 @@ namespace MSBLOC.Core.Model
             CloneRoot = cloneRoot;
             ProjectFile = projectFile;
 
+            if (!projectFile.IsSubPathOf(cloneRoot))
+            {
+                throw new ProjectDetailsException("Project file path is not a subpath of clone root");
+            }
+
             ProjectDirectory = Path.GetDirectoryName(projectFile)
                                ?? throw new InvalidOperationException(
                                    "Path.GetDirectoryName(startedEventArgs.ProjectFile) is null");

@@ -9,28 +9,29 @@ using MSBLOC.Core.Model;
 
 namespace MSBLOC.Core.Services
 {
-    public class Parser : IParser
+    public class BinaryLogProcessor : IBinaryLogProcessor
     {
-        private ILogger<Parser> Logger { get; }
+        private ILogger<BinaryLogProcessor> Logger { get; }
 
-        public Parser(ILogger<Parser> logger = null)
+        public BinaryLogProcessor(ILogger<BinaryLogProcessor> logger = null)
         {
-            Logger = logger ?? new NullLogger<Parser>();
+            Logger = logger ?? new NullLogger<BinaryLogProcessor>();
         }
 
-        public BuildDetails Parse(string filePath, string cloneRoot)
+        /// <inheritdoc />
+        public BuildDetails ProcessLog(string binLogPath, string buildEnvironmentCloneRoot)
         {
             var binLogReader = new StructuredLogger::Microsoft.Build.Logging.BinaryLogReplayEventSource();
 
-            var solutionDetails = new SolutionDetails(cloneRoot);
+            var solutionDetails = new SolutionDetails(buildEnvironmentCloneRoot);
             var buildDetails = new BuildDetails(solutionDetails);
 
-            foreach (var record in binLogReader.ReadRecords(filePath))
+            foreach (var record in binLogReader.ReadRecords(binLogPath))
             {
                 var buildEventArgs = record.Args;
                 if (buildEventArgs is ProjectStartedEventArgs startedEventArgs)
                 {
-                    var projectDetails = new ProjectDetails(cloneRoot, startedEventArgs.ProjectFile);
+                    var projectDetails = new ProjectDetails(buildEnvironmentCloneRoot, startedEventArgs.ProjectFile);
                     solutionDetails.Add(projectDetails);
 
                     var items = startedEventArgs.Items.Cast<DictionaryEntry>()

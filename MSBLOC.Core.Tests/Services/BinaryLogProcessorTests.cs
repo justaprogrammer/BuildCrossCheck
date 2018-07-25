@@ -15,15 +15,15 @@ using Xunit.Abstractions;
 
 namespace MSBLOC.Core.Tests.Services
 {
-    public class ParserTests
+    public class BinaryLogProcessorTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly ILogger<ParserTests> _logger;
+        private readonly ILogger<BinaryLogProcessorTests> _logger;
 
-        public ParserTests(ITestOutputHelper testOutputHelper)
+        public BinaryLogProcessorTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
-            _logger = TestLogger.Create<ParserTests>(testOutputHelper);
+            _logger = TestLogger.Create<BinaryLogProcessorTests>(testOutputHelper);
         }
 
         [Fact]
@@ -68,14 +68,39 @@ namespace MSBLOC.Core.Tests.Services
                 }, cloneRoot);
         }
 
+        [Fact]
+        public void ShouldThrowWhenBuildPathOutisdeCloneRoot()
+        {
+            var solutionDetails = new SolutionDetails("C:\\projects\\testconsoleapp1\\");
+
+            var project = new ProjectDetails("C:\\projects\\testconsoleapp1\\", @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
+            solutionDetails.Add(project);
+
+            project = new ProjectDetails("C:\\projects\\testconsoleapp1\\", @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj");
+            project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
+            solutionDetails.Add(project);
+
+            var projectDetailsException = Assert.Throws<ProjectDetailsException>(() =>
+            {
+                AssertParseLogs("testconsoleapp1-1warning.binlog",
+                    solutionDetails, new[]
+                    {
+                        new Annotation(@"TestConsoleApp1\Program.cs", AnnotationWarningLevel.Warning, "CS0219",
+                            "The variable 'hello' is assigned but its value is never used", 13, 13),
+                    }, "C:\\projects\\testconsoleapp2\\");
+            });
+
+            projectDetailsException.Message.Should().Be("Project file path is not a subpath of clone root");
+        }
+
         private void AssertParseLogs(string resourceName, SolutionDetails expectedSolutionDetails, Annotation[] expectedAnnotations,
             string cloneRoot)
         {
             var resourcePath = TestUtils.GetResourcePath(resourceName);
             File.Exists(resourcePath).Should().BeTrue();
 
-            var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
-            var parsedBinaryLog = parser.Parse(resourcePath, cloneRoot);
+            var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
+            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot);
 
             parsedBinaryLog.Annotations.ToArray().Should().BeEquivalentTo(expectedAnnotations);
 

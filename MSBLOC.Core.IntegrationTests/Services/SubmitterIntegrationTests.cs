@@ -53,8 +53,8 @@ namespace MSBLOC.Core.IntegrationTests.Services
             var cloneRoot = @"C:\projects\testconsoleapp1\";
 
             var startedAt = DateTimeOffset.Now;
-            var parser = new Parser(TestLogger.Create<Parser>(_testOutputHelper));
-            var buildDetails = parser.Parse(resourcePath, cloneRoot);
+            var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
+            var buildDetails = parser.ProcessLog(resourcePath, cloneRoot);
 
             var privateKeySource = new EnvironmentVariablePrivateKeySource(privateKeyEnvironmentVariableName);
             var tokenGenerator = new TokenGenerator(gitHubAppId, privateKeySource);
@@ -62,18 +62,16 @@ namespace MSBLOC.Core.IntegrationTests.Services
             var gitHubClient = await gitHubClientFactory.CreateClientForLogin(integrationTestAppOwner);
             var checkRunsClient = gitHubClient.Check.Run;
 
-            var submitter = new Submitter(checkRunsClient);
-            var checkRun = await submitter.SubmitCheckRun(
+            var submitter = new CheckRunSubmitter(checkRunsClient);
+            var checkRun = await submitter.SubmitCheckRun(buildDetails: buildDetails,
                 owner: integrationTestAppOwner,
                 name: integrationTestAppName,
                 headSha: sha,
                 checkRunName: "MSBuildLog Analyzer",
-                buildDetails: buildDetails,
                 checkRunTitle: "MSBuildLog Analysis",
                 checkRunSummary: "",
                 startedAt: startedAt,
-                completedAt: DateTimeOffset.Now,
-                cloneRoot: cloneRoot);
+                completedAt: DateTimeOffset.Now);
 
             checkRun.Should().NotBeNull();
 
