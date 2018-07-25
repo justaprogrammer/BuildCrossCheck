@@ -72,13 +72,13 @@ function  Send-OctoKitMsbuildLog {
         "Content-Type: application/octet-stream$LF",
         $FileEnc,
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"RepoName`"",
+        "Content-Disposition: form-data; name=`"RepoName`"$LF",
         $RepoName
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"Branch`"",
+        "Content-Disposition: form-data; name=`"Branch`"$LF",
         $Branch
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"SHA`"",
+        "Content-Disposition: form-data; name=`"SHA`"$LF",
         $HeadCommit
         "--$Boundary--$LF"
     ) -join $LF
