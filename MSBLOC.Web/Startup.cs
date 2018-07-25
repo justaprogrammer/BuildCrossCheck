@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GitHubJwt;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSBLOC.Web.Interfaces;
+using MSBLOC.Web.Models;
 using MSBLOC.Web.Services;
 
 namespace MSBLOC.Web
@@ -25,7 +27,10 @@ namespace MSBLOC.Web
         {
             services.AddMvc();
 
+            services.Configure<EnvOptions>(Configuration);
+
             services.AddScoped<ITempFileService, LocalTempFileService>();
+            services.AddSingleton<IPrivateKeySource, OptionsPrivateKeySource>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

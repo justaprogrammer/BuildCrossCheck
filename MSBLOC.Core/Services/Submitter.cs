@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
@@ -22,26 +23,18 @@ namespace MSBLOC.Core.Services
         }
 
         public async Task<CheckRun> SubmitCheckRun(string owner, string name, string headSha,
-            string checkRunName, ParsedBinaryLog parsedBinaryLog, string checkRunTitle, string checkRunSummary)
+            string checkRunName, BuildDetails buildDetails, string checkRunTitle, string checkRunSummary, string cloneRoot)
         {
-            var newCheckRunAnnotations = new List<NewCheckRunAnnotation>();
-            newCheckRunAnnotations.AddRange(parsedBinaryLog.Errors.Select(args => NewCheckRunAnnotation(
-                args.File, 
-                "", 
-                args.LineNumber,
-                args.EndLineNumber, 
-                CheckWarningLevel.Failure, 
-                args.Message, 
-                args.Code)));
+            var newCheckRunAnnotations = buildDetails.Annotations.Select(annotation =>
+            {
+                var warningLevel = GetCheckWarningLevel(annotation.AnnotationWarningLevel);
+                var newCheckRunAnnotation = new NewCheckRunAnnotation(annotation.Filename, "", annotation.LineNumber, annotation.EndLine, warningLevel, annotation.Message)
+                {
+                    Title = annotation.Title
+                };
 
-            newCheckRunAnnotations.AddRange(parsedBinaryLog.Warnings.Select(args => NewCheckRunAnnotation(
-                args.File,
-                "",
-                args.LineNumber,
-                args.EndLineNumber,
-                CheckWarningLevel.Warning,
-                args.Message,
-                args.Code)));
+                return newCheckRunAnnotation;
+            }).ToList();
 
             var newCheckRun = new NewCheckRun(checkRunName, headSha)
             {
@@ -54,19 +47,25 @@ namespace MSBLOC.Core.Services
             return await CheckRunsClient.Create(owner, name, newCheckRun);
         }
 
-        private static NewCheckRunAnnotation NewCheckRunAnnotation(string filename, string blobHref, int lineNumber,
-            int endLine, CheckWarningLevel checkWarningLevel, string message, string title)
+        private static CheckWarningLevel GetCheckWarningLevel(AnnotationWarningLevel annotationWarningLevel)
         {
-            if (endLine == 0)
+            CheckWarningLevel warningLevel;
+            switch (annotationWarningLevel)
             {
-                endLine = lineNumber;
+                case AnnotationWarningLevel.Warning:
+                    warningLevel = CheckWarningLevel.Warning;
+                    break;
+                case AnnotationWarningLevel.Notice:
+                    warningLevel = CheckWarningLevel.Notice;
+                    break;
+                case AnnotationWarningLevel.Failure:
+                    warningLevel = CheckWarningLevel.Failure;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(annotationWarningLevel));
             }
 
-            return new NewCheckRunAnnotation(filename, blobHref, lineNumber,
-                endLine, checkWarningLevel, message)
-            {
-                Title = title
-            };
+            return warningLevel;
         }
     }
 }
