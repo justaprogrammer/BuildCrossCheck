@@ -29,8 +29,7 @@ namespace MSBLOC.Core.Services
         public async Task<CheckRun> SubmitCheckRun(BuildDetails buildDetails,
             string owner, string name, string headSha,
             string checkRunName, string checkRunTitle, string checkRunSummary,
-            DateTimeOffset startedAt,
-            DateTimeOffset completedAt)
+            DateTimeOffset startedAt, DateTimeOffset completedAt)
         {
             var newCheckRunAnnotations = buildDetails.Annotations.Select(annotation =>
             {
