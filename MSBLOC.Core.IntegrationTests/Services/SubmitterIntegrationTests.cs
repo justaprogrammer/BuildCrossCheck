@@ -28,7 +28,7 @@ namespace MSBLOC.Core.IntegrationTests.Services
         public async Task ShouldSubmitWarning()
         {
             const string file = "testconsoleapp1-1warning.binlog";
-            const string sha = "9ebabb7dad7f93ebd947fb005175c57346bed21a";
+            const string sha = "7d8c017ce2934453a2166f28e4eb3b92640c97e4";
 
             await AssertSubmit(file, sha);
         }
@@ -37,7 +37,7 @@ namespace MSBLOC.Core.IntegrationTests.Services
         public async Task ShouldSubmitError()
         {
             const string file = "testconsoleapp1-1error.binlog";
-            const string sha = "d12f68584e84d3e885079e322c8d8bd11cfa1f58";
+            const string sha = "478882ff771853355906ea1e7177daa123116aeb";
 
             await AssertSubmit(file, sha);
         }
