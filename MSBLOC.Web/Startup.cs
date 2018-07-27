@@ -48,6 +48,9 @@ namespace MSBLOC.Web
             });
 
             services.AddScoped<ITempFileService, LocalTempFileService>();
+            services.AddScoped<IBinaryLogProcessor, BinaryLogProcessor>();
+
+            services.AddTransient<IMSBLOCService, MSBLOCService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
