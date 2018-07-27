@@ -7,9 +7,9 @@ namespace MSBLOC.Core.Services
 {
     public class GitHubClientFactory : IGitHubClientFactory
     {
-        public TokenGenerator TokenGenerator { get; }
+        public ITokenGenerator TokenGenerator { get; }
 
-        public GitHubClientFactory(TokenGenerator tokenGenerator)
+        public GitHubClientFactory(ITokenGenerator tokenGenerator)
         {
             TokenGenerator = tokenGenerator;
         }

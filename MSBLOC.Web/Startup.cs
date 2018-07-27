@@ -7,9 +7,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Services;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using MSBLOC.Web.Services;
+using Octokit;
 
 namespace MSBLOC.Web
 {
@@ -29,8 +34,20 @@ namespace MSBLOC.Web
 
             services.Configure<EnvOptions>(Configuration);
 
-            services.AddScoped<ITempFileService, LocalTempFileService>();
             services.AddSingleton<IPrivateKeySource, OptionsPrivateKeySource>();
+            services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async appOwner =>
+            {
+                var gitHubAppId = s.GetService<IOptions<EnvOptions>>().Value.GitHubAppId;
+                var privateKeySource = s.GetService<IPrivateKeySource>();
+                var gitHubTokenGenerator = new TokenGenerator(gitHubAppId, privateKeySource, s.GetService<ILogger<TokenGenerator>>());
+
+                var gitHubClientFactory = new GitHubClientFactory(gitHubTokenGenerator);
+                var gitHubClient = await gitHubClientFactory.CreateClientForLogin(appOwner);
+
+                return new CheckRunSubmitter(gitHubClient.Check.Run, s.GetService<ILogger<CheckRunSubmitter>>());
+            });
+
+            services.AddScoped<ITempFileService, LocalTempFileService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

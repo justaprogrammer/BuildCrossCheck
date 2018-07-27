@@ -9,5 +9,7 @@ namespace MSBLOC.Web.Interfaces
     public interface ITempFileService : IDisposable
     {
         Task<string> CreateFromStreamAsync(string fileName, Stream source);
+        string GetFilePath(string fileName);
+        IEnumerable<string> Files { get; }
     }
 }

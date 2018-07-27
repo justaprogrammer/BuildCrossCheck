@@ -46,6 +46,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string>{{name, fileContent}};
 
             var fileService = Substitute.For<ITempFileService>();
+            var msblocService = Substitute.For<IMSBLOCService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -58,7 +59,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)
+            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService, msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -80,6 +81,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 .ToDictionary(f => $"{string.Join("_", new Faker().Lorem.Words(4))}.txt", f => f);
 
             var fileService = Substitute.For<ITempFileService>();
+            var msblocService = Substitute.For<IMSBLOCService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -92,7 +94,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)
+            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService, msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileContents),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -111,8 +113,9 @@ namespace MSBLOC.Web.Tests.Controllers.api
         public async Task UploadBadRequestTest()
         {
             var fileService = Substitute.For<ITempFileService>();
+            var msblocService = Substitute.For<IMSBLOCService>();
 
-            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)
+            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService, msblocService)
             {
                 ControllerContext = new ControllerContext()
                 {
@@ -138,6 +141,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> { { name, fileContent } };
 
             var fileService = Substitute.For<ITempFileService>();
+            var msblocService = Substitute.For<IMSBLOCService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -150,7 +154,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var formData = new UploadFormData
+            var formData = new SubmitionData
             {
                 ApplicationName = "SomeApplicationName",
                 ApplicationOwner = "SomeApplicationOwner",
@@ -158,7 +162,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 CloneRoot = "c:/cloneRoot"
             };
 
-            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService)
+            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService, msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, formData),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -172,12 +176,12 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             receivedFiles.Should().BeEquivalentTo(fileDictionary);
 
-            var resultFormData = result.Value as UploadFormData;
+            var resultFormData = result.Value;
 
             resultFormData.Should().NotBeNull();
         }
 
-        private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary, UploadFormData formData = null)
+        private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary, SubmitionData formData = null)
         {
             
 

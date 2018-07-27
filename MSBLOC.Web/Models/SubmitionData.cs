@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MSBLOC.Web.Models
 {
-    public class UploadFormData
+    public class SubmitionData
     {
         public string ApplicationOwner { get; set; }
         public string ApplicationName { get; set; }

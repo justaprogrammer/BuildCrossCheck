@@ -26,11 +26,13 @@ namespace MSBLOC.Web.Controllers.api
 
         private readonly ILogger<FileController> _logger;
         private readonly ITempFileService _tempFileService;
+        private readonly IMSBLOCService _msblocService;
 
-        public FileController(ILogger<FileController> logger, ITempFileService tempFileService)
+        public FileController(ILogger<FileController> logger, ITempFileService tempFileService, IMSBLOCService msblocService)
         {
             _logger = logger;
             _tempFileService = tempFileService;
+            _msblocService = msblocService;
         }
 
         [HttpPost]
@@ -103,7 +105,7 @@ namespace MSBLOC.Web.Controllers.api
             }
 
             // Bind form data to a model
-            var formData = new UploadFormData();
+            var formData = new SubmitionData();
             var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(formAccumulator.GetResults()), CultureInfo.CurrentCulture);
 
             var bindingSuccessful = await TryUpdateModelAsync(formData, "", formValueProvider);
@@ -115,7 +117,13 @@ namespace MSBLOC.Web.Controllers.api
                 }
             }
 
-            return Json(formData);
+            var checkRun = await _msblocService.Submit(formData);
+
+            return Json(new
+            {
+                checkRun,
+                formData
+            });
         }
 
         private static Encoding GetEncoding(MultipartSection section)

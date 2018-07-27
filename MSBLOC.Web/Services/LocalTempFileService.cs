@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace MSBLOC.Web.Services
     {
         private readonly ILogger<LocalTempFileService> _logger;
 
-        private readonly IDictionary<string, string> _managedPathDictionary = new Dictionary<string, string>();
+        private readonly ConcurrentDictionary<string, string> _managedPathDictionary = new ConcurrentDictionary<string, string>();
 
         public LocalTempFileService(ILogger<LocalTempFileService> logger)
         {
@@ -23,7 +24,12 @@ namespace MSBLOC.Web.Services
         {
             var targetFilePath = Path.GetTempFileName();
 
-            _managedPathDictionary.Add(fileName, targetFilePath);
+            _managedPathDictionary.AddOrUpdate(fileName, targetFilePath, (f, oldPath) =>
+            {
+                DeleteFile(f, oldPath);
+
+                return targetFilePath;
+            });
 
             using (var targetStream = File.Create(targetFilePath))
             {
@@ -35,18 +41,37 @@ namespace MSBLOC.Web.Services
             return targetFilePath;
         }
 
+        public string GetFilePath(string fileName)
+        {
+            try
+            {
+                return _managedPathDictionary[fileName];
+            }
+            catch (Exception)
+            {
+                throw new FileNotFoundException($"File: '{fileName}' not found.");
+            }
+        }
+
+        public IEnumerable<string> Files => _managedPathDictionary.Keys;
+
         public void Dispose()
         {
             foreach (var kvp in _managedPathDictionary)
             {
-                try
-                {
-                    File.Delete(kvp.Value);
-                }
-                catch(Exception e)
-                {
-                    _logger.LogError(e, $"Error deleting file '{kvp.Key}' with path: '{kvp.Value}'");
-                }
+                DeleteFile(kvp.Key, kvp.Value);
+            }
+        }
+
+        private void DeleteFile(string fileName, string filePath)
+        {
+            try
+            {
+                File.Delete(filePath);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, $"Error deleting file '{fileName}' with path: '{filePath}'");
             }
         }
     }
