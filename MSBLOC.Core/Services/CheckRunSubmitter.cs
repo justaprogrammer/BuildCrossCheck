@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Threading.Tasks;
-using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using MSBLOC.Core.Interfaces;
@@ -12,22 +9,23 @@ using Octokit;
 
 namespace MSBLOC.Core.Services
 {
-    public class Submitter : ISubmitter
+    public class CheckRunSubmitter : ICheckRunSubmitter
     {
         private ICheckRunsClient CheckRunsClient { get; }
-        private ILogger<Submitter> Logger { get; }
+        private ILogger<CheckRunSubmitter> Logger { get; }
 
-        public Submitter(ICheckRunsClient checkRunsClient,
-            ILogger<Submitter> logger = null)
+        public CheckRunSubmitter(ICheckRunsClient checkRunsClient,
+            ILogger<CheckRunSubmitter> logger = null)
         {
             CheckRunsClient = checkRunsClient;
-            Logger = logger ?? new NullLogger<Submitter>();
+            Logger = logger ?? new NullLogger<CheckRunSubmitter>();
         }
 
-        public async Task<CheckRun> SubmitCheckRun(string owner, string name, string headSha,
-            string checkRunName, BuildDetails buildDetails, string checkRunTitle, string checkRunSummary,
-            DateTimeOffset startedAt,
-            DateTimeOffset completedAt, string cloneRoot)
+        /// <inheritdoc />
+        public async Task<CheckRun> SubmitCheckRun(BuildDetails buildDetails,
+            string owner, string name, string headSha,
+            string checkRunName, string checkRunTitle, string checkRunSummary,
+            DateTimeOffset startedAt, DateTimeOffset completedAt)
         {
             var newCheckRunAnnotations = buildDetails.Annotations.Select(annotation =>
             {

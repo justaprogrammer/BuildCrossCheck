@@ -20,9 +20,13 @@ namespace MSBLOC.Core.Model
             CloneRoot = cloneRoot;
             ProjectFile = projectFile;
 
+            if (!projectFile.IsSubPathOf(cloneRoot))
+            {
+                throw new ProjectDetailsException($"Project file path \"{projectFile}\" is not a subpath of \"{cloneRoot}\"");
+            }
+
             ProjectDirectory = Path.GetDirectoryName(projectFile)
-                               ?? throw new InvalidOperationException(
-                                   "Path.GetDirectoryName(startedEventArgs.ProjectFile) is null");
+                               ?? throw new ProjectDetailsException("Path.GetDirectoryName(projectFile) is null");
 
             _paths = new Dictionary<string, string>();
         }
@@ -39,7 +43,7 @@ namespace MSBLOC.Core.Model
         {
             if (_paths.ContainsKey(itemProjectPath))
             {
-                throw new ArgumentException(nameof(itemProjectPath));
+                throw new ProjectDetailsException($"Item \"{itemProjectPath}\" already exists");
             }
 
             _paths[itemProjectPath] = GetClonePath(itemProjectPath);
@@ -49,7 +53,8 @@ namespace MSBLOC.Core.Model
         {
             return Path.Combine(ProjectDirectory, itemProjectPath)
                 .Split(new[] {CloneRoot}, StringSplitOptions.RemoveEmptyEntries)
-                .First();
+                .First()
+                .Replace(@"\", "/");
         }
 
         public string GetPath(string itemProjectPath)
