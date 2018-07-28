@@ -83,6 +83,8 @@ namespace MSBLOC.Web.Tests.Services
 
                 tempFilePath2 = await fileService.CreateFromStreamAsync(resourceFileName, File.OpenRead(replacementPath));
 
+                File.Exists(tempFilePath1).Should().BeFalse();
+
                 tempFilePath2.Should().NotBeNullOrWhiteSpace();
                 tempFilePath2.Should().NotBe(tempFilePath1);
                 tempMd5 = ComputeFileMd5(tempFilePath2);
