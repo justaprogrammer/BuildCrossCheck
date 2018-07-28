@@ -6,6 +6,6 @@ namespace MSBLOC.Web.Interfaces
 {
     public interface IMSBLOCService
     {
-        Task<CheckRun> Submit(SubmitionData submitionData);
+        Task<CheckRun> SubmitAsync(SubmissionData submissionData);
     }
 }

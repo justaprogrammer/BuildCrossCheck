@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -15,12 +16,14 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using MSBLOC.Web.Controllers.api;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using MSBLOC.Web.Tests.Util;
 using Newtonsoft.Json;
 using NSubstitute;
+using Octokit;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -43,7 +46,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var name = "dummyFileName.txt";
             var fileContent = "This is some dummy file contents";
 
-            var fileDictionary = new Dictionary<string, string>{{name, fileContent}};
+            var fileDictionary = new Dictionary<string, string> {{name, fileContent}};
 
             var fileService = Substitute.For<ITempFileService>();
             var msblocService = Substitute.For<IMSBLOCService>();
@@ -59,7 +62,8 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService, msblocService)
+            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+                msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -90,11 +94,12 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 {
                     var fileName = (string) ci[0];
                     var stream = (Stream) ci[1];
-                    receivedFiles.Add(fileName ,new StreamReader(stream, Encoding.UTF8).ReadToEnd());
+                    receivedFiles.Add(fileName, new StreamReader(stream, Encoding.UTF8).ReadToEnd());
                     return $"temp/{fileName}";
                 });
 
-            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService, msblocService)
+            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+                msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileContents),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -115,7 +120,8 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileService = Substitute.For<ITempFileService>();
             var msblocService = Substitute.For<IMSBLOCService>();
 
-            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService, msblocService)
+            var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+                msblocService)
             {
                 ControllerContext = new ControllerContext()
                 {
@@ -133,7 +139,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
         }
 
         [Fact]
-        public async Task UploadFileWithFormData()
+        public async Task UploadFileWithMissingBinaryLogFileName()
         {
             var name = "dummyFileName.txt";
             var fileContent = "This is some dummy file contents";
@@ -153,16 +159,113 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     receivedFiles.Add(fileName, new StreamReader(stream, Encoding.UTF8).ReadToEnd());
                     return $"temp/{fileName}";
                 });
+            fileService.Files.Returns(new[] { name });
 
-            var formData = new SubmitionData
+            var formData = new SubmissionData
             {
                 ApplicationName = "SomeApplicationName",
                 ApplicationOwner = "SomeApplicationOwner",
                 CommitSha = "12345",
-                CloneRoot = "c:/cloneRoot"
+                CloneRoot = "c:/cloneRoot",
+                BinaryLogFileName = string.Empty //Bad Data
             };
 
-            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService, msblocService)
+            var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+                msblocService)
+            {
+                ControllerContext = await RequestWithFiles(fileDictionary, formData),
+                MetadataProvider = new EmptyModelMetadataProvider(),
+                ModelBinderFactory = Substitute.For<IModelBinderFactory>(),
+                ObjectValidator = Substitute.For<IObjectModelValidator>()
+            };
+
+            var result = await fileController.Upload() as BadRequestObjectResult;
+            result.Should().NotBeNull();
+            result.Value.Should().BeOfType<SerializableError>();
+        }
+
+        [Fact]
+        public async Task UploadWithMissingFile()
+        {
+            var name = "dummyFileName.txt";
+            var fileContent = "This is some dummy file contents";
+
+            var fileDictionary = new Dictionary<string, string> { { name, fileContent } };
+
+            var fileService = Substitute.For<ITempFileService>();
+            var msblocService = Substitute.For<IMSBLOCService>();
+
+            var receivedFiles = new Dictionary<string, string>();
+
+            fileService.CreateFromStreamAsync(Arg.Any<string>(), Arg.Any<Stream>())
+                .Returns(ci =>
+                {
+                    var fileName = (string)ci[0];
+                    var stream = (Stream)ci[1];
+                    receivedFiles.Add(fileName, new StreamReader(stream, Encoding.UTF8).ReadToEnd());
+                    return $"temp/{fileName}";
+                });
+            fileService.Files.Returns(new[] { name });
+
+            var formData = new SubmissionData
+            {
+                ApplicationName = "SomeApplicationName",
+                ApplicationOwner = "SomeApplicationOwner",
+                CommitSha = "12345",
+                CloneRoot = "c:/cloneRoot",
+                BinaryLogFileName = "someOtherFileName.txt" //Bad Data
+            };
+
+            var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+                msblocService)
+            {
+                ControllerContext = await RequestWithFiles(fileDictionary, formData),
+                MetadataProvider = new EmptyModelMetadataProvider(),
+                ModelBinderFactory = Substitute.For<IModelBinderFactory>(),
+                ObjectValidator = Substitute.For<IObjectModelValidator>()
+            };
+
+            var result = await fileController.Upload() as BadRequestObjectResult;
+            result.Should().NotBeNull();
+            result.Value.Should().BeOfType<SerializableError>();
+        }
+
+        [Fact]
+        public async Task UploadFileWithFormData()
+        {
+            var name = "dummyFileName.txt";
+            var fileContent = "This is some dummy file contents";
+
+            var fileDictionary = new Dictionary<string, string> {{name, fileContent}};
+
+            var fileService = Substitute.For<ITempFileService>();
+            var msblocService = Substitute.For<IMSBLOCService>();
+
+            var receivedFiles = new Dictionary<string, string>();
+
+            fileService.CreateFromStreamAsync(Arg.Any<string>(), Arg.Any<Stream>())
+                .Returns(ci =>
+                {
+                    var fileName = (string) ci[0];
+                    var stream = (Stream) ci[1];
+                    receivedFiles.Add(fileName, new StreamReader(stream, Encoding.UTF8).ReadToEnd());
+                    return $"temp/{fileName}";
+                });
+            fileService.Files.Returns(new[] {name});
+
+            msblocService.SubmitAsync(null).ReturnsForAnyArgs(new CheckRun());
+
+            var formData = new SubmissionData
+            {
+                ApplicationName = "SomeApplicationName",
+                ApplicationOwner = "SomeApplicationOwner",
+                CommitSha = "12345",
+                CloneRoot = "c:/cloneRoot",
+                BinaryLogFileName = name
+            };
+
+            var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+                msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, formData),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -173,18 +276,18 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var result = await fileController.Upload() as JsonResult;
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
+            await msblocService.Received(1).SubmitAsync(Arg.Is<SubmissionData>(data => data.Equals(formData)));
 
             receivedFiles.Should().BeEquivalentTo(fileDictionary);
 
-            var resultFormData = result.Value;
+            var resultFormData = result.Value as CheckRun;
 
             resultFormData.Should().NotBeNull();
         }
 
-        private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary, SubmitionData formData = null)
+        private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary,
+            SubmissionData formData = null)
         {
-            
-
             var boundary = "---9908908098";
 
             using (var formDataContent = new MultipartFormDataContent(boundary))
@@ -196,7 +299,9 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
                 if (formData != null)
                 {
-                    var formDataDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(formData));
+                    var formDataDictionary =
+                        JsonConvert.DeserializeObject<Dictionary<string, string>>(
+                            JsonConvert.SerializeObject(formData));
 
                     foreach (var kvp in formDataDictionary)
                     {
@@ -210,6 +315,25 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 httpContext.Request.Body = new MemoryStream(await formDataContent.ReadAsByteArrayAsync());
                 var actionContext = new ActionContext(httpContext, new RouteData(), new ControllerActionDescriptor());
                 return new ControllerContext(actionContext);
+            }
+        }
+
+        private class FileControllerStub : FileController
+        {
+            public FileControllerStub(ILogger<FileController> logger, ITempFileService tempFileService, IMSBLOCService msblocService) : base(logger, tempFileService, msblocService)
+            {
+            }
+
+            protected override Task<bool> BindDataAsync(SubmissionData model, Dictionary<string, StringValues> dataToBind)
+            {
+                foreach (var item in dataToBind)
+                {
+                    var propertyInfo = model.GetType().GetProperty(item.Key);
+                    var value = Convert.ChangeType(item.Value.ToString(), propertyInfo.PropertyType);
+                    propertyInfo.SetValue(model, value);
+                }
+
+                return Task.FromResult(true);
             }
         }
     }

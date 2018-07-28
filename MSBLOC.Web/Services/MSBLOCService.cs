@@ -32,14 +32,14 @@ namespace MSBLOC.Web.Services
             _tempFileService = tempFileService;
         }
 
-        public async Task<CheckRun> Submit(SubmitionData submitionData)
+        public async Task<CheckRun> SubmitAsync(SubmissionData submissionData)
         {
-            var appOwner = submitionData.ApplicationOwner;
-            var appName = submitionData.ApplicationName;
-            var cloneRoot = submitionData.CloneRoot;
-            var sha = submitionData.CommitSha;
+            var appOwner = submissionData.ApplicationOwner;
+            var appName = submissionData.ApplicationName;
+            var cloneRoot = submissionData.CloneRoot;
+            var sha = submissionData.CommitSha;
 
-            var resourcePath = _tempFileService.GetFilePath(_tempFileService.Files.FirstOrDefault());
+            var resourcePath = _tempFileService.GetFilePath(submissionData.BinaryLogFileName);
 
             var startedAt = DateTimeOffset.Now;
 

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Interfaces;
@@ -62,6 +63,7 @@ namespace MSBLOC.Web.Controllers.api
                     if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
                     {
                         var fileName = contentDisposition.FileName.Value;
+
                         var path = await _tempFileService.CreateFromStreamAsync(fileName, section.Body);
 
                         _logger.LogInformation($"Copied the uploaded file '{fileName}' to path: '{path}'");
@@ -105,10 +107,10 @@ namespace MSBLOC.Web.Controllers.api
             }
 
             // Bind form data to a model
-            var formData = new SubmitionData();
-            var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(formAccumulator.GetResults()), CultureInfo.CurrentCulture);
+            var formData = new SubmissionData();
 
-            var bindingSuccessful = await TryUpdateModelAsync(formData, "", formValueProvider);
+            var bindingSuccessful = await BindDataAsync(formData, formAccumulator.GetResults());
+
             if (!bindingSuccessful)
             {
                 if (!ModelState.IsValid)
@@ -117,13 +119,29 @@ namespace MSBLOC.Web.Controllers.api
                 }
             }
 
-            var checkRun = await _msblocService.Submit(formData);
-
-            return Json(new
+            if (string.IsNullOrWhiteSpace(formData.BinaryLogFileName))
             {
-                checkRun,
-                formData
-            });
+                ModelState.AddModelError(nameof(formData.BinaryLogFileName), $"No {nameof(formData.BinaryLogFileName)} included in request.");
+                return BadRequest(ModelState);
+            }
+
+            if (!_tempFileService.Files.Contains(formData.BinaryLogFileName))
+            {
+                ModelState.AddModelError(nameof(formData.BinaryLogFileName), $"File '{formData.BinaryLogFileName}' not found in request.");
+                return BadRequest(ModelState);
+            }
+
+            var checkRun = await _msblocService.SubmitAsync(formData);
+
+            return Json(checkRun);
+        }
+
+        protected virtual async Task<bool> BindDataAsync(SubmissionData model, Dictionary<string, StringValues> dataToBind)
+        {
+            var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(dataToBind), CultureInfo.CurrentCulture);
+            var bindingSuccessful = await TryUpdateModelAsync(model, "", formValueProvider);
+
+            return bindingSuccessful;
         }
 
         private static Encoding GetEncoding(MultipartSection section)
