@@ -63,6 +63,18 @@ namespace MSBLOC.Web.Controllers.api
                     if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
                     {
                         var fileName = contentDisposition.FileName.Value;
+                        
+                        switch (contentDisposition.Name.Value)
+                        {
+                            case nameof(SubmissionData.BinaryLogFile):
+                                formAccumulator.Append(nameof(SubmissionData.BinaryLogFile), fileName);
+                                break;
+                            default:
+                                // Drains any remaining section body that has not been consumed and
+                                // reads the headers for the next section.
+                                section = await reader.ReadNextSectionAsync();
+                                continue;
+                        }
 
                         var path = await _tempFileService.CreateFromStreamAsync(fileName, section.Body);
 
@@ -119,15 +131,15 @@ namespace MSBLOC.Web.Controllers.api
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(formData.BinaryLogFileName))
+            if (string.IsNullOrWhiteSpace(formData.BinaryLogFile))
             {
-                ModelState.AddModelError(nameof(formData.BinaryLogFileName), $"No {nameof(formData.BinaryLogFileName)} included in request.");
+                ModelState.AddModelError(nameof(formData.BinaryLogFile), $"No {nameof(formData.BinaryLogFile)} included in request.");
                 return BadRequest(ModelState);
             }
 
-            if (!_tempFileService.Files.Contains(formData.BinaryLogFileName))
+            if (!_tempFileService.Files.Contains(formData.BinaryLogFile))
             {
-                ModelState.AddModelError(nameof(formData.BinaryLogFileName), $"File '{formData.BinaryLogFileName}' not found in request.");
+                ModelState.AddModelError(nameof(formData.BinaryLogFile), $"File '{formData.BinaryLogFile}' not found in request.");
                 return BadRequest(ModelState);
             }
 

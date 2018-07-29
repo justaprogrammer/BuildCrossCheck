@@ -40,7 +40,7 @@ namespace MSBLOC.Web.Tests.Services
                 .RuleFor(sd => sd.ApplicationName, f => f.Hacker.Phrase())
                 .RuleFor(sd => sd.CloneRoot, f => f.System.DirectoryPath())
                 .RuleFor(sd => sd.CommitSha, f => f.Hashids.Encode())
-                .RuleFor(sd => sd.BinaryLogFileName, f => f.System.FileName())
+                .RuleFor(sd => sd.BinaryLogFile, f => f.System.FileName())
                 .Generate();
 
             var checkRun = new Faker<CheckRun>()
@@ -71,7 +71,7 @@ namespace MSBLOC.Web.Tests.Services
 
             Received.InOrder(async () =>
             {
-                tempFileService.GetFilePath(Arg.Is(submissionData.BinaryLogFileName));
+                tempFileService.GetFilePath(Arg.Is(submissionData.BinaryLogFile));
                 binaryLogProcessor.ProcessLog(Arg.Is(binaryLogFilePath), Arg.Is(submissionData.CloneRoot));
                 await checkRunSubmitterFactory.Invoke(Arg.Is(submissionData.ApplicationOwner));
                 await checkRunSubmitter.SubmitCheckRun(

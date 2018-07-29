@@ -39,7 +39,7 @@ namespace MSBLOC.Web.Services
             var cloneRoot = submissionData.CloneRoot;
             var sha = submissionData.CommitSha;
 
-            var resourcePath = _tempFileService.GetFilePath(submissionData.BinaryLogFileName);
+            var resourcePath = _tempFileService.GetFilePath(submissionData.BinaryLogFile);
 
             var startedAt = DateTimeOffset.Now;
 

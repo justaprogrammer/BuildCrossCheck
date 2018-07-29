@@ -62,7 +62,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+            var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary),
@@ -98,7 +98,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var fileController = new FileController(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+            var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileContents),
@@ -109,9 +109,9 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             await fileController.Upload();
 
-            await fileService.Received(fileContents.Count).CreateFromStreamAsync(Arg.Any<string>(), Arg.Any<Stream>());
+            await fileService.Received(1).CreateFromStreamAsync(Arg.Any<string>(), Arg.Any<Stream>());
 
-            receivedFiles.Should().BeEquivalentTo(fileContents);
+            receivedFiles.Count.Should().Be(1);
         }
 
         [Fact]
@@ -167,7 +167,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 ApplicationOwner = "SomeApplicationOwner",
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot",
-                BinaryLogFileName = string.Empty //Bad Data
+                BinaryLogFile = string.Empty //Bad Data
             };
 
             var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
@@ -213,7 +213,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 ApplicationOwner = "SomeApplicationOwner",
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot",
-                BinaryLogFileName = "someOtherFileName.txt" //Bad Data
+                BinaryLogFile = "someOtherFileName.txt" //Bad Data
             };
 
             var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
@@ -260,8 +260,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 ApplicationName = "SomeApplicationName",
                 ApplicationOwner = "SomeApplicationOwner",
                 CommitSha = "12345",
-                CloneRoot = "c:/cloneRoot",
-                BinaryLogFileName = name
+                CloneRoot = "c:/cloneRoot"
             };
 
             var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
@@ -276,7 +275,12 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var result = await fileController.Upload() as JsonResult;
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
-            await msblocService.Received(1).SubmitAsync(Arg.Is<SubmissionData>(data => data.Equals(formData)));
+            await msblocService.Received(1).SubmitAsync(Arg.Is<SubmissionData>(data =>
+                data.ApplicationOwner.Equals(formData.ApplicationOwner) &&
+                data.ApplicationName.Equals(formData.ApplicationName) && 
+                data.CloneRoot.Equals(formData.CloneRoot) &&
+                data.CommitSha.Equals(formData.CommitSha) &&
+                data.BinaryLogFile.Equals(receivedFiles.Keys.FirstOrDefault())));
 
             receivedFiles.Should().BeEquivalentTo(fileDictionary);
 
@@ -290,11 +294,15 @@ namespace MSBLOC.Web.Tests.Controllers.api
         {
             var boundary = "---9908908098";
 
+            var isFirst = true;
+
             using (var formDataContent = new MultipartFormDataContent(boundary))
             {
                 foreach (var kvp in fileDictionary)
                 {
-                    formDataContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes(kvp.Value)), "files", kvp.Key);
+                    var fileRole = (isFirst) ? nameof(SubmissionData.BinaryLogFile) : "SomeOtherUnusedRole";
+                    isFirst = false;
+                    formDataContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes(kvp.Value)), fileRole, kvp.Key);
                 }
 
                 if (formData != null)
@@ -303,7 +311,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                         JsonConvert.DeserializeObject<Dictionary<string, string>>(
                             JsonConvert.SerializeObject(formData));
 
-                    foreach (var kvp in formDataDictionary)
+                    foreach (var kvp in formDataDictionary.Where(i => i.Value != null))
                     {
                         formDataContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes(kvp.Value)), kvp.Key);
                     }
