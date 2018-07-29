@@ -131,12 +131,6 @@ namespace MSBLOC.Web.Controllers.api
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(formData.BinaryLogFile))
-            {
-                ModelState.AddModelError(nameof(formData.BinaryLogFile), $"No {nameof(formData.BinaryLogFile)} included in request.");
-                return BadRequest(ModelState);
-            }
-
             if (!_tempFileService.Files.Contains(formData.BinaryLogFile))
             {
                 ModelState.AddModelError(nameof(formData.BinaryLogFile), $"File '{formData.BinaryLogFile}' not found in request.");
