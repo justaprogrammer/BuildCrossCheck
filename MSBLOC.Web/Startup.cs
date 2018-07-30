@@ -11,10 +11,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Services;
+using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using MSBLOC.Web.Services;
-using Octokit;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace MSBLOC.Web
 {
@@ -51,6 +52,12 @@ namespace MSBLOC.Web
             services.AddScoped<IBinaryLogProcessor, BinaryLogProcessor>();
 
             services.AddTransient<IMSBLOCService, MSBLOCService>();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("0.0.1", new Info { Title = "MSBLOC Web API", Version = "0.0.1" });
+                c.OperationFilter<MultiPartFormBindingFilter>();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -65,6 +72,14 @@ namespace MSBLOC.Web
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
+            app.UseSwagger(c => { c.RouteTemplate = "docs/{documentName}/swagger.json"; });
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/docs/0.0.1/swagger.json", "MSBLOC Web API");
+                c.RoutePrefix = "docs";
+            });
 
             app.UseStaticFiles();
 
