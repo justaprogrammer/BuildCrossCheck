@@ -17,6 +17,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DEC73CC3-0764-4CE8-A344-3F665AB78FF2}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBLOC.Core.IntegrationTests", "MSBLOC.Core.IntegrationTests\MSBLOC.Core.IntegrationTests.csproj", "{DCD121DF-91AD-413B-ADDF-CBFC0DF55C18}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3F926502-1D86-45B8-B222-056C1E766440} = {3F926502-1D86-45B8-B222-056C1E766440}
 	EndProjectSection
 EndProject
 Global
@@ -41,6 +44,10 @@ Global
 		{F173BCB1-26C7-4688-B517-AA03740762DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F173BCB1-26C7-4688-B517-AA03740762DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F173BCB1-26C7-4688-B517-AA03740762DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCD121DF-91AD-413B-ADDF-CBFC0DF55C18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCD121DF-91AD-413B-ADDF-CBFC0DF55C18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCD121DF-91AD-413B-ADDF-CBFC0DF55C18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCD121DF-91AD-413B-ADDF-CBFC0DF55C18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

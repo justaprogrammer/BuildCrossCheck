@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="GitHubJwt" Version="0.0.2" />
+    <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" />
     <PackageReference Include="Microsoft.Build" Version="15.7.179" />
     <PackageReference Include="Microsoft.Build.Framework" Version="15.7.179" />
     <PackageReference Include="Microsoft.Build.Logging.StructuredLogger" Version="1.1.224" />

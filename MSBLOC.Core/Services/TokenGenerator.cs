@@ -9,22 +9,25 @@ namespace MSBLOC.Core.Services
     public class TokenGenerator : ITokenGenerator
     {
         private IPrivateKeySource _privateKeySource;
+        private int _appIntegrationId;
         private  ILogger<TokenGenerator> Logger { get; }
 
-        public TokenGenerator(IPrivateKeySource privateKeySource, ILogger<TokenGenerator> logger = null)
+        public TokenGenerator(int appIntegrationId, IPrivateKeySource privateKeySource,
+            ILogger<TokenGenerator> logger = null)
         {
             _privateKeySource = privateKeySource;
             Logger = logger ?? new NullLogger<TokenGenerator>();
+            _appIntegrationId = appIntegrationId;
         }
 
-        public string GetToken()
+        public string GetToken(int expirationSeconds = 600)
         {
             var generator = new GitHubJwtFactory(
                 _privateKeySource, 
                 new GitHubJwtFactoryOptions
                 {
-                    AppIntegrationId = 1, // The GitHub App Id
-                    ExpirationSeconds = 600 // 10 minutes is the maximum time allowed
+                    AppIntegrationId = _appIntegrationId,
+                    ExpirationSeconds = expirationSeconds
                 }
             );
 
