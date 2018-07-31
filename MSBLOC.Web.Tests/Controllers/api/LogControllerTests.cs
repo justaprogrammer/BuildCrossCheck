@@ -29,14 +29,14 @@ using Xunit.Abstractions;
 
 namespace MSBLOC.Web.Tests.Controllers.api
 {
-    public class FileControllerTests
+    public class LogControllerTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly ILogger<FileControllerTests> _logger;
+        private readonly ILogger<LogControllerTests> _logger;
 
-        public FileControllerTests(ITestOutputHelper testOutputHelper)
+        public LogControllerTests(ITestOutputHelper testOutputHelper)
         {
-            _logger = TestLogger.Create<FileControllerTests>(testOutputHelper);
+            _logger = TestLogger.Create<LogControllerTests>(testOutputHelper);
             _testOutputHelper = testOutputHelper;
         }
 
@@ -62,7 +62,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+            var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary),
@@ -98,7 +98,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+            var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileContents),
@@ -120,7 +120,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileService = Substitute.For<ITempFileService>();
             var msblocService = Substitute.For<IMSBLOCService>();
 
-            var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+            var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = new ControllerContext()
@@ -170,7 +170,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 BinaryLogFile = string.Empty //Bad Data
             };
 
-            var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+            var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, formData),
@@ -216,7 +216,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 BinaryLogFile = "someOtherFileName.txt" //Bad Data
             };
 
-            var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+            var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, formData),
@@ -263,7 +263,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 CloneRoot = "c:/cloneRoot"
             };
 
-            var fileController = new FileControllerStub(TestLogger.Create<FileController>(_testOutputHelper), fileService,
+            var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, formData),
@@ -326,9 +326,9 @@ namespace MSBLOC.Web.Tests.Controllers.api
             }
         }
 
-        private class FileControllerStub : FileController
+        private class LogControllerStub : LogController
         {
-            public FileControllerStub(ILogger<FileController> logger, ITempFileService tempFileService, IMSBLOCService msblocService) : base(logger, tempFileService, msblocService)
+            public LogControllerStub(ILogger<LogController> logger, ITempFileService tempFileService, IMSBLOCService msblocService) : base(logger, tempFileService, msblocService)
             {
             }
 

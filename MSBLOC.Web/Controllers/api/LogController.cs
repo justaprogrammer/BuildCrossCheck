@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
@@ -20,16 +22,16 @@ using MSBLOC.Web.Models;
 namespace MSBLOC.Web.Controllers.api
 {
     [Route("api/[controller]")]
-    public class FileController : Controller
+    public class LogController : Controller
     {
 
         private static readonly FormOptions DefaultFormOptions = new FormOptions();
 
-        private readonly ILogger<FileController> _logger;
+        private readonly ILogger<LogController> _logger;
         private readonly ITempFileService _tempFileService;
         private readonly IMSBLOCService _msblocService;
 
-        public FileController(ILogger<FileController> logger, ITempFileService tempFileService, IMSBLOCService msblocService)
+        public LogController(ILogger<LogController> logger, ITempFileService tempFileService, IMSBLOCService msblocService)
         {
             _logger = logger;
             _tempFileService = tempFileService;
@@ -38,6 +40,9 @@ namespace MSBLOC.Web.Controllers.api
 
         [HttpPost]
         [DisableFormValueModelBinding]
+        [MultiPartFormBinding(typeof(SubmissionData))]
+        [Route("upload")]
+        [Produces("application/json")]
         public async Task<IActionResult> Upload()
         {
             if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
@@ -131,10 +136,18 @@ namespace MSBLOC.Web.Controllers.api
                 }
             }
 
-            if (!_tempFileService.Files.Contains(formData.BinaryLogFile))
+            var requiredFormFileProperties = typeof(SubmissionData).GetProperties()
+                .Where(p => p.GetCustomAttributes(typeof(RequiredAttribute), true).Any())
+                .Where(p => p.GetCustomAttributes(typeof(FormFileAttribute), true).Any());
+
+            foreach (var requiredFormFileProperty in requiredFormFileProperties)
             {
-                ModelState.AddModelError(nameof(formData.BinaryLogFile), $"File '{formData.BinaryLogFile}' not found in request.");
-                return BadRequest(ModelState);
+                var fileName = requiredFormFileProperty.GetValue(formData);
+                if (!_tempFileService.Files.Contains(fileName))
+                {
+                    ModelState.AddModelError(requiredFormFileProperty.Name, $"File '{requiredFormFileProperty.Name}' with name: '{fileName}' not found in request.");
+                    return BadRequest(ModelState);
+                }
             }
 
             var checkRun = await _msblocService.SubmitAsync(formData);
