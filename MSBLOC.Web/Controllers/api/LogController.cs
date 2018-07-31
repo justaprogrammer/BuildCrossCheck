@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -135,10 +136,18 @@ namespace MSBLOC.Web.Controllers.api
                 }
             }
 
-            if (!_tempFileService.Files.Contains(formData.BinaryLogFile))
+            var requiredFormFileProperties = typeof(SubmissionData).GetProperties()
+                .Where(p => p.GetCustomAttributes(typeof(RequiredAttribute), true).Any())
+                .Where(p => p.GetCustomAttributes(typeof(FormFileAttribute), true).Any());
+
+            foreach (var requiredFormFileProperty in requiredFormFileProperties)
             {
-                ModelState.AddModelError(nameof(formData.BinaryLogFile), $"File '{formData.BinaryLogFile}' not found in request.");
-                return BadRequest(ModelState);
+                var fileName = requiredFormFileProperty.GetValue(formData);
+                if (!_tempFileService.Files.Contains(fileName))
+                {
+                    ModelState.AddModelError(requiredFormFileProperty.Name, $"File '{requiredFormFileProperty.Name}' with name: '{fileName}' not found in request.");
+                    return BadRequest(ModelState);
+                }
             }
 
             var checkRun = await _msblocService.SubmitAsync(formData);
