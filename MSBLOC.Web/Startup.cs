@@ -56,7 +56,7 @@ namespace MSBLOC.Web
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("0.0.1", new Info { Title = "MSBLOC Web API", Version = "0.0.1" });
-                c.OperationFilter<MultiPartFormBindingFilter>();
+                c.OperationFilter<MultiPartFormBindingAttribute.MultiPartFormBindingFilter>();
             });
         }
 

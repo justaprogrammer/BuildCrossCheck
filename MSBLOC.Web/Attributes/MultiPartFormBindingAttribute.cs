@@ -19,70 +19,70 @@ namespace MSBLOC.Web.Attributes
         {
             BindingType = bindingType;
         }
-    }
 
-    public class MultiPartFormBindingFilter : IOperationFilter
-    {
-        public void Apply(Operation operation, OperationFilterContext context)
+        public class MultiPartFormBindingFilter : IOperationFilter
         {
-            var customBindingAttributes = context.MethodInfo.GetCustomAttributes(typeof(MultiPartFormBindingAttribute), true)
-                .Select(o => (MultiPartFormBindingAttribute) o);
-
-            operation.Consumes.Add("multipart/form-data");
-
-            foreach (var customBindingAttribute in customBindingAttributes)
+            public void Apply(Operation operation, OperationFilterContext context)
             {
-                foreach (var property in customBindingAttribute.BindingType.GetProperties())
+                var customBindingAttributes = context.MethodInfo.GetCustomAttributes(typeof(MultiPartFormBindingAttribute), true)
+                    .Select(o => (MultiPartFormBindingAttribute)o);
+
+                operation.Consumes = new []{"multipart/form-data"};
+
+                foreach (var customBindingAttribute in customBindingAttributes)
                 {
-                    string parameterType = null;
-                    string parameterFormat = null;
-
-                    if (property.PropertyType == typeof(string))
+                    foreach (var property in customBindingAttribute.BindingType.GetProperties())
                     {
-                        parameterType = "string";
+                        string parameterType = null;
+                        string parameterFormat = null;
+
+                        if (property.PropertyType == typeof(string))
+                        {
+                            parameterType = "string";
+                        }
+
+                        if (property.PropertyType == typeof(int))
+                        {
+                            parameterFormat = "int32";
+                            parameterType = "integer";
+                        }
+
+                        if (property.PropertyType == typeof(long))
+                        {
+                            parameterFormat = "int64";
+                            parameterType = "integer";
+                        }
+
+                        if (property.PropertyType == typeof(float))
+                        {
+                            parameterFormat = "float";
+                            parameterType = "number";
+                        }
+
+                        if (property.PropertyType == typeof(double))
+                        {
+                            parameterFormat = "double";
+                            parameterType = "number";
+                        }
+
+                        if (property.GetCustomAttributes(typeof(FormFileAttribute), false).Any())
+                        {
+                            parameterFormat = "binary";
+                            parameterType = "file";
+                        }
+
+                        operation.Parameters.Add(new NonBodyParameter()
+                        {
+                            Name = property.Name,
+                            In = "formData",
+                            Required = property.GetCustomAttributes(typeof(RequiredAttribute), false).Any(),
+                            Type = parameterType,
+                            Format = parameterFormat
+                        });
                     }
-
-                    if (property.PropertyType == typeof(int))
-                    {
-                        parameterFormat = "int32";
-                        parameterType = "integer";
-                    }
-
-                    if (property.PropertyType == typeof(long))
-                    {
-                        parameterFormat = "int64";
-                        parameterType = "integer";
-                    }
-
-                    if (property.PropertyType == typeof(float))
-                    {
-                        parameterFormat = "float";
-                        parameterType = "number";
-                    }
-
-                    if (property.PropertyType == typeof(double))
-                    {
-                        parameterFormat = "double";
-                        parameterType = "number";
-                    }
-
-                    if (property.GetCustomAttributes(typeof(FormFileAttribute), false).Any())
-                    {
-                        parameterFormat = "binary";
-                        parameterType = "file";
-                    }
-
-                    operation.Parameters.Add(new NonBodyParameter()
-                    {
-                        Name = property.Name,
-                        In = "formData",
-                        Required = property.GetCustomAttributes(typeof(RequiredAttribute), false).Any(),
-                        Type = parameterType,
-                        Format = parameterFormat
-                    });
                 }
-            }
 
+            }
         }
     }
 }
