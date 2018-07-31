@@ -55,11 +55,13 @@ function  Send-OctoKitMsbuildLog {
         [ValidateNotNullOrEmpty()]
         [string] $RepoName = $env:APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME,
         [ValidateNotNullOrEmpty()]
-        [string] $Branch = $env:APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH,
+        [string] $CloneRoot = $env:APPVEYOR_BUILD_FOLDER,
         [ValidateNotNullOrEmpty()]
         [Alias('Sha', 'CommitHash')]
         [string] $HeadCommit = $env:APPVEYOR_PULL_REQUEST_HEAD_COMMIT
     )
+    $ApplicationOwner, $ApplicationName = $RepoName.Split('/');
+
     #TODO: Stream this
     $FileBytes = [System.IO.File]::ReadAllBytes($Path);
     $FileEnc = [System.Text.Encoding]::GetEncoding('UTF-8').GetString($FileBytes);
@@ -72,13 +74,16 @@ function  Send-OctoKitMsbuildLog {
         "Content-Type: application/octet-stream$LF",
         $FileEnc,
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"RepoName`"$LF",
-        $RepoName
+        "Content-Disposition: form-data; name=`"ApplicationOwner`"$LF",
+        $ApplicationOwner
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"Branch`"$LF",
-        $Branch
+        "Content-Disposition: form-data; name=`"ApplicationName`"$LF",
+        $ApplicationName
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"SHA`"$LF",
+        "Content-Disposition: form-data; name=`"CloneRoot`"$LF",
+        $CloneRoot
+        "--$Boundary",
+        "Content-Disposition: form-data; name=`"CommitSha`"$LF",
         $HeadCommit
         "--$Boundary--$LF"
     ) -join $LF
