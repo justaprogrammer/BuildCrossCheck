@@ -38,7 +38,6 @@ namespace MSBLOC.Web.Controllers.api
         [DisableFormValueModelBinding]
         public async Task<IActionResult> Upload()
         {
-            Request.EnableRewind();
             if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
             {
                 return BadRequest($"Expected a multipart request, but got {Request.ContentType}");
