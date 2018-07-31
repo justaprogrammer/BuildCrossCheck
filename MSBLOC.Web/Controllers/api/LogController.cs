@@ -161,7 +161,7 @@ namespace MSBLOC.Web.Controllers.api
                 }
             };
 
-            return Content(JsonConvert.SerializeObject(checkRun, serializerSettings), "application/json");
+            return Json(checkRun);
         }
 
         protected virtual async Task<bool> BindDataAsync(SubmissionData model, Dictionary<string, StringValues> dataToBind)

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Bogus;
@@ -12,7 +10,6 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Routing;
@@ -124,7 +121,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
                 msblocService)
             {
-                ControllerContext = new ControllerContext()
+                ControllerContext = new ControllerContext
                 {
                     HttpContext = new DefaultHttpContext()
                 },
@@ -279,7 +276,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
             };
 
-            var result = await fileController.Upload() as ContentResult;
+            var result = await fileController.Upload() as JsonResult;
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
             await msblocService.Received(1).SubmitAsync(Arg.Is<SubmissionData>(data =>
@@ -291,10 +288,11 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             receivedFiles.Should().BeEquivalentTo(fileDictionary);
 
-            var resultFormData = JsonConvert.DeserializeObject<dynamic>(result?.Content);
+            var resultFormData = result?.Value as CheckRun;
 
-            ((long) resultFormData.Id).Should().Be(checkRun.Id);
-            ((string) resultFormData.HeadSha).Should().Be(checkRun.HeadSha);
+            resultFormData.Should().NotBeNull();
+            resultFormData.Id.Should().Be(checkRun.Id);
+            resultFormData.HeadSha.Should().Be(checkRun.HeadSha);
         }
 
         private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary,

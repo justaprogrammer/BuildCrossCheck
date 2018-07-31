@@ -15,6 +15,7 @@ using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using MSBLOC.Web.Services;
+using MSBLOC.Web.Util;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace MSBLOC.Web
@@ -31,7 +32,10 @@ namespace MSBLOC.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvc().AddJsonOptions(options =>
+            {
+                options.SerializerSettings.Converters.Add(new OctokitStringEnumConverter());
+            });
 
             services.Configure<EnvOptions>(Configuration);
 
