@@ -3,12 +3,23 @@ image: Visual Studio 2017
 before_build:
     - ps: |
         nuget restore MSBuildLogOctokitChecker.sln
-build:
-    project: MSBuildLogOctokitChecker.sln
-    verbosity: minimal
+build_script:
+- ps: >-
+    msbuild MSBuildLogOctokitChecker.sln --% /bl:output.binlog /flp:logfile=output.log;verbosity=diagnostic
+    
+    if (! $?) {
+      echo "Build Error"
+      Push-AppveyorArtifact output.log -Type log
+      Push-AppveyorArtifact output.binlog -Type log
+      exit -1
+    }
 after_build:
     - cmd: dotnet publish MSBLOC.Web --output %appveyor_build_folder%\dist
 artifacts:
+    - path: output.log
+      name: log
+    - path: output.binlog
+      name: log
     - path: dist
       name: dist.web
       type: WebDeployPackage
