@@ -73,7 +73,16 @@ namespace MSBLOC.Web
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.UseSwagger(c => { c.RouteTemplate = "docs/{documentName}/swagger.json"; });
+            app.UseSwagger(c =>
+            {
+                c.RouteTemplate = "docs/{documentName}/swagger.json";
+
+                //Make routes lower case (Controller names for example)
+                c.PreSerializeFilters.Add((document, request) =>
+                {
+                    document.Paths = document.Paths.ToDictionary(item => item.Key.ToLowerInvariant(), item => item.Value);
+                });
+            });
 
             app.UseSwaggerUI(c =>
             {
