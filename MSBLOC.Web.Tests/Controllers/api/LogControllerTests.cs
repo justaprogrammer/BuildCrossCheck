@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -253,7 +254,13 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 });
             fileService.Files.Returns(new[] {name});
 
-            msblocService.SubmitAsync(null).ReturnsForAnyArgs(new CheckRun());
+            var checkRun = new CheckRun(
+                id: 1234, headSha: "123456", externalId: "", url: "", htmlUrl: "", status: CheckStatus.Completed,
+                conclusion: CheckConclusion.Failure, startedAt: DateTimeOffset.Now.AddMinutes(-10),
+                completedAt: DateTimeOffset.Now, output: new CheckRunOutputResponse("title", "summary", "text", 5),
+                name: "Name", checkSuite: new CheckSuite(), app: new GitHubApp(), pullRequests: null);
+
+            msblocService.SubmitAsync(null).ReturnsForAnyArgs(checkRun);
 
             var formData = new SubmissionData
             {
@@ -272,7 +279,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
             };
 
-            var result = await fileController.Upload() as JsonResult;
+            var result = await fileController.Upload() as ContentResult;
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
             await msblocService.Received(1).SubmitAsync(Arg.Is<SubmissionData>(data =>
@@ -284,9 +291,10 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             receivedFiles.Should().BeEquivalentTo(fileDictionary);
 
-            var resultFormData = result.Value as CheckRun;
+            var resultFormData = JsonConvert.DeserializeObject<dynamic>(result?.Content);
 
-            resultFormData.Should().NotBeNull();
+            ((long) resultFormData.Id).Should().Be(checkRun.Id);
+            ((string) resultFormData.HeadSha).Should().Be(checkRun.HeadSha);
         }
 
         private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary,

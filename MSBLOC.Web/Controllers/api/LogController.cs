@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
@@ -18,6 +17,8 @@ using Microsoft.Net.Http.Headers;
 using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
+using MSBLOC.Web.Util;
+using Newtonsoft.Json;
 
 namespace MSBLOC.Web.Controllers.api
 {
@@ -152,7 +153,15 @@ namespace MSBLOC.Web.Controllers.api
 
             var checkRun = await _msblocService.SubmitAsync(formData);
 
-            return Json(checkRun);
+            var serializerSettings = new JsonSerializerSettings
+            {
+                Converters = new JsonConverter[]
+                {
+                    new OctokitStringEnumConverter()
+                }
+            };
+
+            return Content(JsonConvert.SerializeObject(checkRun, serializerSettings), "application/json");
         }
 
         protected virtual async Task<bool> BindDataAsync(SubmissionData model, Dictionary<string, StringValues> dataToBind)
