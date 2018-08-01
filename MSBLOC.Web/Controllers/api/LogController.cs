@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,30 +12,38 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
+using MSBLOC.Web.Util;
+using Newtonsoft.Json;
 
 namespace MSBLOC.Web.Controllers.api
 {
     [Route("api/[controller]")]
-    public class FileController : Controller
+    public class LogController : Controller
     {
 
         private static readonly FormOptions DefaultFormOptions = new FormOptions();
 
-        private readonly ILogger<FileController> _logger;
+        private readonly ILogger<LogController> _logger;
         private readonly ITempFileService _tempFileService;
+        private readonly IMSBLOCService _msblocService;
 
-        public FileController(ILogger<FileController> logger, ITempFileService tempFileService)
+        public LogController(ILogger<LogController> logger, ITempFileService tempFileService, IMSBLOCService msblocService)
         {
             _logger = logger;
             _tempFileService = tempFileService;
+            _msblocService = msblocService;
         }
 
         [HttpPost]
         [DisableFormValueModelBinding]
+        [MultiPartFormBinding(typeof(SubmissionData))]
+        [Route("upload")]
+        [Produces("application/json")]
         public async Task<IActionResult> Upload()
         {
             if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
@@ -60,6 +69,19 @@ namespace MSBLOC.Web.Controllers.api
                     if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
                     {
                         var fileName = contentDisposition.FileName.Value;
+                        
+                        switch (contentDisposition.Name.Value)
+                        {
+                            case nameof(SubmissionData.BinaryLogFile):
+                                formAccumulator.Append(nameof(SubmissionData.BinaryLogFile), fileName);
+                                break;
+                            default:
+                                // Drains any remaining section body that has not been consumed and
+                                // reads the headers for the next section.
+                                section = await reader.ReadNextSectionAsync();
+                                continue;
+                        }
+
                         var path = await _tempFileService.CreateFromStreamAsync(fileName, section.Body);
 
                         _logger.LogInformation($"Copied the uploaded file '{fileName}' to path: '{path}'");
@@ -103,10 +125,10 @@ namespace MSBLOC.Web.Controllers.api
             }
 
             // Bind form data to a model
-            var formData = new UploadFormData();
-            var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(formAccumulator.GetResults()), CultureInfo.CurrentCulture);
+            var formData = new SubmissionData();
 
-            var bindingSuccessful = await TryUpdateModelAsync(formData, "", formValueProvider);
+            var bindingSuccessful = await BindDataAsync(formData, formAccumulator.GetResults());
+
             if (!bindingSuccessful)
             {
                 if (!ModelState.IsValid)
@@ -115,7 +137,39 @@ namespace MSBLOC.Web.Controllers.api
                 }
             }
 
-            return Json(formData);
+            var requiredFormFileProperties = typeof(SubmissionData).GetProperties()
+                .Where(p => p.GetCustomAttributes(typeof(RequiredAttribute), true).Any())
+                .Where(p => p.GetCustomAttributes(typeof(FormFileAttribute), true).Any());
+
+            foreach (var requiredFormFileProperty in requiredFormFileProperties)
+            {
+                var fileName = requiredFormFileProperty.GetValue(formData);
+                if (!_tempFileService.Files.Contains(fileName))
+                {
+                    ModelState.AddModelError(requiredFormFileProperty.Name, $"File '{requiredFormFileProperty.Name}' with name: '{fileName}' not found in request.");
+                    return BadRequest(ModelState);
+                }
+            }
+
+            var checkRun = await _msblocService.SubmitAsync(formData);
+
+            var serializerSettings = new JsonSerializerSettings
+            {
+                Converters = new JsonConverter[]
+                {
+                    new OctokitStringEnumConverter()
+                }
+            };
+
+            return Json(checkRun);
+        }
+
+        protected virtual async Task<bool> BindDataAsync(SubmissionData model, Dictionary<string, StringValues> dataToBind)
+        {
+            var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(dataToBind), CultureInfo.CurrentCulture);
+            var bindingSuccessful = await TryUpdateModelAsync(model, "", formValueProvider);
+
+            return bindingSuccessful;
         }
 
         private static Encoding GetEncoding(MultipartSection section)

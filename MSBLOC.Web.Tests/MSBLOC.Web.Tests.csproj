@@ -24,6 +24,9 @@
     <None Update="Resources\testconsoleapp1-1error.binlog">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\testconsoleapp1-1warning.binlog">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
