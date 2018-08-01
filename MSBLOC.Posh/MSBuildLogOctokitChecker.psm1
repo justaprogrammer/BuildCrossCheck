@@ -9,14 +9,15 @@ function  Send-MsbuildLog {
         [ValidateNotNullOrEmpty()]
         [string] $Path,
         [ValidateNotNullOrEmpty()]
-        [string] $RepoName = $env:APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME,
+        [string] $RepoOwner,
+        [ValidateNotNullOrEmpty()]
+        [string] $RepoName,
         [ValidateNotNullOrEmpty()]
         [string] $CloneRoot = $env:APPVEYOR_BUILD_FOLDER,
         [ValidateNotNullOrEmpty()]
         [Alias('Sha', 'CommitHash')]
         [string] $HeadCommit = $env:APPVEYOR_PULL_REQUEST_HEAD_COMMIT
     )
-    $ApplicationOwner, $ApplicationName = $RepoName.Split('/');
 
     #TODO: Stream this
     $FileBytes = [System.IO.File]::ReadAllBytes($Path);
@@ -30,11 +31,11 @@ function  Send-MsbuildLog {
         "Content-Type: application/octet-stream$LF",
         $FileEnc,
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"ApplicationOwner`"$LF",
-        $ApplicationOwner
+        "Content-Disposition: form-data; name=`"RepoOwner`"$LF",
+        $RepoOwner
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"ApplicationName`"$LF",
-        $ApplicationName
+        "Content-Disposition: form-data; name=`"RepoName`"$LF",
+        $RepoName
         "--$Boundary",
         "Content-Disposition: form-data; name=`"CloneRoot`"$LF",
         $CloneRoot
@@ -51,6 +52,22 @@ function  Send-MsbuildLog {
         -ContentType "multipart/form-data; boundary=`"$Boundary`"" `
         -Body $Body
 
+}
+
+function  Send-MsbuildLog-Appveyor {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [ValidateScript({ [System.IO.File]::Exists($_)})]
+        [ValidateNotNullOrEmpty()]
+        [string] $Path
+    )
+
+    $RepoOwner, $RepoName = $env:APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME.Split('/');
+    $CloneRoot = $env:APPVEYOR_BUILD_FOLDER
+    $HeadCommit = $env:APPVEYOR_PULL_REQUEST_HEAD_COMMIT
+
+    Send-MsbuildLog $Path $CloneRoot $RepoOwner $RepoName $HeadCommit
 }
 
 # Export only the functions using PowerShell standard verb-noun naming.
