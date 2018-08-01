@@ -1,6 +1,4 @@
 
-$script:BaseUrl = 'http://msblocweb.azurewebsites.net'
-
 function  Send-MsbuildLog {
     [CmdletBinding()]
     param (
@@ -48,7 +46,7 @@ function  Send-MsbuildLog {
         "--$Boundary--$LF"
     ) -join $LF
 
-    $Uri = GetUploadUrl $script:BaseUrl
+    $Uri = GetUploadUrl
     Invoke-RestMethod `
         -Method POST `
         -Uri $Uri `
@@ -83,10 +81,8 @@ function GetUploadUrl() {
     [CmdletBinding()]
     [OutputType([String])]
     param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string] $BaseUrl
     )
+    $BaseUrl = If($env:MSBLOC_POSH_URL) {$env:MSBLOC_POSH_URL} else {'http://msblocweb.azurewebsites.net'}
     $FullUrl = '{0}/api/log/upload' -f $BaseUrl
     Write-Verbose "Upload Url: $FullUrl"
     return $FullUrl
