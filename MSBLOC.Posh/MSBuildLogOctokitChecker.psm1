@@ -18,6 +18,10 @@ function  Send-MsbuildLog {
         [string] $HeadCommit
     )
 
+    If(-not [System.IO.Path]::IsPathRooted($Path)) {
+        $Path = [System.IO.Path]::Combine($PWD, $Path);
+    }
+
     #TODO: Stream this
     $FileBytes = [System.IO.File]::ReadAllBytes($Path);
     $FileEnc = [System.Text.Encoding]::GetEncoding('UTF-8').GetString($FileBytes);
