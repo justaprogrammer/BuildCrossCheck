@@ -70,7 +70,7 @@ function  Send-OctoKitMsbuildLog {
     $LF = "`r`n";
     $Body = @(
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"MsbuildLog`"; filename=`"$($FileInfo.Name)`"",
+        "Content-Disposition: form-data; name=`"BinaryLogFile`"; filename=`"$($FileInfo.Name)`"",
         "Content-Type: application/octet-stream$LF",
         $FileEnc,
         "--$Boundary",
@@ -111,7 +111,7 @@ function GetUploadUrl() {
         [ValidateNotNullOrEmpty()]
         [string] $BaseUrl
     )
-    $FullUrl = '{0}/api/File' -f $BaseUrl
+    $FullUrl = '{0}/api/log/upload' -f $BaseUrl
     Write-Verbose "Upload Url: $FullUrl"
     return $FullUrl
 }
