@@ -2,6 +2,6 @@
 {
     public interface ITokenGenerator
     {
-        string GetToken();
+        string GetToken(int expirationSeconds = 600);
     }
 }

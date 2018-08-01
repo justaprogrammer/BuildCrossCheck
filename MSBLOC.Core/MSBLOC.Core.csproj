@@ -6,16 +6,14 @@
 
   <ItemGroup>
     <PackageReference Include="GitHubJwt" Version="0.0.2" />
+    <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" />
     <PackageReference Include="Microsoft.Build" Version="15.7.179" />
     <PackageReference Include="Microsoft.Build.Framework" Version="15.7.179" />
     <PackageReference Include="Microsoft.Build.Logging.StructuredLogger" Version="1.1.224" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.7.179" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.7.179" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\octokit.net\Octokit\Octokit.csproj" />
+    <PackageReference Include="Octokit" Version="0.31.0" />
   </ItemGroup>
 
   <Target Name="CreateAliasForStructuredLogger" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
