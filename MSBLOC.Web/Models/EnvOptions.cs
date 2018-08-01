@@ -8,5 +8,6 @@ namespace MSBLOC.Web.Models
     public class EnvOptions
     {
         public string GitHubAppPrivateKey { get; set; }
+        public int GitHubAppId { get; set; }
     }
 }
