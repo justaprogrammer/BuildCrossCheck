@@ -13,10 +13,10 @@ function  Send-MsbuildLog {
         [ValidateNotNullOrEmpty()]
         [string] $RepoName,
         [ValidateNotNullOrEmpty()]
-        [string] $CloneRoot = $env:APPVEYOR_BUILD_FOLDER,
+        [string] $CloneRoot,
         [ValidateNotNullOrEmpty()]
         [Alias('Sha', 'CommitHash')]
-        [string] $HeadCommit = $env:APPVEYOR_PULL_REQUEST_HEAD_COMMIT
+        [string] $HeadCommit
     )
 
     #TODO: Stream this
@@ -54,7 +54,7 @@ function  Send-MsbuildLog {
 
 }
 
-function  Send-MsbuildLog-Appveyor {
+function  Send-MsbuildLogAppveyor {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
