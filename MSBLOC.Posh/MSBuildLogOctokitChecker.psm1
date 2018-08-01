@@ -5,7 +5,6 @@ function  Send-MsbuildLog {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [ValidateScript({ [System.IO.File]::Exists($_)})]
         [ValidateNotNullOrEmpty()]
         [string] $Path,
         [ValidateNotNullOrEmpty()]
@@ -58,14 +57,14 @@ function  Send-MsbuildLogAppveyor {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [ValidateScript({ [System.IO.File]::Exists($_)})]
         [ValidateNotNullOrEmpty()]
         [string] $Path
     )
 
-    $RepoOwner, $RepoName = $env:APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME.Split('/');
+    $RepoOwnerName = $env:APPVEYOR_REPO_NAME
+    $RepoOwner, $RepoName = $RepoOwnerName.Split('/');
     $CloneRoot = $env:APPVEYOR_BUILD_FOLDER
-    $HeadCommit = $env:APPVEYOR_PULL_REQUEST_HEAD_COMMIT
+    $HeadCommit = $env:APPVEYOR_REPO_COMMIT
 
     Send-MsbuildLog $Path $CloneRoot $RepoOwner $RepoName $HeadCommit
 }
