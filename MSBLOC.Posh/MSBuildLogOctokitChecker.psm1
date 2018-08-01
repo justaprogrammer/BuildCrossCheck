@@ -1,57 +1,13 @@
 
-$script:BaseUrl = 'http://localhost:64952'
+$script:BaseUrl = 'http://msblocweb.azurewebsites.net'
 
-function Get-OctoKitMsbuildLogBaseUrl{
-    [CmdletBinding()]
-    [OutputType([String])]
-    param()
-    $script:BaseUrl
-}
-
-<#
-.SYNOPSIS
-Sets the base url
-
-.DESCRIPTION
-
-.PARAMETER Url
-Parameter description
-
-.PARAMETER Passthru
-Setting this causes $Url to be returned.
-
-.EXAMPLE
-Set-OctoKitMsbuildLogBaseUrl http://msbloc.localtest.me:64952
-Set-OctoKitMsbuildLogBaseUrl http://localhost:64952
-
-.NOTES
-General notes
-#>
-function Set-OctoKitMsbuildLogBaseUrl{
-    [CmdletBinding()]
-    [OutputType([String])]
-    param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string] $Url,
-        [switch] $Passthru
-    )
-    $script:BaseUrl = $Url
-    if($Passthru) {
-        return $script:BaseUrl
-    }
-}
-
-function  Send-OctoKitMsbuildLog {
+function  Send-MsbuildLog {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [ValidateScript({ [System.IO.File]::Exists($_)})]
         [ValidateNotNullOrEmpty()]
         [string] $Path,
-        # TODO: Add ValidateScript to ensure its a real URI
-        [ValidateNotNullOrEmpty()]
-        [string] $BaseUri = $script:BaseUrl, #TODO: Replace with production Url
         [ValidateNotNullOrEmpty()]
         [string] $RepoName = $env:APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME,
         [ValidateNotNullOrEmpty()]
@@ -88,7 +44,7 @@ function  Send-OctoKitMsbuildLog {
         "--$Boundary--$LF"
     ) -join $LF
 
-    $Uri = GetUploadUrl $BaseUri
+    $Uri = GetUploadUrl $script:BaseUrl
     Invoke-RestMethod `
         -Method POST `
         -Uri $Uri `
