@@ -34,8 +34,8 @@ namespace MSBLOC.Web.Services
 
         public async Task<CheckRun> SubmitAsync(SubmissionData submissionData)
         {
-            var appOwner = submissionData.ApplicationOwner;
-            var appName = submissionData.ApplicationName;
+            var repoOwner = submissionData.RepoOwner;
+            var repoName = submissionData.RepoName;
             var cloneRoot = submissionData.CloneRoot;
             var sha = submissionData.CommitSha;
 
@@ -45,11 +45,11 @@ namespace MSBLOC.Web.Services
 
             var buildDetails = _binaryLogProcessor.ProcessLog(resourcePath, cloneRoot);
 
-            var submitter = await _checkRunSubmitterFactoryAsync(appOwner);
+            var submitter = await _checkRunSubmitterFactoryAsync(repoOwner);
 
             var checkRun = await submitter.SubmitCheckRun(buildDetails: buildDetails,
-                owner: appOwner,
-                name: appName,
+                owner: repoOwner,
+                name: repoName,
                 headSha: sha,
                 checkRunName: "MSBuildLog Analyzer",
                 checkRunTitle: "MSBuildLog Analysis",

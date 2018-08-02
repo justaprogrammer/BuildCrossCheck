@@ -1,100 +1,97 @@
 
-$script:BaseUrl = 'http://localhost:64952'
-
-function Get-OctoKitMsbuildLogBaseUrl{
-    [CmdletBinding()]
-    [OutputType([String])]
-    param()
-    $script:BaseUrl
-}
-
-<#
-.SYNOPSIS
-Sets the base url
-
-.DESCRIPTION
-
-.PARAMETER Url
-Parameter description
-
-.PARAMETER Passthru
-Setting this causes $Url to be returned.
-
-.EXAMPLE
-Set-OctoKitMsbuildLogBaseUrl http://msbloc.localtest.me:64952
-Set-OctoKitMsbuildLogBaseUrl http://localhost:64952
-
-.NOTES
-General notes
-#>
-function Set-OctoKitMsbuildLogBaseUrl{
-    [CmdletBinding()]
-    [OutputType([String])]
-    param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string] $Url,
-        [switch] $Passthru
-    )
-    $script:BaseUrl = $Url
-    if($Passthru) {
-        return $script:BaseUrl
-    }
-}
-
-function  Send-OctoKitMsbuildLog {
+function  Send-MsbuildLog {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [ValidateScript({ [System.IO.File]::Exists($_)})]
         [ValidateNotNullOrEmpty()]
         [string] $Path,
-        # TODO: Add ValidateScript to ensure its a real URI
         [ValidateNotNullOrEmpty()]
-        [string] $BaseUri = $script:BaseUrl, #TODO: Replace with production Url
+        [string] $RepoOwner,
         [ValidateNotNullOrEmpty()]
-        [string] $RepoName = $env:APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME,
+        [string] $RepoName,
         [ValidateNotNullOrEmpty()]
-        [string] $CloneRoot = $env:APPVEYOR_BUILD_FOLDER,
+        [string] $CloneRoot,
         [ValidateNotNullOrEmpty()]
         [Alias('Sha', 'CommitHash')]
-        [string] $HeadCommit = $env:APPVEYOR_PULL_REQUEST_HEAD_COMMIT
+        [string] $HeadCommit
     )
-    $ApplicationOwner, $ApplicationName = $RepoName.Split('/');
+
+    If(-not [System.IO.Path]::IsPathRooted($Path)) {
+        $Path = [System.IO.Path]::Combine($PWD, $Path);
+    }
 
     #TODO: Stream this
     $FileBytes = [System.IO.File]::ReadAllBytes($Path);
-    $FileEnc = [System.Text.Encoding]::GetEncoding('UTF-8').GetString($FileBytes);
+    $FileEnc = [System.Text.Encoding]::GetEncoding("ISO-8859-1").GetString($FileBytes);
     $FileInfo = New-Object System.IO.FileInfo @($Path)
     $Boundary = [System.Guid]::NewGuid().ToString();
     $LF = "`r`n";
     $Body = @(
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"BinaryLogFile`"; filename=`"$($FileInfo.Name)`"",
-        "Content-Type: application/octet-stream$LF",
-        $FileEnc,
+        "Content-Disposition: form-data; name=`"RepoOwner`"$LF",
+        $RepoOwner
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"ApplicationOwner`"$LF",
-        $ApplicationOwner
+        "Content-Disposition: form-data; name=`"RepoName`"$LF",
+        $RepoName
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"ApplicationName`"$LF",
-        $ApplicationName
+        "Content-Disposition: form-data; name=`"CommitSha`"$LF",
+        $HeadCommit,
         "--$Boundary",
         "Content-Disposition: form-data; name=`"CloneRoot`"$LF",
         $CloneRoot
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"CommitSha`"$LF",
-        $HeadCommit
+        "Content-Disposition: form-data; name=`"BinaryLogFile`"; filename=`"$($FileInfo.Name)`"",
+        "Content-Type: application/octet-stream$LF",
+        $FileEnc,
         "--$Boundary--$LF"
     ) -join $LF
 
-    $Uri = GetUploadUrl $BaseUri
-    Invoke-RestMethod `
-        -Method POST `
-        -Uri $Uri `
-        -ContentType "multipart/form-data; boundary=`"$Boundary`"" `
-        -Body $Body
+    $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+    $headers.Add("Accept", "application/json")
 
+    $Uri = GetUploadUrl
+
+    $ProxyUri = [Uri]$null
+    $Proxy = [System.Net.WebRequest]::GetSystemWebProxy()
+    if ($Proxy) {
+        $Proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
+        $ProxyUri = $Proxy.GetProxy("$Uri")
+    }
+
+    if ($ProxyUri -ne $Uri){
+        Invoke-RestMethod `
+            -Method POST `
+            -Uri $Uri `
+            -ContentType "multipart/form-data; boundary=$Boundary" `
+            -Body $Body `
+            -Headers $Headers `
+            -Proxy $ProxyUri `
+            -ProxyUseDefaultCredentials
+    }
+    else {
+        Invoke-RestMethod `
+            -Method POST `
+            -Uri $Uri `
+            -ContentType "multipart/form-data; boundary=$Boundary" `
+            -Body $Body `
+            -Headers $Headers
+    }
+}
+
+function  Send-MsbuildLogAppveyor {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $Path
+    )
+
+    $RepoOwnerName = $env:APPVEYOR_REPO_NAME
+    $RepoOwner, $RepoName = $RepoOwnerName.Split('/');
+    $CloneRoot = $env:APPVEYOR_BUILD_FOLDER
+    $HeadCommit = $env:APPVEYOR_REPO_COMMIT
+
+    Send-MsbuildLog $Path $RepoOwner $RepoName $CloneRoot $HeadCommit
 }
 
 # Export only the functions using PowerShell standard verb-noun naming.
@@ -107,10 +104,8 @@ function GetUploadUrl() {
     [CmdletBinding()]
     [OutputType([String])]
     param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string] $BaseUrl
     )
+    $BaseUrl = If($env:MSBLOC_POSH_URL) {$env:MSBLOC_POSH_URL} else {'http://msblocweb.azurewebsites.net'}
     $FullUrl = '{0}/api/log/upload' -f $BaseUrl
     Write-Verbose "Upload Url: $FullUrl"
     return $FullUrl
