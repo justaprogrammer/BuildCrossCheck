@@ -22,7 +22,7 @@ function  Send-MsbuildLog {
 
     #TODO: Stream this
     $FileBytes = [System.IO.File]::ReadAllBytes($Path);
-    $FileEnc = [System.Text.Encoding]::GetEncoding('UTF-8').GetString($FileBytes);
+    $FileEnc = [System.Text.Encoding]::GetEncoding("ISO-8859-1").GetString($FileBytes);
     $FileInfo = New-Object System.IO.FileInfo @($Path)
     $Boundary = [System.Guid]::NewGuid().ToString();
     $LF = "`r`n";
