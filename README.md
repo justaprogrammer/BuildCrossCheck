@@ -7,7 +7,7 @@
 
 ## Overview
 
-MSBuildLogOctokitChecker is a MSBuild Binary log reading GitHub App. Integrate it with the build process of any repository that uses MSBuild, and it'll identify build warnings and errors in Pull Requests that you open like this:
+MSBuildLogOctokitChecker is a GitHub App that uses MSBuild Binary log files to help check pull requests. Integrate it with the build process of any repository that uses MSBuild, and it will identify build warnings and errors in Pull Requests that you open like this:
 
 <img src="./docs/images/testconsole1-warning-pr-changes.png">
 <img src="./docs/images/testconsole1-warning-pr-check-runs.png">
