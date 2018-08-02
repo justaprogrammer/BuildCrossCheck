@@ -37,7 +37,7 @@ namespace MSBLOC.Core.Services
                 };
 
                 return newCheckRunAnnotation;
-            }).ToList();
+            }).Take(50).ToList();
 
             var newCheckRun = new NewCheckRun(checkRunName, headSha)
             {
