@@ -46,13 +46,36 @@ function  Send-MsbuildLog {
         "--$Boundary--$LF"
     ) -join $LF
 
-    $Uri = GetUploadUrl
-    Invoke-RestMethod `
-        -Method POST `
-        -Uri $Uri `
-        -ContentType "multipart/form-data; boundary=`"$Boundary`"" `
-        -Body $Body
+    $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+    $headers.Add("Accept", "application/json")
 
+    $Uri = GetUploadUrl
+
+    $ProxyUri = [Uri]$null
+    $Proxy = [System.Net.WebRequest]::GetSystemWebProxy()
+    if ($Proxy) {
+        $Proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
+        $ProxyUri = $Proxy.GetProxy("$Uri")
+    }
+
+    if ($ProxyUri -ne $Uri){
+        Invoke-RestMethod `
+            -Method POST `
+            -Uri $Uri `
+            -ContentType "multipart/form-data; boundary=`"$Boundary`"" `
+            -Body $Body `
+            -Headers $Headers `
+            -Proxy $ProxyUri `
+            -ProxyUseDefaultCredentials
+    }
+    else {
+        Invoke-RestMethod `
+            -Method POST `
+            -Uri $Uri `
+            -ContentType "multipart/form-data; boundary=`"$Boundary`"" `
+            -Body $Body `
+            -Headers $Headers
+    }
 }
 
 function  Send-MsbuildLogAppveyor {
