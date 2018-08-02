@@ -28,21 +28,21 @@ function  Send-MsbuildLog {
     $LF = "`r`n";
     $Body = @(
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"BinaryLogFile`"; filename=`"$($FileInfo.Name)`"",
-        "Content-Type: application/octet-stream$LF",
-        $FileEnc,
-        "--$Boundary",
         "Content-Disposition: form-data; name=`"RepoOwner`"$LF",
         $RepoOwner
         "--$Boundary",
         "Content-Disposition: form-data; name=`"RepoName`"$LF",
         $RepoName
         "--$Boundary",
+        "Content-Disposition: form-data; name=`"CommitSha`"$LF",
+        $HeadCommit,
+        "--$Boundary",
         "Content-Disposition: form-data; name=`"CloneRoot`"$LF",
         $CloneRoot
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"CommitSha`"$LF",
-        $HeadCommit
+        "Content-Disposition: form-data; name=`"BinaryLogFile`"; filename=`"$($FileInfo.Name)`"",
+        "Content-Type: application/octet-stream$LF",
+        $FileEnc,
         "--$Boundary--$LF"
     ) -join $LF
 
