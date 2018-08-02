@@ -1,5 +1,9 @@
 # Integrating
 
+## Adding the GitHub App to your Repo
+
+Add the [MSBLOC GitHub App](https://github.com/apps/msbuildlog-octokit-checker) to the repositories that you would like to work with.
+
 ## Collecting the MSBuild Binary Log file
 
 In order to capture a binary log file from MSBuild your project must be built with MSBuild 15.3 (Visual Studio 2017 Update 3) or greater. The switch `/bl` must be added to your MSBuild command.
