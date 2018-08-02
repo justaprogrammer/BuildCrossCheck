@@ -99,7 +99,7 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public void ShouldParseOctokitGraphQL()
         {
-            var cloneRoot = @"C:\Users\Spade\Projects\GitHub\Octokit.GraphQL\";
+            var cloneRoot = @"C:\projects\octokit-graphql\";
 
             var resourcePath = TestUtils.GetResourcePath("octokit.graphql.binlog");
             File.Exists(resourcePath).Should().BeTrue();
