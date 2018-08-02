@@ -18,24 +18,24 @@ More information about the MSBuild Binary Log format can be found [here](http://
    - [MSBuildLogOctokitChecker.psd1](../MSBLOC.Post/MSBuildLogOctokitChecker.psd1)
    - [MSBuildLogOctokitChecker.psm1](../MSBLOC.Post/MSBuildLogOctokitChecker.psm1)
 1. Modify you build script to perform the following steps
-```
-version: 1.0.{build}
-image: Visual Studio 2017
-build_script:
-- ps: >-
-    Import-Module .\tools\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
-    msbuild TestConsoleApp1.sln --% /bl:output.binlog /flp:logfile=output.log;verbosity=diagnostic
+   ```
+   version: 1.0.{build}
+   image: Visual Studio 2017
+   build_script:
+      - ps: >-
+       Import-Module .\tools\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
+       msbuild TestConsoleApp1.sln --% /bl:output.binlog /flp:logfile=output.log;verbosity=diagnostic
     
-    if (! $?) {
-      echo "Build Error"
-      Push-AppveyorArtifact output.log -Type log
-      Push-AppveyorArtifact output.binlog -Type log
-      Send-MsbuildLogAppveyor output.binlog
-      exit -1
-    }
-    $binLogPath = (Get-Item -Path ".\").FullName + "\output.binlog"
+       if (! $?) {
+         echo "Build Error"
+         Push-AppveyorArtifact output.log -Type log
+         Push-AppveyorArtifact output.binlog -Type log
+         Send-MsbuildLogAppveyor output.binlog
+         exit -1
+       }
+       $binLogPath = (Get-Item -Path ".\").FullName + "\output.binlog"
     
-    Send-MsbuildLogAppveyor $binLogPath
-```
+       Send-MsbuildLogAppveyor $binLogPath
+   ```
 
 ## Integrating on Other CI
