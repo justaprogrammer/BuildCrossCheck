@@ -29,7 +29,7 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public void ShouldTestConsoleApp1Warning()
         {
-            var cloneRoot = "C:\\projects\\testconsoleapp1\\";
+            var cloneRoot = @"C:\projects\testconsoleapp1\";
 
             var solutionDetails = new SolutionDetails(cloneRoot);
 
@@ -50,7 +50,7 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public void ShouldTestConsoleApp1Error()
         {
-            var cloneRoot = "C:\\projects\\testconsoleapp1\\";
+            var cloneRoot = @"C:\projects\testconsoleapp1\";
 
             var solutionDetails = new SolutionDetails(cloneRoot);
 
@@ -66,6 +66,42 @@ namespace MSBLOC.Core.Tests.Services
                 {
                     new Annotation(@"TestConsoleApp1/Program.cs", AnnotationWarningLevel.Failure, "CS1002", "; expected", 13, 13),
                 }, cloneRoot);
+        }
+
+        [Fact]
+        public void ShouldMSBLOC()
+        {
+            var cloneRoot = @"C:\projects\msbuildlogoctokitchecker\";
+
+            var solutionDetails = new SolutionDetails(cloneRoot);
+
+            var project = new ProjectDetails(cloneRoot, @"C:\projects\msbuildlogoctokitchecker\MSBuildLogOctokitChecker.sln");
+            solutionDetails.Add(project);
+
+            project = new ProjectDetails(cloneRoot, @"C:\projects\msbuildlogoctokitchecker\MSBLOC.Core\MSBLOC.Core.csproj");
+            solutionDetails.Add(project);
+
+            project = new ProjectDetails(cloneRoot, @"C:\projects\msbuildlogoctokitchecker\MSBLOC.Web\MSBLOC.Web.csproj");
+            solutionDetails.Add(project);
+
+            project = new ProjectDetails(cloneRoot, @"C:\projects\msbuildlogoctokitchecker\MSBLOC.Web.Tests\MSBLOC.Web.Tests.csproj");
+            solutionDetails.Add(project);
+
+            project = new ProjectDetails(cloneRoot, @"C:\projects\msbuildlogoctokitchecker\MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj.metaproj");
+            solutionDetails.Add(project);
+
+            project = new ProjectDetails(cloneRoot, @"C:\projects\msbuildlogoctokitchecker\MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj");
+            solutionDetails.Add(project);
+
+            var resourcePath = TestUtils.GetResourcePath("msbloc.binlog");
+            File.Exists(resourcePath).Should().BeTrue();
+
+            var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
+            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot);
+
+            parsedBinaryLog.Annotations.ToArray().Should().BeEquivalentTo(new Annotation[0]);
+
+            parsedBinaryLog.SolutionDetails.Should().BeEquivalentTo(solutionDetails, options => options.IncludingNestedObjects().IncludingProperties().Excluding(info => info.SelectedMemberInfo.Name == "Paths"));
         }
 
         [Fact]
