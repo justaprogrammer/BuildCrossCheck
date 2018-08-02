@@ -22,6 +22,10 @@ The authors of MSBuildLogOctokitChecker maintain a hosted version of the source 
 
 You can find our documentation [here](docs/readme.md).
 
+## More information
+- [MSBuild Log](http://msbuildlog.com/)
+- [GitHub Checks API](https://developer.github.com/v3/checks/)
+
 ## Questions?
 
 Please [file an issue](https://github.com/justaprogrammer/MSBuildLogOctokitChecker/issues/new/choose)! If you'd prefer to reach out in private, please send an email to Stanley.Goldman@gmail.com.
