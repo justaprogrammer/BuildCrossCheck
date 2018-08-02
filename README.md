@@ -16,7 +16,8 @@ _(see examples at: [justaprogrammer/TestConsoleApp1/pulls](https://github.com/ju
 
 ## Getting started
 
-The authors of MSBuildLogOctokitChecker maintain a hosted version of the source code you see here. [Install it today!](https://github.com/apps/MSBuildLogOctokitChecker)
+The authors of MSBuildLogOctokitChecker maintain a hosted version of the source code you see here.
+Install it by adding the GitHub App: [github.com/apps/MSBuildLogOctokitChecker](https://github.com/apps/MSBuildLogOctokitChecker) to your repositories and following the [intgration documentation](docs/integrating.md). 
 
 ## Documentation
 
