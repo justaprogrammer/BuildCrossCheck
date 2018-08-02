@@ -5,14 +5,19 @@ before_build:
         nuget restore MSBuildLogOctokitChecker.sln
 build_script:
 - ps: >-
+    Import-Module .\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
+
     msbuild MSBuildLogOctokitChecker.sln --% /bl:output.binlog /flp:logfile=output.log;verbosity=diagnostic
     
     if (! $?) {
       echo "Build Error"
       Push-AppveyorArtifact output.log -Type log
       Push-AppveyorArtifact output.binlog -Type log
+      Send-MsbuildLogAppveyor output.binlog
       exit -1
     }
+    
+    Send-MsbuildLogAppveyor output.binlog
 after_build:
     - cmd: dotnet publish MSBLOC.Web --output %appveyor_build_folder%\dist
 artifacts:
