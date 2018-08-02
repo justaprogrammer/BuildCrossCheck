@@ -62,7 +62,7 @@ function  Send-MsbuildLog {
         Invoke-RestMethod `
             -Method POST `
             -Uri $Uri `
-            -ContentType "multipart/form-data; boundary=`"$Boundary`"" `
+            -ContentType "multipart/form-data; boundary=--$Boundary" `
             -Body $Body `
             -Headers $Headers `
             -Proxy $ProxyUri `
@@ -72,7 +72,7 @@ function  Send-MsbuildLog {
         Invoke-RestMethod `
             -Method POST `
             -Uri $Uri `
-            -ContentType "multipart/form-data; boundary=`"$Boundary`"" `
+            -ContentType "multipart/form-data; boundary=--$Boundary" `
             -Body $Body `
             -Headers $Headers
     }
