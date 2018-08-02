@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
@@ -17,16 +18,20 @@ using Microsoft.Net.Http.Headers;
 using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
-using MSBLOC.Web.Util;
-using Newtonsoft.Json;
 
 namespace MSBLOC.Web.Controllers.api
 {
     [Route("api/[controller]")]
     public class LogController : Controller
     {
-
         private static readonly FormOptions DefaultFormOptions = new FormOptions();
+        private static readonly Lazy<IList<string>> SubmissionDataFormFileNamesLazy = new Lazy<IList<string>>(() =>
+        {
+            return typeof(SubmissionData).GetProperties()
+                .Where(p => p.GetCustomAttributes(typeof(FormFileAttribute), false).Any())
+                .Select(p => p.Name)
+                .ToList();
+        });
 
         private readonly ILogger<LogController> _logger;
         private readonly ITempFileService _tempFileService;
@@ -58,70 +63,84 @@ namespace MSBLOC.Web.Controllers.api
                 MediaTypeHeaderValue.Parse(Request.ContentType),
                 DefaultFormOptions.MultipartBoundaryLengthLimit);
             var reader = new MultipartReader(boundary, HttpContext.Request.Body);
-
-            var section = await reader.ReadNextSectionAsync();
-            while (section != null)
+            using (_logger.BeginScope(new
             {
-                var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var contentDisposition);
-
-                if (hasContentDispositionHeader)
+                Boundary = boundary,
+                Request.ContentType
+            }))
+            {
+                _logger.LogTrace("Reading next section");
+                var section = await reader.ReadNextSectionAsync();
+                while (section != null)
                 {
-                    if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
+                    var hasContentDispositionHeader =
+                        ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var contentDisposition);
+
+                    if (hasContentDispositionHeader)
                     {
-                        var fileName = contentDisposition.FileName.Value;
-                        
-                        switch (contentDisposition.Name.Value)
+                        _logger.LogTrace("Content Disposition Header: {0}", section.ContentDisposition);
+
+                        if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
                         {
-                            case nameof(SubmissionData.BinaryLogFile):
-                                formAccumulator.Append(nameof(SubmissionData.BinaryLogFile), fileName);
-                                break;
-                            default:
+                            var fileName = contentDisposition.FileName.Value;
+
+                            if (!SubmissionDataFormFileNamesLazy.Value.Contains(contentDisposition.Name.Value))
+                            {
+                                _logger.LogInformation($"Unknown file '{contentDisposition.Name.Value}' with fileName: '{fileName}' is being ignored.");
                                 // Drains any remaining section body that has not been consumed and
                                 // reads the headers for the next section.
                                 section = await reader.ReadNextSectionAsync();
                                 continue;
+                            }
+
+                            formAccumulator.Append(contentDisposition.Name.Value, fileName);
+
+                            var path = await _tempFileService.CreateFromStreamAsync(fileName, section.Body);
+
+                            _logger.LogInformation($"Copied the uploaded file '{fileName}' to path: '{path}'");
                         }
-
-                        var path = await _tempFileService.CreateFromStreamAsync(fileName, section.Body);
-
-                        _logger.LogInformation($"Copied the uploaded file '{fileName}' to path: '{path}'");
-                    }
-                    else if (MultipartRequestHelper.HasFormDataContentDisposition(contentDisposition))
-                    {
-                        // Content-Disposition: form-data; name="key"
-                        //
-                        // value
-
-                        // Do not limit the key name length here because the 
-                        // multipart headers length limit is already in effect.
-                        var key = HeaderUtilities.RemoveQuotes(contentDisposition.Name);
-                        var encoding = GetEncoding(section);
-                        using (var streamReader = new StreamReader(
-                            section.Body,
-                            encoding,
-                            detectEncodingFromByteOrderMarks: true,
-                            bufferSize: 1024,
-                            leaveOpen: true))
+                        else if (MultipartRequestHelper.HasFormDataContentDisposition(contentDisposition))
                         {
-                            // The value length limit is enforced by MultipartBodyLengthLimit
-                            var value = await streamReader.ReadToEndAsync();
-                            if (String.Equals(value, "undefined", StringComparison.OrdinalIgnoreCase))
-                            {
-                                value = String.Empty;
-                            }
-                            formAccumulator.Append(key.Value, value);
+                            // Content-Disposition: form-data; name="key"
+                            //
+                            // value
 
-                            if (formAccumulator.ValueCount > DefaultFormOptions.ValueCountLimit)
+                            // Do not limit the key name length here because the 
+                            // multipart headers length limit is already in effect.
+                            var key = HeaderUtilities.RemoveQuotes(contentDisposition.Name);
+
+                            _logger.LogDebug("Retrieving value for {0}", key);
+
+                            var encoding = GetEncoding(section);
+                            using (var streamReader = new StreamReader(
+                                section.Body,
+                                encoding,
+                                detectEncodingFromByteOrderMarks: true,
+                                bufferSize: 1024,
+                                leaveOpen: true))
                             {
-                                throw new InvalidDataException($"Form key count limit {DefaultFormOptions.ValueCountLimit} exceeded.");
+                                // The value length limit is enforced by MultipartBodyLengthLimit
+                                var value = await streamReader.ReadToEndAsync();
+                                if (String.Equals(value, "undefined", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    value = String.Empty;
+                                }
+
+                                formAccumulator.Append(key.Value, value);
+
+                                if (formAccumulator.ValueCount > DefaultFormOptions.ValueCountLimit)
+                                {
+                                    throw new InvalidDataException(
+                                        $"Form key count limit {DefaultFormOptions.ValueCountLimit} exceeded.");
+                                }
                             }
                         }
                     }
-                }
 
-                // Drains any remaining section body that has not been consumed and
-                // reads the headers for the next section.
-                section = await reader.ReadNextSectionAsync();
+                    // Drains any remaining section body that has not been consumed and
+                    // reads the headers for the next section.
+                    section = await reader.ReadNextSectionAsync();
+                }
             }
 
             // Bind form data to a model
@@ -152,14 +171,6 @@ namespace MSBLOC.Web.Controllers.api
             }
 
             var checkRun = await _msblocService.SubmitAsync(formData);
-
-            var serializerSettings = new JsonSerializerSettings
-            {
-                Converters = new JsonConverter[]
-                {
-                    new OctokitStringEnumConverter()
-                }
-            };
 
             return Json(checkRun);
         }
