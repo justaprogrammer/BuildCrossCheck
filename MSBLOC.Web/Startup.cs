@@ -40,14 +40,14 @@ namespace MSBLOC.Web
             services.Configure<EnvOptions>(Configuration);
 
             services.AddSingleton<IPrivateKeySource, OptionsPrivateKeySource>();
-            services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async appOwner =>
+            services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async repoOwner =>
             {
                 var gitHubAppId = s.GetService<IOptions<EnvOptions>>().Value.GitHubAppId;
                 var privateKeySource = s.GetService<IPrivateKeySource>();
                 var gitHubTokenGenerator = new TokenGenerator(gitHubAppId, privateKeySource, s.GetService<ILogger<TokenGenerator>>());
 
                 var gitHubClientFactory = new GitHubClientFactory(gitHubTokenGenerator);
-                var gitHubClient = await gitHubClientFactory.CreateClientForLogin(appOwner);
+                var gitHubClient = await gitHubClientFactory.CreateClientForLogin(repoOwner);
 
                 return new CheckRunSubmitter(gitHubClient.Check.Run, s.GetService<ILogger<CheckRunSubmitter>>());
             });

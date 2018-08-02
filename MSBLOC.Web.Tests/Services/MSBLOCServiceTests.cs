@@ -36,8 +36,8 @@ namespace MSBLOC.Web.Tests.Services
         public async Task SubmitTest()
         {
             var submissionData = new Faker<SubmissionData>()
-                .RuleFor(sd => sd.ApplicationOwner, f => f.Person.FullName)
-                .RuleFor(sd => sd.ApplicationName, f => f.Hacker.Phrase())
+                .RuleFor(sd => sd.RepoOwner, f => f.Person.FullName)
+                .RuleFor(sd => sd.RepoName, f => f.Hacker.Phrase())
                 .RuleFor(sd => sd.CloneRoot, f => f.System.DirectoryPath())
                 .RuleFor(sd => sd.CommitSha, f => f.Hashids.Encode())
                 .RuleFor(sd => sd.BinaryLogFile, f => f.System.FileName())
@@ -73,11 +73,11 @@ namespace MSBLOC.Web.Tests.Services
             {
                 tempFileService.GetFilePath(Arg.Is(submissionData.BinaryLogFile));
                 binaryLogProcessor.ProcessLog(Arg.Is(binaryLogFilePath), Arg.Is(submissionData.CloneRoot));
-                await checkRunSubmitterFactory.Invoke(Arg.Is(submissionData.ApplicationOwner));
+                await checkRunSubmitterFactory.Invoke(Arg.Is(submissionData.RepoOwner));
                 await checkRunSubmitter.SubmitCheckRun(
                     buildDetails: Arg.Is(buildDetails),
-                    owner: Arg.Is(submissionData.ApplicationOwner),
-                    name: Arg.Is(submissionData.ApplicationName),
+                    owner: Arg.Is(submissionData.RepoOwner),
+                    name: Arg.Is(submissionData.RepoName),
                     headSha: Arg.Is(submissionData.CommitSha),
                     checkRunName: Arg.Any<string>(),
                     checkRunTitle: Arg.Any<string>(),
