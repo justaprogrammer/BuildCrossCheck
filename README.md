@@ -22,6 +22,10 @@ The authors of MSBuildLogOctokitChecker maintain a hosted version of the source 
 
 You can find our documentation [here](docs/readme.md).
 
+## Licenses
+- This source is distributed under under the AGPL.
+- The Powershell module is distributed under the MIT License.
+
 ## More information
 - [MSBuild Log](http://msbuildlog.com/)
 - [GitHub Checks API](https://developer.github.com/v3/checks/)
