@@ -1,3 +1,5 @@
+# Contributing
+
 ## Running Integration Tests
 
 Integration tests in the project `MSBLOC.Core.IntegrationTests` require the following:
