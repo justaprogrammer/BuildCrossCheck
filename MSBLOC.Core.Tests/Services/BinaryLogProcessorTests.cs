@@ -93,15 +93,19 @@ namespace MSBLOC.Core.Tests.Services
             project = new ProjectDetails(cloneRoot, @"C:\projects\msbuildlogoctokitchecker\MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj");
             solutionDetails.Add(project);
 
-            var resourcePath = TestUtils.GetResourcePath("msbloc.binlog");
+            AssertParseLogs("msbloc.binlog", solutionDetails, new Annotation[0], cloneRoot, options => options.IncludingNestedObjects().IncludingProperties().Excluding(info => info.SelectedMemberInfo.Name == "Paths"));
+        }
+
+        [Fact]
+        public void ShouldParseOctokitGraphQL()
+        {
+            var cloneRoot = @"C:\Users\Spade\Projects\GitHub\Octokit.GraphQL\";
+
+            var resourcePath = TestUtils.GetResourcePath("octokit.graphql.binlog");
             File.Exists(resourcePath).Should().BeTrue();
 
             var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
             var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot);
-
-            parsedBinaryLog.Annotations.ToArray().Should().BeEquivalentTo(new Annotation[0]);
-
-            parsedBinaryLog.SolutionDetails.Should().BeEquivalentTo(solutionDetails, options => options.IncludingNestedObjects().IncludingProperties().Excluding(info => info.SelectedMemberInfo.Name == "Paths"));
         }
 
         [Fact]
@@ -130,7 +134,7 @@ namespace MSBLOC.Core.Tests.Services
         }
 
         private void AssertParseLogs(string resourceName, SolutionDetails expectedSolutionDetails, Annotation[] expectedAnnotations,
-            string cloneRoot)
+            string cloneRoot, Func<EquivalencyAssertionOptions<SolutionDetails>, EquivalencyAssertionOptions<SolutionDetails>> solutionDetailsEquivalency = null)
         {
             var resourcePath = TestUtils.GetResourcePath(resourceName);
             File.Exists(resourcePath).Should().BeTrue();
@@ -140,7 +144,8 @@ namespace MSBLOC.Core.Tests.Services
 
             parsedBinaryLog.Annotations.ToArray().Should().BeEquivalentTo(expectedAnnotations);
 
-            parsedBinaryLog.SolutionDetails.Should().BeEquivalentTo(expectedSolutionDetails, options => options.IncludingNestedObjects().IncludingProperties());
+            solutionDetailsEquivalency = solutionDetailsEquivalency ?? (options => options.IncludingNestedObjects().IncludingProperties());
+            parsedBinaryLog.SolutionDetails.Should().BeEquivalentTo(expectedSolutionDetails, solutionDetailsEquivalency);
         }
     }
 }
