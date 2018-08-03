@@ -278,6 +278,10 @@ namespace MSBLOC.Core.Tests.Services
                     {
                         Annotations = remainingAnnotation
                     },
+                    Status = CheckStatus.Completed,
+                    StartedAt = startedAt,
+                    CompletedAt = completedAt,
+                    Conclusion = expectedConclusion
                 };
 
                 checkRunUpdate.Should().BeEquivalentTo(expectedCheckRunUpdate);

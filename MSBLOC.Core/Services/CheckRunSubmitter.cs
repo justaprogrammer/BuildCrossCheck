@@ -40,6 +40,9 @@ namespace MSBLOC.Core.Services
                 return newCheckRunAnnotation;
             }).Batch(50).ToArray();
 
+            var checkConclusion = buildDetails.Annotations
+                .Any(annotation => annotation.AnnotationWarningLevel == AnnotationWarningLevel.Failure) ? CheckConclusion.Failure : CheckConclusion.Success;
+
             var newCheckRun = new NewCheckRun(checkRunName, headSha)
             {
                 Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
@@ -49,8 +52,7 @@ namespace MSBLOC.Core.Services
                 Status = CheckStatus.Completed,
                 StartedAt = startedAt,
                 CompletedAt = completedAt,
-                Conclusion = buildDetails.Annotations
-                    .Any(annotation => annotation.AnnotationWarningLevel == AnnotationWarningLevel.Failure) ? CheckConclusion.Failure : CheckConclusion.Success
+                Conclusion = checkConclusion
             };
 
             var checkRun = await CheckRunsClient.Create(owner, name, newCheckRun);
@@ -62,7 +64,11 @@ namespace MSBLOC.Core.Services
                     Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
                     {
                         Annotations = newCheckRunAnnotation.ToArray()
-                    }
+                    },
+                    Status = CheckStatus.Completed,
+                    StartedAt = startedAt,
+                    CompletedAt = completedAt,
+                    Conclusion = checkConclusion
                 });
             }
 
