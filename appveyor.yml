@@ -5,7 +5,10 @@ before_build:
         nuget restore MSBuildLogOctokitChecker.sln -Verbosity Quiet
 build_script:
 - ps: >-
-    Import-Module .\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
+    if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
+    {
+      Import-Module .\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
+    }
 
     msbuild MSBuildLogOctokitChecker.sln --% /bl:output.binlog /verbosity:minimal
     
