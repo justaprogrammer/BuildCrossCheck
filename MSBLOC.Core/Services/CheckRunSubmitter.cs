@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using MoreLinq.Extensions;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
 using Octokit;
@@ -37,13 +38,13 @@ namespace MSBLOC.Core.Services
                 };
 
                 return newCheckRunAnnotation;
-            }).Take(50).ToList();
+            }).Batch(50).ToArray();
 
             var newCheckRun = new NewCheckRun(checkRunName, headSha)
             {
                 Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
                 {
-                    Annotations = newCheckRunAnnotations
+                    Annotations = newCheckRunAnnotations.FirstOrDefault()?.ToArray()
                 },
                 Status = CheckStatus.Completed,
                 StartedAt = startedAt,
@@ -52,7 +53,20 @@ namespace MSBLOC.Core.Services
                     .Any(annotation => annotation.AnnotationWarningLevel == AnnotationWarningLevel.Failure) ? CheckConclusion.Failure : CheckConclusion.Success
             };
 
-            return await CheckRunsClient.Create(owner, name, newCheckRun);
+            var checkRun = await CheckRunsClient.Create(owner, name, newCheckRun);
+
+            foreach (var newCheckRunAnnotation in newCheckRunAnnotations.Skip(1))
+            {
+                await CheckRunsClient.Update(owner, name, checkRun.Id, new CheckRunUpdate()
+                {
+                    Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
+                    {
+                        Annotations = newCheckRunAnnotation.ToArray()
+                    }
+                });
+            }
+
+            return checkRun;
         }
 
         private static string BlobHref(string owner, string repository, string sha, string file)
