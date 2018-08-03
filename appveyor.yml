@@ -2,7 +2,7 @@ version: 1.0.{build}
 image: Visual Studio 2017
 before_build:
     - ps: |
-        nuget restore MSBuildLogOctokitChecker.sln
+        nuget restore MSBuildLogOctokitChecker.sln -Verbosity Quiet
 build_script:
 - ps: >-
     Import-Module .\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
