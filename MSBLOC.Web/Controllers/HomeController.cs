@@ -18,30 +18,8 @@ namespace MSBLOC.Web.Controllers
 {
     public class HomeController : Controller
     {
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            if (User?.Identity.IsAuthenticated ?? false)
-            {
-                var gitHubClientFactory = new GitHubClientFactory(null);
-                var gitHubName = User.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
-                var gitHubLogin = User.FindFirst(c => c.Type == "urn:github:login")?.Value;
-                var gitHubUrl = User.FindFirst(c => c.Type == "urn:github:url")?.Value;
-                var gitHubAvatar = User.FindFirst(c => c.Type == "urn:github:avatar")?.Value;
-
-                string accessToken = await HttpContext.GetTokenAsync("access_token");
-
-                var github = gitHubClientFactory.CreateClientForToken(accessToken);
-                var repositories = await github.Repository.GetAllForCurrent();
-
-                var connection = gitHubClientFactory.CreateGraphQlConnectionForToken(accessToken);
-                var query = new Query().Viewer
-                    .Repositories(null, null, null, null, null, null, null, null, null)
-                    .AllPages()
-                    .Select(repository => repository.Name);
-
-                var repositoriesFromGraphQL = await connection.Run(query);
-            }
-
             return View();
         }
 

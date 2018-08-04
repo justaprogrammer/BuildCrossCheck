@@ -13,13 +13,13 @@ namespace MSBLOC.Web.Tests.Controllers
     public class HomeControllerTest
     {
         [Fact]
-        public async Task Index()
+        public void Index()
         {
             // Arrange
             HomeController controller = new HomeController();
 
             // Act
-            ViewResult result = (await controller.Index()) as ViewResult;
+            ViewResult result = controller.Index() as ViewResult;
 
             // Assert
             Assert.NotNull(result);

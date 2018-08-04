@@ -55,7 +55,7 @@ namespace MSBLOC.Web
                 var gitHubTokenGenerator = new TokenGenerator(gitHubAppId, privateKeySource, s.GetService<ILogger<TokenGenerator>>());
 
                 var gitHubClientFactory = new GitHubClientFactory(gitHubTokenGenerator);
-                var gitHubClient = await gitHubClientFactory.CreateGitHubAppClientForLogin(repoOwner);
+                var gitHubClient = await gitHubClientFactory.CreateAppClient(repoOwner);
 
                 return new CheckRunSubmitter(gitHubClient.Check.Run, s.GetService<ILogger<CheckRunSubmitter>>());
             });
