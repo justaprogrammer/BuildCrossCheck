@@ -1,5 +1,9 @@
 # Integrating
 
+## Adding the GitHub App to your Repo
+
+Add the [MSBLOC GitHub App](https://github.com/apps/msbuildlog-octokit-checker) to the repositories that you would like to work with.
+
 ## Collecting the MSBuild Binary Log file
 
 In order to capture a binary log file from MSBuild your project must be built with MSBuild 15.3 (Visual Studio 2017 Update 3) or greater. The switch `/bl` must be added to your MSBuild command.
@@ -29,11 +33,17 @@ More information about the MSBuild Binary Log format can be found [here](http://
     
        if (! $?) {
          echo "Build Error"
-         Send-MsbuildLogAppveyor output.binlog
+         if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
+         {
+           Send-MsbuildLogAppveyor output.binlog
+         }
          exit -1
        }
     
-       Send-MsbuildLogAppveyor $binLogPath
+       if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
+       {
+         Send-MsbuildLogAppveyor output.binlog
+       }
    ```
    The key points are as follows
 
@@ -41,9 +51,9 @@ More information about the MSBuild Binary Log format can be found [here](http://
    1. Importing the MSBLOC.Posh Powershell Module
    1. Invoking MSBuild with the option to output the binary log
    1. Captuing errors from MSBuild
-      - Invoking `Send-MsbuildLogAppveyor` to send MSBLOC the binary log file
+      - If it is a branch build invoke `Send-MsbuildLogAppveyor` to send MSBLOC the binary log file
       - Returning an error for MSBuild
-   1. Invoking `Send-MsbuildLogAppveyor` to send MSBLOC the binary log file
+   1. If it is a branch build invoke `Send-MsbuildLogAppveyor` to send MSBLOC the binary log file
 
    An example can be found [here](https://github.com/justaprogrammer/TestConsoleApp1/blob/appveyor/appveyor.yml)
 
