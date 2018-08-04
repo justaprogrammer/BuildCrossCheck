@@ -2,27 +2,35 @@ version: 1.0.{build}
 image: Visual Studio 2017
 before_build:
     - ps: |
-        nuget restore MSBuildLogOctokitChecker.sln
+        nuget restore MSBuildLogOctokitChecker.sln -Verbosity Quiet
 build_script:
 - ps: >-
-    Import-Module .\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
+    if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
+    {
+      Import-Module .\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
+    }
 
-    msbuild MSBuildLogOctokitChecker.sln --% /bl:output.binlog /flp:logfile=output.log;verbosity=diagnostic
+    msbuild MSBuildLogOctokitChecker.sln --% /bl:output.binlog /verbosity:minimal
     
     if (! $?) {
       echo "Build Error"
-      Push-AppveyorArtifact output.log -Type log
       Push-AppveyorArtifact output.binlog -Type log
-      Send-MsbuildLogAppveyor output.binlog
+
+      if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
+      {
+        Send-MsbuildLogAppveyor output.binlog
+      }
+      
       exit -1
     }
     
-    Send-MsbuildLogAppveyor output.binlog
+    if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
+    {
+      Send-MsbuildLogAppveyor output.binlog
+    }
 after_build:
     - cmd: dotnet publish MSBLOC.Web --output %appveyor_build_folder%\dist
 artifacts:
-    - path: output.log
-      name: log
     - path: output.binlog
       name: log
     - path: dist
