@@ -59,7 +59,7 @@ namespace MSBLOC.Core.IntegrationTests.Services
             var privateKeySource = new EnvironmentVariablePrivateKeySource(privateKeyEnvironmentVariableName);
             var tokenGenerator = new TokenGenerator(gitHubAppId, privateKeySource);
             var gitHubClientFactory = new GitHubClientFactory(tokenGenerator);
-            var gitHubClient = await gitHubClientFactory.CreateClientForLogin(integrationTestAppOwner);
+            var gitHubClient = await gitHubClientFactory.CreateGitHubAppClientForLogin(integrationTestAppOwner);
             var checkRunsClient = gitHubClient.Check.Run;
 
             var submitter = new CheckRunSubmitter(checkRunsClient);
