@@ -1,0 +1,31 @@
+﻿@model System.Collections.Generic.IReadOnlyList<Octokit.Repository>
+
+<div class="row">
+    <div class="col-md-12">
+
+        <h3>Repositories associated with current User</h3>
+        <p>This page displays all the GitHub repositories associated the the current User.</p>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Repository
+                    </th>
+                    <th>
+                        Url
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var repo in Model)
+                {
+                    <tr>
+                        <td>@repo.Name</td>
+                        <td>@repo.Url</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

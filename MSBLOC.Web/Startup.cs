@@ -40,17 +40,43 @@ namespace MSBLOC.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = "GitHub";
+            })
+            .AddCookie(options =>
+            {
+                options.LoginPath = "/signin";
+                options.LogoutPath = "/signout";
+            })
+            .AddGitHub(options =>
+            {
+                options.ClientId = Configuration["GitHub:OAuth:ClientId"];
+                options.ClientSecret = Configuration["GitHub:OAuth:ClientSecret"];
+                options.Scope.Add("user:email");
+
+                options.ClaimActions.Clear();
+                options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+                options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
+                options.ClaimActions.MapJsonKey("urn:github:login", "login");
+                options.ClaimActions.MapJsonKey("urn:github:url", "html_url");
+                options.ClaimActions.MapJsonKey("urn:github:avatar", "avatar_url");
+
+                options.SaveTokens = true;
+            });
+
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.Converters.Add(new OctokitStringEnumConverter());
             });
 
-            services.Configure<EnvOptions>(Configuration);
+            services.Configure<GitHubAppOptions>(Configuration.GetSection("GitHub:App"));
 
             services.AddSingleton<IPrivateKeySource, OptionsPrivateKeySource>();
             services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async repoOwner =>
             {
-                var gitHubAppId = s.GetService<IOptions<EnvOptions>>().Value.GitHubAppId;
+                var gitHubAppId = s.GetService<IOptions<GitHubAppOptions>>().Value.Id;
                 var privateKeySource = s.GetService<IPrivateKeySource>();
                 var gitHubTokenGenerator = new TokenGenerator(gitHubAppId, privateKeySource, s.GetService<ILogger<TokenGenerator>>());
 
@@ -69,49 +95,6 @@ namespace MSBLOC.Web
             {
                 c.SwaggerDoc("0.0.1", new Info { Title = "MSBLOC Web API", Version = "0.0.1" });
                 c.OperationFilter<MultiPartFormBindingAttribute.MultiPartFormBindingFilter>();
-            });
-
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = "GitHub";
-            })
-            .AddCookie()
-            .AddOAuth("GitHub", options =>
-            {
-                options.ClientId = "9d983a7c0f3f410d0daf";
-                options.ClientSecret = "c6b78ba4e36eb20d34660cff98fccc150a146e06";
-                options.CallbackPath = new PathString("/authorize");
-
-                options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
-                options.TokenEndpoint = "https://github.com/login/oauth/access_token";
-                options.UserInformationEndpoint = "https://api.github.com/user";
-
-                options.SaveTokens = true;
-
-                options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-                options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
-                options.ClaimActions.MapJsonKey("urn:github:login", "login");
-                options.ClaimActions.MapJsonKey("urn:github:url", "html_url");
-                options.ClaimActions.MapJsonKey("urn:github:avatar", "avatar_url");
-
-                options.Events = new OAuthEvents
-                {
-                    OnCreatingTicket = async context =>
-                    {
-                        var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-
-                        var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-                        response.EnsureSuccessStatusCode();
-
-                        var user = JObject.Parse(await response.Content.ReadAsStringAsync());
-
-                        context.RunClaimActions(user);
-                    }
-                };
             });
         }
 

@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="2.0.0" />
     <PackageReference Include="BuildBundlerMinifier" Version="2.8.391" />
     <PackageReference Include="GitHubJwt" Version="0.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.2" />
@@ -21,6 +22,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MSBLOC.Core\MSBLOC.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\" />
   </ItemGroup>
 
 </Project>
