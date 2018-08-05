@@ -30,6 +30,9 @@ using MSBLOC.Web.Util;
 using Newtonsoft.Json.Linq;
 using Octokit;
 using Swashbuckle.AspNetCore.Swagger;
+using GitHubClientFactory = MSBLOC.Web.Services.GitHubClientFactory;
+using ICheckRunSubmitter = MSBLOC.Core.Interfaces.ICheckRunSubmitter;
+using IGitHubClientFactory = MSBLOC.Web.Interfaces.IGitHubClientFactory;
 
 namespace MSBLOC.Web
 {
@@ -77,30 +80,17 @@ namespace MSBLOC.Web
                 options.SerializerSettings.Converters.Add(new OctokitStringEnumConverter());
             });
 
+            services.AddHttpContextAccessor();
+
             services.Configure<GitHubAppOptions>(Configuration.GetSection("GitHub:App"));
 
             services.AddSingleton<IPrivateKeySource, OptionsPrivateKeySource>();
-            services.AddSingleton<Func<string, Task<IGitHubClient>>>(s => async repoOwner =>
-            {
-                var gitHubClientFactory = new GitHubClientFactory();
-                var gitHubClient = await gitHubClientFactory.CreateAppClient(s.GetService<ITokenGenerator>(), repoOwner);
-
-                return gitHubClient;
-            });
-            services.AddSingleton<Func<HttpContext, Task<IGitHubClient>>>(s => async httpContext =>
-            {
-                var token = await httpContext.GetTokenAsync("access_token");
-                var gitHubClientFactory = new GitHubClientFactory();
-                var gitHubClient = gitHubClientFactory.CreateClient(token);
-
-                return gitHubClient;
-            });
             services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async repoOwner =>
             {
-                var gitHubClient = await s.GetService<Func<string, Task<IGitHubClient>>>()(repoOwner);
+                var gitHubClient = await s.GetService<IGitHubClientFactory>().CreateAppClient(repoOwner);
                 return new CheckRunSubmitter(gitHubClient.Check.Run, s.GetService<ILogger<CheckRunSubmitter>>());
             });
-
+            
             services.AddScoped<ITempFileService, LocalTempFileService>();
             services.AddScoped<IBinaryLogProcessor, BinaryLogProcessor>();
             services.AddScoped<ITokenGenerator>(s =>
@@ -112,7 +102,7 @@ namespace MSBLOC.Web
             services.AddScoped<IMongoClient>(s => new MongoClient(Configuration["MongoDB:ConnectionString"]));
             services.AddScoped<IMongoDatabase>(s => s.GetService<IMongoClient>().GetDatabase(Configuration["MongoDB:Database"]));
             services.AddScoped<IGitHubRepositoryContext, GitHubRepositoryContext>();
-            
+            services.AddScoped<IGitHubClientFactory, GitHubClientFactory>();
 
             services.AddTransient<IMSBLOCService, MSBLOCService>();
 
