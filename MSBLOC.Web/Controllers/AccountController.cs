@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Services;
 
 namespace MSBLOC.Web.Controllers
@@ -31,7 +32,7 @@ namespace MSBLOC.Web.Controllers
         [Authorize]
         public async Task<IActionResult> ListRepositories()
         {
-            var gitHubClientFactory = new GitHubClientFactory(null);
+            var gitHubClientFactory = new GitHubClientFactory();
             var gitHubName = User.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
             var gitHubLogin = User.FindFirst(c => c.Type == "urn:github:login")?.Value;
             var gitHubUrl = User.FindFirst(c => c.Type == "urn:github:url")?.Value;
@@ -39,7 +40,7 @@ namespace MSBLOC.Web.Controllers
 
             var accessToken = await HttpContext.GetTokenAsync("access_token");
 
-            var github = gitHubClientFactory.CreateClientForToken(accessToken);
+            var github = gitHubClientFactory.CreateClient(accessToken);
             var repositories = await github.Repository.GetAllForCurrent();
 
             return View(repositories);

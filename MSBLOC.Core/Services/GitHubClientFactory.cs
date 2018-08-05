@@ -9,23 +9,20 @@ namespace MSBLOC.Core.Services
 {
     public class GitHubClientFactory : IGitHubClientFactory
     {
-        public GitHubClientFactory(ITokenGenerator tokenGenerator)
+        public GitHubClientFactory()
         {
-            TokenGenerator = tokenGenerator;
         }
 
-        public ITokenGenerator TokenGenerator { get; }
-
-        public async Task<IGitHubClient> CreateAppClient(string login)
+        public async Task<IGitHubClient> CreateAppClient(ITokenGenerator tokenGenerator, string login)
         {
-            var (installation, token) = await FindInstallationAndGetToken(login);
+            var (installation, token) = await FindInstallationAndGetToken(tokenGenerator, login);
             return new GitHubClient(new ProductHeaderValue(GetUserAgent(installation)),
                 new InMemoryCredentialStore(new Credentials(token)));
         }
 
-        public async Task<IGitHubGraphQLClient> CreateAppGraphQLClient(string login)
+        public async Task<IGitHubGraphQLClient> CreateAppGraphQLClient(ITokenGenerator tokenGenerator, string login)
         {
-            var (installation, token) = await FindInstallationAndGetToken(login);
+            var (installation, token) = await FindInstallationAndGetToken(tokenGenerator, login);
             return new GitHubGraphQLClient(new Octokit.GraphQL.ProductHeaderValue(GetUserAgent(installation)), token);
         }
 
@@ -49,9 +46,9 @@ namespace MSBLOC.Core.Services
             return userAgent;
         }
 
-        private async Task<ValueTuple<Installation, string>> FindInstallationAndGetToken(string login)
+        private async Task<ValueTuple<Installation, string>> FindInstallationAndGetToken(ITokenGenerator tokenGenerator, string login)
         {
-            var jwtToken = TokenGenerator.GetToken();
+            var jwtToken = tokenGenerator.GetToken();
 
             var appClient = new GitHubClient(new ProductHeaderValue("MSBuildLogOctokitChecker"))
             {

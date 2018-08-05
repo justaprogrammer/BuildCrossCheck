@@ -76,18 +76,20 @@ namespace MSBLOC.Web
             services.AddSingleton<IPrivateKeySource, OptionsPrivateKeySource>();
             services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async repoOwner =>
             {
-                var gitHubAppId = s.GetService<IOptions<GitHubAppOptions>>().Value.Id;
-                var privateKeySource = s.GetService<IPrivateKeySource>();
-                var gitHubTokenGenerator = new TokenGenerator(gitHubAppId, privateKeySource, s.GetService<ILogger<TokenGenerator>>());
-
-                var gitHubClientFactory = new GitHubClientFactory(gitHubTokenGenerator);
-                var gitHubClient = await gitHubClientFactory.CreateAppClient(repoOwner);
+                var gitHubClientFactory = new GitHubClientFactory();
+                var gitHubClient = await gitHubClientFactory.CreateAppClient(s.GetService<ITokenGenerator>(), repoOwner);
 
                 return new CheckRunSubmitter(gitHubClient.Check.Run, s.GetService<ILogger<CheckRunSubmitter>>());
             });
 
             services.AddScoped<ITempFileService, LocalTempFileService>();
             services.AddScoped<IBinaryLogProcessor, BinaryLogProcessor>();
+            services.AddScoped<ITokenGenerator>(s =>
+            {
+                var gitHubAppId = s.GetService<IOptions<GitHubAppOptions>>().Value.Id;
+                var privateKeySource = s.GetService<IPrivateKeySource>();
+                return new TokenGenerator(gitHubAppId, privateKeySource, s.GetService<ILogger<TokenGenerator>>());
+            });
 
             services.AddTransient<IMSBLOCService, MSBLOCService>();
 

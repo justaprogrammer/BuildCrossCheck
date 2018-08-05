@@ -24,8 +24,4 @@
     <ProjectReference Include="..\MSBLOC.Core\MSBLOC.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Extensions\" />
-  </ItemGroup>
-
 </Project>
