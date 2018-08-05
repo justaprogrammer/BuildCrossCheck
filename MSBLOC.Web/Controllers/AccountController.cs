@@ -19,16 +19,17 @@ using IGitHubClientFactory = MSBLOC.Web.Interfaces.IGitHubClientFactory;
 
 namespace MSBLOC.Web.Controllers
 {
+    [Authorize]
     public class AccountController : Controller
     {
         [HttpGet("~/signin")]
+        [AllowAnonymous]
         public IActionResult SignIn()
         {
             return Challenge(new AuthenticationProperties { RedirectUri = "/" }, "GitHub");
         }
 
         [HttpGet("~/signout"), HttpPost("~/signout")]
-        [Authorize]
         public async Task<IActionResult> SignOut()
         {
             var authProperties = new AuthenticationProperties {RedirectUri = "/"};
@@ -36,7 +37,6 @@ namespace MSBLOC.Web.Controllers
             return SignOut(authProperties);
         }
 
-        [Authorize]
         public async Task<IActionResult> ListRepositories([FromServices] IGitHubRepositoryContext repoContext, [FromServices] IGitHubClientFactory gitHubClientFactory)
         {
             var github = await gitHubClientFactory.CreateClientForCurrentUser();
