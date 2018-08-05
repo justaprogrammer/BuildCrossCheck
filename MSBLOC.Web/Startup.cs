@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Authentication;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using GitHubJwt;
@@ -16,9 +17,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Services;
 using MSBLOC.Web.Attributes;
+using MSBLOC.Web.Contexts;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using MSBLOC.Web.Services;
@@ -55,6 +58,7 @@ namespace MSBLOC.Web
                 options.ClientId = Configuration["GitHub:OAuth:ClientId"];
                 options.ClientSecret = Configuration["GitHub:OAuth:ClientSecret"];
                 options.Scope.Add("user:email");
+                options.Scope.Add("read:org");
 
                 options.ClaimActions.Clear();
                 options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
@@ -90,6 +94,9 @@ namespace MSBLOC.Web
                 var privateKeySource = s.GetService<IPrivateKeySource>();
                 return new TokenGenerator(gitHubAppId, privateKeySource, s.GetService<ILogger<TokenGenerator>>());
             });
+            services.AddScoped<IMongoClient>(s => new MongoClient(Configuration["MongoDB:ConnectionString"]));
+            services.AddScoped<IMongoDatabase>(s => s.GetService<IMongoClient>().GetDatabase(Configuration["MongoDB:Database"]));
+            services.AddScoped<IGitHubRepositoryContext, GitHubRepositoryContext>();
 
             services.AddTransient<IMSBLOCService, MSBLOCService>();
 

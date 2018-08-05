@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -7,8 +8,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Services;
+using MSBLOC.Web.Interfaces;
+using MSBLOC.Web.Models;
+using Octokit;
 
 namespace MSBLOC.Web.Controllers
 {
@@ -30,20 +35,74 @@ namespace MSBLOC.Web.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> ListRepositories()
+        public async Task<IActionResult> ListRepositories([FromServices] IGitHubRepositoryContext repoContext)
         {
             var gitHubClientFactory = new GitHubClientFactory();
-            var gitHubName = User.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
-            var gitHubLogin = User.FindFirst(c => c.Type == "urn:github:login")?.Value;
-            var gitHubUrl = User.FindFirst(c => c.Type == "urn:github:url")?.Value;
-            var gitHubAvatar = User.FindFirst(c => c.Type == "urn:github:avatar")?.Value;
 
             var accessToken = await HttpContext.GetTokenAsync("access_token");
 
             var github = gitHubClientFactory.CreateClient(accessToken);
-            var repositories = await github.Repository.GetAllForCurrent();
+
+            var repositories = (await github.Repository.GetAllForCurrent())
+                .Select(r => new GitHubRepository
+                {
+                    Name = r.Name,
+                    Id = r.Id,
+                    Url = r.Url
+                })
+                .ToList();
+
+            var filter = Builders<GitHubRepository>.Filter.In(nameof(GitHubRepository.Id), repositories.Select(r => r.Id));
+
+            var savedRepos = await repoContext.Repositories.Find(filter).ToListAsync();
+
+            foreach (var savedRepo in savedRepos)
+            {
+                var repo = repositories.FirstOrDefault(r => r.Id == savedRepo.Id);
+                if (repo == null) continue;
+                repo.Id = savedRepo.Id;
+                repo.Secret = savedRepo.Secret;
+            }
 
             return View(repositories);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateSecret([FromServices] IGitHubRepositoryContext repoContext, [FromQuery] long gitHubRepositoryId)
+        {
+            var gitHubClientFactory = new GitHubClientFactory();
+
+            var accessToken = await HttpContext.GetTokenAsync("access_token");
+
+            var github = gitHubClientFactory.CreateClient(accessToken);
+
+            var repository = await github.Repository.Get(gitHubRepositoryId);
+
+            var filter = Builders<GitHubRepository>.Filter.Eq(nameof(GitHubRepository.Id), gitHubRepositoryId);
+            var repo = await repoContext.Repositories.Find(filter).FirstOrDefaultAsync();
+
+            if (repo == null)
+            {
+                repo = new GitHubRepository
+                {
+                    Id = repository.Id,
+                    Name = repository.Name,
+                    Url = repository.Url,
+                    Secret = Guid.NewGuid().ToString()
+                };
+
+                await repoContext.Repositories.InsertOneAsync(repo);
+            }
+            else
+            {
+                repo.Name = repository.Name;
+                repo.Url = repository.Url;
+                repo.Secret = Guid.NewGuid().ToString();
+
+                await repoContext.Repositories.ReplaceOneAsync(filter, repo);
+            }
+
+            return RedirectToAction("ListRepositories");
         }
     }
 }
