@@ -30,9 +30,6 @@ using MSBLOC.Web.Util;
 using Newtonsoft.Json.Linq;
 using Octokit;
 using Swashbuckle.AspNetCore.Swagger;
-using GitHubClientFactory = MSBLOC.Web.Services.GitHubClientFactory;
-using ICheckRunSubmitter = MSBLOC.Core.Interfaces.ICheckRunSubmitter;
-using IGitHubClientFactory = MSBLOC.Web.Interfaces.IGitHubClientFactory;
 
 namespace MSBLOC.Web
 {

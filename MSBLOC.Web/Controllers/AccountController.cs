@@ -15,7 +15,6 @@ using MSBLOC.Core.Services;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using Octokit;
-using IGitHubClientFactory = MSBLOC.Web.Interfaces.IGitHubClientFactory;
 
 namespace MSBLOC.Web.Controllers
 {
@@ -37,9 +36,9 @@ namespace MSBLOC.Web.Controllers
             return SignOut(authProperties);
         }
 
-        public async Task<IActionResult> ListRepositories([FromServices] IGitHubRepositoryContext repoContext, [FromServices] IGitHubClientFactory gitHubClientFactory)
+        public async Task<IActionResult> ListRepositories([FromServices] IGitHubRepositoryContext repoContext, [FromServices] IGitHubUserClientFactory gitHubClientFactory)
         {
-            var github = await gitHubClientFactory.CreateClientForCurrentUser();
+            var github = await gitHubClientFactory.CreateClient();
 
             var repositories = (await github.Repository.GetAllForCurrent())
                 .Select(r => new GitHubRepository
@@ -66,9 +65,9 @@ namespace MSBLOC.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CreateSecret([FromServices] IGitHubRepositoryContext repoContext, [FromServices] IGitHubClientFactory gitHubClientFactory, [FromQuery] long gitHubRepositoryId)
+        public async Task<IActionResult> CreateSecret([FromServices] IGitHubRepositoryContext repoContext, [FromServices] IGitHubUserClientFactory gitHubClientFactory, [FromQuery] long gitHubRepositoryId)
         {
-            var github = await gitHubClientFactory.CreateClientForCurrentUser();
+            var github = await gitHubClientFactory.CreateClient();
 
             var repoTask = github.Repository.Get(gitHubRepositoryId);
 

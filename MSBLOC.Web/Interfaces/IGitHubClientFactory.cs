@@ -1,11 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using MSBLOC.Core.Services;
 using Octokit;
+using System.Threading.Tasks;
 
 namespace MSBLOC.Web.Interfaces
 {
-    public interface IGitHubClientFactory
+    public interface IGitHubUserClientFactory
     {
-        Task<IGitHubClient> CreateAppClient(string repositoryOwner);
-        Task<IGitHubClient> CreateClientForCurrentUser();
+        Task<IGitHubClient> CreateClient();
+        Task<IGitHubGraphQLClient> CreateGraphQLClient();
     }
 }
