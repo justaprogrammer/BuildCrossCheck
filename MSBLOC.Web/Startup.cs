@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using GitHubJwt;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,6 +28,7 @@ using MSBLOC.Web.Models;
 using MSBLOC.Web.Services;
 using MSBLOC.Web.Util;
 using Newtonsoft.Json.Linq;
+using Octokit;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace MSBLOC.Web
@@ -78,11 +80,24 @@ namespace MSBLOC.Web
             services.Configure<GitHubAppOptions>(Configuration.GetSection("GitHub:App"));
 
             services.AddSingleton<IPrivateKeySource, OptionsPrivateKeySource>();
-            services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async repoOwner =>
+            services.AddSingleton<Func<string, Task<IGitHubClient>>>(s => async repoOwner =>
             {
                 var gitHubClientFactory = new GitHubClientFactory();
                 var gitHubClient = await gitHubClientFactory.CreateAppClient(s.GetService<ITokenGenerator>(), repoOwner);
 
+                return gitHubClient;
+            });
+            services.AddSingleton<Func<HttpContext, Task<IGitHubClient>>>(s => async httpContext =>
+            {
+                var token = await httpContext.GetTokenAsync("access_token");
+                var gitHubClientFactory = new GitHubClientFactory();
+                var gitHubClient = gitHubClientFactory.CreateClient(token);
+
+                return gitHubClient;
+            });
+            services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async repoOwner =>
+            {
+                var gitHubClient = await s.GetService<Func<string, Task<IGitHubClient>>>()(repoOwner);
                 return new CheckRunSubmitter(gitHubClient.Check.Run, s.GetService<ILogger<CheckRunSubmitter>>());
             });
 
@@ -97,6 +112,7 @@ namespace MSBLOC.Web
             services.AddScoped<IMongoClient>(s => new MongoClient(Configuration["MongoDB:ConnectionString"]));
             services.AddScoped<IMongoDatabase>(s => s.GetService<IMongoClient>().GetDatabase(Configuration["MongoDB:Database"]));
             services.AddScoped<IGitHubRepositoryContext, GitHubRepositoryContext>();
+            
 
             services.AddTransient<IMSBLOCService, MSBLOCService>();
 

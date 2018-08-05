@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
@@ -35,13 +36,9 @@ namespace MSBLOC.Web.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> ListRepositories([FromServices] IGitHubRepositoryContext repoContext)
+        public async Task<IActionResult> ListRepositories([FromServices] IGitHubRepositoryContext repoContext, [FromServices] Func<HttpContext, Task<IGitHubClient>> gitHubClientFactory)
         {
-            var gitHubClientFactory = new GitHubClientFactory();
-
-            var accessToken = await HttpContext.GetTokenAsync("access_token");
-
-            var github = gitHubClientFactory.CreateClient(accessToken);
+            var github = await gitHubClientFactory(HttpContext);
 
             var repositories = (await github.Repository.GetAllForCurrent())
                 .Select(r => new GitHubRepository
@@ -68,18 +65,14 @@ namespace MSBLOC.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CreateSecret([FromServices] IGitHubRepositoryContext repoContext, [FromQuery] long gitHubRepositoryId)
+        public async Task<IActionResult> CreateSecret([FromServices] IGitHubRepositoryContext repoContext, [FromServices] Func<HttpContext, Task<IGitHubClient>> gitHubClientFactory, [FromQuery] long gitHubRepositoryId)
         {
-            var gitHubClientFactory = new GitHubClientFactory();
-
-            var accessToken = await HttpContext.GetTokenAsync("access_token");
-
-            var github = gitHubClientFactory.CreateClient(accessToken);
-
-            var repository = await github.Repository.Get(gitHubRepositoryId);
+            var repoTask = (await gitHubClientFactory(HttpContext)).Repository.Get(gitHubRepositoryId);
 
             var filter = Builders<GitHubRepository>.Filter.Eq(nameof(GitHubRepository.Id), gitHubRepositoryId);
             var repo = await repoContext.Repositories.Find(filter).FirstOrDefaultAsync();
+
+            var repository = await repoTask;
 
             if (repo == null)
             {
