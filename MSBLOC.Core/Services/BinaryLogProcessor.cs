@@ -31,17 +31,20 @@ namespace MSBLOC.Core.Services
                 var buildEventArgs = record.Args;
                 if (buildEventArgs is ProjectStartedEventArgs startedEventArgs)
                 {
-                    var projectDetails = new ProjectDetails(buildEnvironmentCloneRoot, startedEventArgs.ProjectFile);
-                    solutionDetails.Add(projectDetails);
+                    if(!solutionDetails.ContainsKey(startedEventArgs.ProjectFile))
+                    { 
+                        var projectDetails = new ProjectDetails(buildEnvironmentCloneRoot, startedEventArgs.ProjectFile);
+                        solutionDetails.Add(projectDetails);
 
-                    var items = startedEventArgs.Items.Cast<DictionaryEntry>()
-                        .Where(entry => (string) entry.Key == "Compile")
-                        .Select(entry => entry.Value)
-                        .Cast<ITaskItem>()
-                        .Select(item => item.ItemSpec)
-                        .ToArray();
+                        var items = startedEventArgs.Items.Cast<DictionaryEntry>()
+                            .Where(entry => (string) entry.Key == "Compile")
+                            .Select(entry => entry.Value)
+                            .Cast<ITaskItem>()
+                            .Select(item => item.ItemSpec)
+                            .ToArray();
 
-                    projectDetails.AddItems(items);
+                        projectDetails.AddItems(items);
+                    }
                 }
 
                 if (buildEventArgs is BuildWarningEventArgs buildWarning)

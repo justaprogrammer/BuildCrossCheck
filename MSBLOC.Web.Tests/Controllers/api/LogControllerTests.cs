@@ -161,8 +161,8 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             var formData = new SubmissionData
             {
-                ApplicationName = "SomeApplicationName",
-                ApplicationOwner = "SomeApplicationOwner",
+                RepoName = "SomeApplicationName",
+                RepoOwner = "SomeApplicationOwner",
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot",
                 BinaryLogFile = string.Empty //Bad Data
@@ -207,8 +207,8 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             var formData = new SubmissionData
             {
-                ApplicationName = "SomeApplicationName",
-                ApplicationOwner = "SomeApplicationOwner",
+                RepoName = "SomeApplicationName",
+                RepoOwner = "SomeApplicationOwner",
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot",
                 BinaryLogFile = "someOtherFileName.txt" //Bad Data
@@ -261,8 +261,8 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             var formData = new SubmissionData
             {
-                ApplicationName = "SomeApplicationName",
-                ApplicationOwner = "SomeApplicationOwner",
+                RepoName = "SomeApplicationName",
+                RepoOwner = "SomeApplicationOwner",
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot"
             };
@@ -280,8 +280,8 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
             await msblocService.Received(1).SubmitAsync(Arg.Is<SubmissionData>(data =>
-                data.ApplicationOwner.Equals(formData.ApplicationOwner) &&
-                data.ApplicationName.Equals(formData.ApplicationName) && 
+                data.RepoOwner.Equals(formData.RepoOwner) &&
+                data.RepoName.Equals(formData.RepoName) && 
                 data.CloneRoot.Equals(formData.CloneRoot) &&
                 data.CommitSha.Equals(formData.CommitSha) &&
                 data.BinaryLogFile.Equals(receivedFiles.Keys.FirstOrDefault())));
