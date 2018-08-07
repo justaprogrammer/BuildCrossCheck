@@ -103,7 +103,7 @@ namespace MSBLOC.Web
             services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async repoOwner =>
             {
                 var tokenGenerator = s.GetService<ITokenGenerator>();
-                var gitHubClient = await s.GetService<IGitHuAppClientFactory>().CreateClient(tokenGenerator, repoOwner);
+                var gitHubClient = await s.GetService<IGitHubAppClientFactory>().CreateClient(tokenGenerator, repoOwner);
                 return new CheckRunSubmitter(gitHubClient.Check.Run, s.GetService<ILogger<CheckRunSubmitter>>());
             });
             
@@ -119,7 +119,7 @@ namespace MSBLOC.Web
             services.AddScoped<IMongoDatabase>(s => s.GetService<IMongoClient>().GetDatabase(Configuration["MongoDB:Database"]));
             services.AddScoped<IPersistantDataContext, PersistantDataContext>();
             services.AddScoped<IGitHubClientFactory, GitHubClientFactory>();
-            services.AddScoped<IGitHuAppClientFactory, GitHuAppClientFactory>();
+            services.AddScoped<IGitHubAppClientFactory, GitHubAppClientFactory>();
             services.AddScoped<IGitHubUserClientFactory, GitHubUserClientFactory>();
             services.AddScoped<IJsonWebTokenService, JsonWebTokenService>();
 

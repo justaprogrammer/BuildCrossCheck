@@ -6,7 +6,7 @@ using Octokit;
 
 namespace MSBLOC.Core.Services.Factories
 {
-    public class GitHuAppClientFactory : IGitHuAppClientFactory
+    public class GitHubAppClientFactory : IGitHubAppClientFactory
     {
         public async Task<IGitHubClient> CreateClient(ITokenGenerator tokenGenerator, string login)
         {

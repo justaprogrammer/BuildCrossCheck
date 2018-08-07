@@ -4,7 +4,7 @@ using Octokit;
 
 namespace MSBLOC.Core.Interfaces
 {
-    public interface IGitHuAppClientFactory
+    public interface IGitHubAppClientFactory
     {
         Task<IGitHubClient> CreateClient(ITokenGenerator tokenGenerator, string login);
         Task<IGitHubGraphQLClient> CreateGraphQLClient(ITokenGenerator tokenGenerator, string login);
