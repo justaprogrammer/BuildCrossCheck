@@ -37,9 +37,9 @@ namespace MSBLOC.Web.Controllers
             return SignOut(authProperties);
         }
 
-        public async Task<IActionResult> ListRepositories([FromServices] IPersistantDataContext dbContext, [FromServices] IGitHubClientFactory gitHubClientFactory)
+        public async Task<IActionResult> ListRepositories([FromServices] IPersistantDataContext dbContext, [FromServices] IGitHubUserClientFactory gitHubClientFactory)
         {
-            var github = await gitHubClientFactory.CreateClientForCurrentUser();
+            var github = await gitHubClientFactory.CreateClient();
 
             var repositories = (await github.Repository.GetAllForCurrent()).ToList();
 
@@ -56,9 +56,9 @@ namespace MSBLOC.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CreateToken([FromServices] IPersistantDataContext dbContext, [FromServices] IGitHubClientFactory gitHubClientFactory, [FromServices] IJsonWebTokenService tokenService, [FromQuery] long gitHubRepositoryId)
+        public async Task<IActionResult> CreateToken([FromServices] IPersistantDataContext dbContext, [FromServices] IGitHubUserClientFactory gitHubClientFactory, [FromServices] IJsonWebTokenService tokenService, [FromQuery] long gitHubRepositoryId)
         {
-            var github = await gitHubClientFactory.CreateClientForCurrentUser();
+            var github = await gitHubClientFactory.CreateClient();
 
             var repository = await github.Repository.Get(gitHubRepositoryId);
 
@@ -75,9 +75,9 @@ namespace MSBLOC.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> RevokeToken([FromServices] IPersistantDataContext dbContext, [FromServices] IGitHubClientFactory gitHubClientFactory, [FromQuery] Guid tokenId)
+        public async Task<IActionResult> RevokeToken([FromServices] IPersistantDataContext dbContext, [FromServices] IGitHubUserClientFactory gitHubClientFactory, [FromQuery] Guid tokenId)
         {
-            var github = await gitHubClientFactory.CreateClientForCurrentUser();
+            var github = await gitHubClientFactory.CreateClient();
 
             var repositories = (await github.Repository.GetAllForCurrent()).ToList();
 

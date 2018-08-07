@@ -120,6 +120,7 @@ namespace MSBLOC.Web
             services.AddScoped<IPersistantDataContext, PersistantDataContext>();
             services.AddScoped<IGitHubClientFactory, GitHubClientFactory>();
             services.AddScoped<IGitHuAppClientFactory, GitHuAppClientFactory>();
+            services.AddScoped<IGitHubUserClientFactory, GitHubUserClientFactory>();
             services.AddScoped<IJsonWebTokenService, JsonWebTokenService>();
 
             services.AddTransient<IMSBLOCService, MSBLOCService>();
