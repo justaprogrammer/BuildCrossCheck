@@ -22,7 +22,7 @@ namespace MSBLOC.Web.Tests.Services
             var optionsAccessor = Substitute.For<IOptions<GitHubAppOptions>>();
             optionsAccessor.Value.Returns(options);
 
-            var keySource = new OptionsPrivateKeySource(optionsAccessor);
+            var keySource = new GitHubAppOptionsPrivateKeySource(optionsAccessor);
 
             var reader = keySource.GetPrivateKeyReader();
 

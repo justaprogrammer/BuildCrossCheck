@@ -10,11 +10,11 @@ using MSBLOC.Web.Models;
 
 namespace MSBLOC.Web.Services
 {
-    public class OptionsPrivateKeySource : IPrivateKeySource
+    public class GitHubAppOptionsPrivateKeySource : IPrivateKeySource
     {
         private readonly IOptions<GitHubAppOptions> _optionsAccessor;
 
-        public OptionsPrivateKeySource(IOptions<GitHubAppOptions> optionsAccessor)
+        public GitHubAppOptionsPrivateKeySource(IOptions<GitHubAppOptions> optionsAccessor)
         {
             _optionsAccessor = optionsAccessor;
         }
