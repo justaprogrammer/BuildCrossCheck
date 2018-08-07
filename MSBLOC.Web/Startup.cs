@@ -21,6 +21,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Services;
+using MSBLOC.Core.Services.Factories;
 using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Contexts;
 using MSBLOC.Web.Interfaces;
@@ -84,7 +85,8 @@ namespace MSBLOC.Web
             services.AddSingleton<IPrivateKeySource, OptionsPrivateKeySource>();
             services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async repoOwner =>
             {
-                var gitHubClient = await s.GetService<IGitHubClientFactory>().CreateAppClient(repoOwner);
+                var tokenGenerator = s.GetService<ITokenGenerator>();
+                var gitHubClient = await s.GetService<IGitHuAppClientFactory>().CreateClient(tokenGenerator, repoOwner);
                 return new CheckRunSubmitter(gitHubClient.Check.Run, s.GetService<ILogger<CheckRunSubmitter>>());
             });
             
@@ -100,6 +102,7 @@ namespace MSBLOC.Web
             services.AddScoped<IMongoDatabase>(s => s.GetService<IMongoClient>().GetDatabase(Configuration["MongoDB:Database"]));
             services.AddScoped<IGitHubRepositoryContext, GitHubRepositoryContext>();
             services.AddScoped<IGitHubClientFactory, GitHubClientFactory>();
+            services.AddScoped<IGitHuAppClientFactory, GitHuAppClientFactory>();
 
             services.AddTransient<IMSBLOCService, MSBLOCService>();
 
