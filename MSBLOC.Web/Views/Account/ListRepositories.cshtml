@@ -1,5 +1,9 @@
-﻿@model IEnumerable<GitHubRepository>
-
+﻿@using Octokit
+@using AccessToken = MSBLOC.Web.Models.AccessToken
+@{
+    var tokenLookup = ViewBag.TokenLookup as ILookup<long, AccessToken>;
+    var repositories = ViewBag.Repositories as IEnumerable<Repository>;
+}
 <div class="row">
     <div class="col-md-12">
 
@@ -18,22 +22,31 @@
             </thead>
 
             <tbody>
-                @foreach (var repo in Model)
+                @foreach (var repo in repositories)
                 {
                     <tr>
                         <td><a href="@repo.Url" target="_blank">@repo.Name</a></td>
                         <td>
-                            @if (string.IsNullOrWhiteSpace(repo.Secret))
-                            {
-                                @Html.ActionLink("Create Secret", "CreateSecret", "Account", new
+                            <div>
+                                <a target="_blank" href="@Url.Action("CreateToken", "Account", new
+                                                         {
+                                                             gitHubRepositoryId = repo.Id
+                                                         })">Create Token</a>
+                            </div>
+                            <div>
+                                @if (tokenLookup.Contains(repo.Id) && tokenLookup[repo.Id].Any())
                                 {
-                                    gitHubRepositoryId = repo.Id
-                                })
-                            }
-                            else
-                            {
-                                @repo.Secret
-                            }
+                                    <ul>
+                                        @foreach (var token in tokenLookup[repo.Id])
+                                        {
+                                            <li>@Html.ActionLink(token.Id.ToString(), "RevokeToken", "Account", new
+                                                {
+                                                    tokenId = token.Id
+                                                })</li>
+                                        }
+                                    </ul>
+                                }
+                            </div>
                         </td>
                     </tr>
                 }

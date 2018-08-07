@@ -47,31 +47,47 @@ namespace MSBLOC.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = "GitHub";
-            })
-            .AddCookie(options =>
-            {
-                options.LoginPath = "/signin";
-                options.LogoutPath = "/signout";
-            })
-            .AddGitHub(options =>
-            {
-                options.ClientId = Configuration["GitHub:OAuth:ClientId"];
-                options.ClientSecret = Configuration["GitHub:OAuth:ClientSecret"];
-                options.Scope.Add("user:email");
-                options.Scope.Add("read:org");
+                {
+                    options.DefaultScheme = "PolicyScheme";
+                    options.DefaultChallengeScheme = "GitHub";
+                })
+                .AddPolicyScheme("PolicyScheme", "Policy Scheme", options =>
+                {
+                    options.ForwardDefaultSelector = context =>
+                    {
+                        if (context.Request.Path.StartsWithSegments("/api"))
+                        {
+                            // JWT bearer
+                            return "MSBLOC.Api.Scheme";
+                        }
+                        return CookieAuthenticationDefaults.AuthenticationScheme;
+                    };
+                })
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/signin";
+                    options.LogoutPath = "/signout";
+                })
+                .AddGitHub(options =>
+                {
+                    options.ClientId = Configuration["GitHub:OAuth:ClientId"];
+                    options.ClientSecret = Configuration["GitHub:OAuth:ClientSecret"];
+                    options.Scope.Add("user:email");
+                    options.Scope.Add("read:org");
 
-                options.ClaimActions.Clear();
-                options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-                options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
-                options.ClaimActions.MapJsonKey("urn:github:login", "login");
-                options.ClaimActions.MapJsonKey("urn:github:url", "html_url");
-                options.ClaimActions.MapJsonKey("urn:github:avatar", "avatar_url");
+                    options.ClaimActions.Clear();
+                    options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+                    options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
+                    options.ClaimActions.MapJsonKey("urn:github:login", "login");
+                    options.ClaimActions.MapJsonKey("urn:github:url", "html_url");
+                    options.ClaimActions.MapJsonKey("urn:github:avatar", "avatar_url");
 
-                options.SaveTokens = true;
-            });
+                    options.SaveTokens = true;
+                })
+                .AddScheme<JsonWebTokenAuthenticationOptions, JsonWebTokenAuthenticationHandler>("MSBLOC.Api.Scheme", options =>
+                {
+
+                });
 
             services.AddMvc().AddJsonOptions(options =>
             {
@@ -81,8 +97,9 @@ namespace MSBLOC.Web
             services.AddHttpContextAccessor();
 
             services.Configure<GitHubAppOptions>(Configuration.GetSection("GitHub:App"));
+            services.Configure<AuthOptions>(Configuration.GetSection("Auth"));
 
-            services.AddSingleton<IPrivateKeySource, OptionsPrivateKeySource>();
+            services.AddSingleton<IPrivateKeySource, GitHubAppOptionsPrivateKeySource>();
             services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async repoOwner =>
             {
                 var tokenGenerator = s.GetService<ITokenGenerator>();
@@ -100,9 +117,10 @@ namespace MSBLOC.Web
             });
             services.AddScoped<IMongoClient>(s => new MongoClient(Configuration["MongoDB:ConnectionString"]));
             services.AddScoped<IMongoDatabase>(s => s.GetService<IMongoClient>().GetDatabase(Configuration["MongoDB:Database"]));
-            services.AddScoped<IGitHubRepositoryContext, GitHubRepositoryContext>();
+            services.AddScoped<IPersistantDataContext, PersistantDataContext>();
             services.AddScoped<IGitHubClientFactory, GitHubClientFactory>();
             services.AddScoped<IGitHuAppClientFactory, GitHuAppClientFactory>();
+            services.AddScoped<IJsonWebTokenService, JsonWebTokenService>();
 
             services.AddTransient<IMSBLOCService, MSBLOCService>();
 
