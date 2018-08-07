@@ -21,6 +21,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Services;
+using MSBLOC.Core.Services.Factories;
 using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Contexts;
 using MSBLOC.Web.Interfaces;
@@ -30,9 +31,6 @@ using MSBLOC.Web.Util;
 using Newtonsoft.Json.Linq;
 using Octokit;
 using Swashbuckle.AspNetCore.Swagger;
-using GitHubClientFactory = MSBLOC.Web.Services.GitHubClientFactory;
-using ICheckRunSubmitter = MSBLOC.Core.Interfaces.ICheckRunSubmitter;
-using IGitHubClientFactory = MSBLOC.Web.Interfaces.IGitHubClientFactory;
 
 namespace MSBLOC.Web
 {
@@ -104,7 +102,8 @@ namespace MSBLOC.Web
             services.AddSingleton<IPrivateKeySource, GitHubAppOptionsPrivateKeySource>();
             services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async repoOwner =>
             {
-                var gitHubClient = await s.GetService<IGitHubClientFactory>().CreateAppClient(repoOwner);
+                var tokenGenerator = s.GetService<ITokenGenerator>();
+                var gitHubClient = await s.GetService<IGitHubAppClientFactory>().CreateClient(tokenGenerator, repoOwner);
                 return new CheckRunSubmitter(gitHubClient.Check.Run, s.GetService<ILogger<CheckRunSubmitter>>());
             });
             
@@ -120,6 +119,8 @@ namespace MSBLOC.Web
             services.AddScoped<IMongoDatabase>(s => s.GetService<IMongoClient>().GetDatabase(Configuration["MongoDB:Database"]));
             services.AddScoped<IPersistantDataContext, PersistantDataContext>();
             services.AddScoped<IGitHubClientFactory, GitHubClientFactory>();
+            services.AddScoped<IGitHubAppClientFactory, GitHubAppClientFactory>();
+            services.AddScoped<IGitHubUserClientFactory, GitHubUserClientFactory>();
             services.AddScoped<IJsonWebTokenService, JsonWebTokenService>();
 
             services.AddTransient<IMSBLOCService, MSBLOCService>();
