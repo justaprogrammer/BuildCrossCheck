@@ -16,6 +16,7 @@ using Activity = System.Diagnostics.Activity;
 
 namespace MSBLOC.Web.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class HomeController : Controller
     {
         public IActionResult Index()

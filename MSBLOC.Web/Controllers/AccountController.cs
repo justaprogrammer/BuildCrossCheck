@@ -20,6 +20,7 @@ using AccessToken = MSBLOC.Web.Models.AccessToken;
 namespace MSBLOC.Web.Controllers
 {
     [Authorize]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class AccountController : Controller
     {
         [HttpGet("~/signin")]

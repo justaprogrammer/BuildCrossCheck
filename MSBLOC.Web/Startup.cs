@@ -1,19 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Security.Authentication;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using GitHubJwt;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -28,8 +22,6 @@ using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using MSBLOC.Web.Services;
 using MSBLOC.Web.Util;
-using Newtonsoft.Json.Linq;
-using Octokit;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace MSBLOC.Web
@@ -49,7 +41,6 @@ namespace MSBLOC.Web
             services.AddAuthentication(options =>
                 {
                     options.DefaultScheme = "PolicyScheme";
-                    options.DefaultChallengeScheme = "GitHub";
                 })
                 .AddPolicyScheme("PolicyScheme", "Policy Scheme", options =>
                 {
@@ -58,7 +49,7 @@ namespace MSBLOC.Web
                         if (context.Request.Path.StartsWithSegments("/api"))
                         {
                             // JWT bearer
-                            return "MSBLOC.Api.Scheme";
+                            return JsonWebTokenAuthenticationHandler.SchemeName;
                         }
                         return CookieAuthenticationDefaults.AuthenticationScheme;
                     };
@@ -67,6 +58,7 @@ namespace MSBLOC.Web
                 {
                     options.LoginPath = "/signin";
                     options.LogoutPath = "/signout";
+                    options.ForwardChallenge = "GitHub";
                 })
                 .AddGitHub(options =>
                 {
@@ -84,9 +76,10 @@ namespace MSBLOC.Web
 
                     options.SaveTokens = true;
                 })
-                .AddScheme<JsonWebTokenAuthenticationOptions, JsonWebTokenAuthenticationHandler>("MSBLOC.Api.Scheme", options =>
+                .AddScheme<JsonWebTokenAuthenticationOptions, JsonWebTokenAuthenticationHandler>(JsonWebTokenAuthenticationHandler.SchemeName, options =>
                 {
-
+                    options.ForwardChallenge = JsonWebTokenAuthenticationHandler.SchemeName;
+                    options.ForwardAuthenticate = JsonWebTokenAuthenticationHandler.SchemeName;
                 });
 
             services.AddMvc().AddJsonOptions(options =>
@@ -129,6 +122,20 @@ namespace MSBLOC.Web
             {
                 c.SwaggerDoc("0.0.1", new Info { Title = "MSBLOC Web API", Version = "0.0.1" });
                 c.OperationFilter<MultiPartFormBindingAttribute.MultiPartFormBindingFilter>();
+                //c.OperationFilter<SecurityRequirementsOperationFilter>();
+
+                c.AddSecurityDefinition("Bearer", new ApiKeyScheme
+                {
+                    Description = "Standard Authorization header using the Bearer scheme. Example: \"bearer {token}\"",
+                    In = "header",
+                    Name = "Authorization",
+                    Type = "apiKey"
+                });
+
+                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
+                {
+                    {"Bearer", new string[] { }},
+                });
             });
         }
 
