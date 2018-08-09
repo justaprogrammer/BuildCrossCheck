@@ -96,7 +96,7 @@ namespace MSBLOC.Web
             services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async repoOwner =>
             {
                 var tokenGenerator = s.GetService<ITokenGenerator>();
-                var gitHubClient = await s.GetService<IGitHubAppClientFactory>().CreateClient(tokenGenerator, repoOwner);
+                var gitHubClient = await s.GetService<IGitHubAppClientFactory>().CreateAppClientForLogin(tokenGenerator, repoOwner);
                 return new CheckRunSubmitter(gitHubClient.Check.Run, s.GetService<ILogger<CheckRunSubmitter>>());
             });
             

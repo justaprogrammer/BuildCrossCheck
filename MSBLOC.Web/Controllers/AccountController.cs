@@ -42,6 +42,8 @@ namespace MSBLOC.Web.Controllers
         {
             var github = await gitHubClientFactory.CreateClient();
 
+            InstallationsResponse installations = await github.GitHubApps.GetAllInstallationsForUser();
+
             var repositories = (await github.Repository.GetAllForCurrent()).ToList();
 
             var filter = Builders<AccessToken>.Filter.In(nameof(AccessToken.GitHubRepositoryId), repositories.Select(r => r.Id));
