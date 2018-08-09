@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
-using MSBLOC.Core.Services;
 using MSBLOC.Web.Interfaces;
-using MSBLOC.Web.Models;
 using Octokit;
 using AccessToken = MSBLOC.Web.Models.AccessToken;
 
@@ -38,19 +32,38 @@ namespace MSBLOC.Web.Controllers
             return SignOut(authProperties);
         }
 
-        public async Task<IActionResult> ListRepositories([FromServices] IPersistantDataContext dbContext, [FromServices] IGitHubUserClientFactory gitHubClientFactory)
+        public async Task<IActionResult> ListRepositories(
+            [FromServices] IPersistantDataContext dbContext, 
+            [FromServices] ITokenGenerator tokenGenerator, 
+            [FromServices] IGitHubAppClientFactory gitHubAppClientFactory, 
+            [FromServices] IGitHubUserClientFactory gitHubUserClientFactory)
         {
-            var github = await gitHubClientFactory.CreateClient();
+            var gitHubAppClient = gitHubAppClientFactory.CreateAppClient(tokenGenerator);
 
-            InstallationsResponse installations = await github.GitHubApps.GetAllInstallationsForUser();
+            var userClient = await gitHubUserClientFactory.CreateClient();
+            var gitHubAppsUserClient = userClient.GitHubApps;
 
-            var repositories = (await github.Repository.GetAllForCurrent()).ToList();
+            InstallationsResponse installations = await gitHubAppsUserClient.GetAllInstallationsForUser();
+            var repositories = new List<Repository>();
+            foreach (var installation in installations.Installations)
+            {
+                switch (installation.TargetType.Value)
+                {
+                    case AccountType.Organization:
+                        repositories.AddRange(await userClient.Repository.GetAllForOrg(installation.Account.Login));
+                        break;
 
-            var filter = Builders<AccessToken>.Filter.In(nameof(AccessToken.GitHubRepositoryId), repositories.Select(r => r.Id));
+                    case AccountType.User:
+                    case AccountType.Bot:
+                        throw new NotSupportedException();
 
-            var issuedAccessTokens = await dbContext.AccessTokens.Find(filter).ToListAsync();
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
 
-            var tokenLookup = issuedAccessTokens.ToLookup(t => t.GitHubRepositoryId, r => r);
+            var tokenLookup = new Dictionary<long, AccessToken>()
+                .ToLookup(pair => pair.Key, pair => pair.Value);
 
             ViewBag.TokenLookup = tokenLookup;
             ViewBag.Repositories = repositories;
