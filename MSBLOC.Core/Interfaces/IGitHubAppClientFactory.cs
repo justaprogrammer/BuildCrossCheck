@@ -6,7 +6,9 @@ namespace MSBLOC.Core.Interfaces
 {
     public interface IGitHubAppClientFactory
     {
-        Task<IGitHubClient> CreateClient(ITokenGenerator tokenGenerator, string login);
-        Task<IGitHubGraphQLClient> CreateGraphQLClient(ITokenGenerator tokenGenerator, string login);
+        Task<IGitHubClient> CreateAppClientForLogin(ITokenGenerator tokenGenerator, string login);
+        Task<IGitHubGraphQLClient> CreateAppGraphQLClientForLogin(ITokenGenerator tokenGenerator, string login);
+        GitHubClient CreateAppClient(ITokenGenerator tokenGenerator);
+        IGitHubGraphQLClient CreateAppGraphQLClient(ITokenGenerator tokenGenerator);
     }
 }

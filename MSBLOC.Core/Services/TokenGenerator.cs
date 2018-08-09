@@ -22,6 +22,8 @@ namespace MSBLOC.Core.Services
 
         public string GetToken(int expirationSeconds = 600)
         {
+            var readToEnd = _privateKeySource.GetPrivateKeyReader().ReadToEnd();
+
             var generator = new GitHubJwtFactory(
                 _privateKeySource, 
                 new GitHubJwtFactoryOptions

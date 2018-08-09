@@ -1,28 +1,23 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using GitHubJwt;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.IntegrationTests.Utilities;
-using MSBLOC.Core.Model;
 using MSBLOC.Core.Services;
-using MSBLOC.Core.Services.Factories;
 using MSBLOC.Core.Tests.Util;
-using Octokit;
 using Xunit.Abstractions;
 
-namespace MSBLOC.Core.IntegrationTests.Services
+namespace MSBLOC.Core.IntegrationTests.Concepts
 {
-    public class SubmitterIntegrationTests
+    public class SubmissionIntegrationTests : IntegrationTestsBase
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly ILogger<SubmitterIntegrationTests> _logger;
+        private readonly ILogger<SubmissionIntegrationTests> _logger;
 
-        public SubmitterIntegrationTests(ITestOutputHelper testOutputHelper)
+        public SubmissionIntegrationTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
-            _logger = TestLogger.Create<SubmitterIntegrationTests>(testOutputHelper);
+            _logger = TestLogger.Create<SubmissionIntegrationTests>(testOutputHelper);
         }
 
         [IntegrationTest]
@@ -45,11 +40,6 @@ namespace MSBLOC.Core.IntegrationTests.Services
 
         private async Task AssertSubmit(string file, string sha)
         {
-            var gitHubAppId = Helper.GitHubAppId;
-            var integrationTestAppOwner = Helper.IntegrationTestAppOwner;
-            var integrationTestAppName = Helper.IntegrationTestAppName;
-            var privateKeyEnvironmentVariableName = Helper.GitHubAppPrivateKeyEnvironmentVariable;
-
             var resourcePath = TestUtils.GetResourcePath(file);
             var cloneRoot = @"C:\projects\testconsoleapp1\";
 
@@ -57,16 +47,13 @@ namespace MSBLOC.Core.IntegrationTests.Services
             var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
             var buildDetails = parser.ProcessLog(resourcePath, cloneRoot);
 
-            var privateKeySource = new EnvironmentVariablePrivateKeySource(privateKeyEnvironmentVariableName);
-            var tokenGenerator = new TokenGenerator(gitHubAppId, privateKeySource);
-            var gitHubClientFactory = new GitHubAppClientFactory();
-            var gitHubClient = await gitHubClientFactory.CreateAppClientForLogin(tokenGenerator, integrationTestAppOwner);
+            var gitHubClient = await CreateGitHubAppClientForLogin(TestAppOwner);
             var checkRunsClient = gitHubClient.Check.Run;
 
             var submitter = new CheckRunSubmitter(checkRunsClient);
             var checkRun = await submitter.SubmitCheckRun(buildDetails: buildDetails,
-                owner: integrationTestAppOwner,
-                name: integrationTestAppName,
+                owner: TestAppOwner,
+                name: TestAppRepo,
                 headSha: sha,
                 checkRunName: "MSBuildLog Analyzer",
                 checkRunTitle: "MSBuildLog Analysis",
