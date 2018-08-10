@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using MSBLOC.Core.Model;
+using MSBLOC.Core.Extensions;
 using Xunit;
 
 namespace MSBLOC.Core.Tests.Extensions

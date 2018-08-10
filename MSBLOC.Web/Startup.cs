@@ -114,6 +114,7 @@ namespace MSBLOC.Web
             services.AddScoped<IGitHubClientFactory, GitHubClientFactory>();
             services.AddScoped<IGitHubAppClientFactory, GitHubAppClientFactory>();
             services.AddScoped<IGitHubUserClientFactory, GitHubUserClientFactory>();
+            services.AddScoped<IGitHubUserModelService, GitHubUserModelService>();
             services.AddScoped<IJsonWebTokenService, JsonWebTokenService>();
 
             services.AddTransient<IMSBLOCService, MSBLOCService>();

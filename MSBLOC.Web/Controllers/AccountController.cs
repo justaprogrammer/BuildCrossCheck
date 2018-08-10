@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -8,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Web.Interfaces;
-using Octokit;
 using AccessToken = MSBLOC.Web.Models.AccessToken;
 
 namespace MSBLOC.Web.Controllers
@@ -27,27 +25,17 @@ namespace MSBLOC.Web.Controllers
         [HttpGet("~/signout"), HttpPost("~/signout")]
         public async Task<IActionResult> SignOut()
         {
-            var authProperties = new AuthenticationProperties {RedirectUri = "/"};
+            var authProperties = new AuthenticationProperties { RedirectUri = "/" };
             await HttpContext.SignOutAsync(authProperties);
             return SignOut(authProperties);
         }
 
         public async Task<IActionResult> ListRepositories(
-            [FromServices] IPersistantDataContext dbContext, 
-            [FromServices] IGitHubUserClientFactory gitHubUserClientFactory)
+            [FromServices] IPersistantDataContext dbContext,
+            [FromServices] IGitHubUserModelService gitHubUserModelService)
         {
-            var userClient = await gitHubUserClientFactory.CreateClient();
-            var gitHubAppsUserClient = userClient.GitHubApps;
-            var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installations;
-
-            var repositories = new List<Repository>();
-
-            var installationsResponse = await gitHubAppsUserClient.GetAllInstallationsForUser();
-            foreach (var installation in installationsResponse.Installations)
-            {
-                var repositoriesResponse = await gitHubAppsInstallationsUserClient.GetAllRepositoriesForUser(installation.Id);
-                repositories.AddRange(repositoriesResponse.Repositories);
-            }
+            var userInstallations = await gitHubUserModelService.GetUserInstallations();
+            var repositories = userInstallations.SelectMany(installation => installation.Repositories).ToArray();
 
             var filter = Builders<AccessToken>.Filter.In(nameof(AccessToken.GitHubRepositoryId), repositories.Select(r => r.Id));
 
@@ -62,12 +50,16 @@ namespace MSBLOC.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CreateToken([FromServices] IPersistantDataContext dbContext, [FromServices] IGitHubUserClientFactory gitHubClientFactory, [FromServices] IJsonWebTokenService tokenService, [FromQuery] long gitHubRepositoryId)
+        public async Task<IActionResult> CreateToken(
+            [FromServices] IPersistantDataContext dbContext,
+            [FromServices] IGitHubUserModelService gitHubUserModelService,
+            [FromServices] IJsonWebTokenService tokenService,
+            [FromQuery] long installationId,
+            [FromQuery] long repositoryId)
         {
-            var github = await gitHubClientFactory.CreateClient();
 
-            var repository = await github.Repository.Get(gitHubRepositoryId);
-
+            var userInstallation = await gitHubUserModelService.GetUserInstallation(installationId);
+            var repository = userInstallation.Repositories.FirstOrDefault(userRepository => userRepository.Id == repositoryId);
             if (repository == null)
             {
                 return NotFound();
@@ -81,11 +73,13 @@ namespace MSBLOC.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> RevokeToken([FromServices] IPersistantDataContext dbContext, [FromServices] IGitHubUserClientFactory gitHubClientFactory, [FromQuery] Guid tokenId)
+        public async Task<IActionResult> RevokeToken(
+            [FromServices] IPersistantDataContext dbContext,
+            [FromServices] IGitHubUserModelService gitHubUserModelService, 
+            [FromQuery] Guid tokenId)
         {
-            var github = await gitHubClientFactory.CreateClient();
-
-            var repositories = (await github.Repository.GetAllForCurrent()).ToList();
+            var userInstallations = await gitHubUserModelService.GetUserInstallations();
+            var repositories = userInstallations.SelectMany(installation => installation.Repositories).ToArray();
 
             var filter = Builders<AccessToken>.Filter.Eq(nameof(AccessToken.Id), tokenId);
 

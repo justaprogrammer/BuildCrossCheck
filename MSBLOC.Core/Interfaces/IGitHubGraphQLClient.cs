@@ -1,4 +1,4 @@
-namespace MSBLOC.Core.Services
+namespace MSBLOC.Core.Interfaces
 {
     public interface IGitHubGraphQLClient
     {
