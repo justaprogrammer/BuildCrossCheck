@@ -14,7 +14,7 @@ build_script:
     
     if (! $?) {
       echo "Build Error"
-      Push-AppveyorArtifact output.binlog -Type log
+      Push-AppveyorArtifact output.binlog -Type File
 
       if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
       {
@@ -33,6 +33,7 @@ after_build:
 artifacts:
     - path: output.binlog
       name: log
+      type: File
     - path: dist
       name: dist.web
       type: WebDeployPackage
