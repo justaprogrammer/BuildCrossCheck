@@ -12,6 +12,9 @@ namespace MSBLOC.Core.Services
 {
     public class CheckRunSubmitter : ICheckRunSubmitter
     {
+        /// <remarks>We can only send 50 annotations per rest call.</remarks>
+        private const int AnnotationBatchSize = 50;
+
         private ICheckRunsClient CheckRunsClient { get; }
         private ILogger<CheckRunSubmitter> Logger { get; }
 
@@ -28,51 +31,74 @@ namespace MSBLOC.Core.Services
             string checkRunName, string checkRunTitle, string checkRunSummary,
             DateTimeOffset startedAt, DateTimeOffset completedAt)
         {
-            var newCheckRunAnnotations = buildDetails.Annotations.Select(annotation =>
+            using (Logger.BeginScope(new
             {
-                var warningLevel = GetCheckWarningLevel(annotation.AnnotationWarningLevel);
-                var blobHref = BlobHref(owner, name, headSha, annotation.Filename);
-                var newCheckRunAnnotation = new NewCheckRunAnnotation(annotation.Filename, blobHref, annotation.LineNumber, annotation.EndLine, warningLevel, annotation.Message)
+                Owner = owner,
+                Name = name,
+                HeadSha = headSha,
+                CheckRunName = checkRunName
+            }))
+            {
+                var newCheckRunAnnotations = buildDetails.Annotations.Select(annotation =>
                 {
-                    Title = annotation.Title
-                };
+                    var warningLevel = GetCheckWarningLevel(annotation.AnnotationWarningLevel);
+                    var blobHref = BlobHref(owner, name, headSha, annotation.Filename);
+                    var newCheckRunAnnotation = new NewCheckRunAnnotation(annotation.Filename, blobHref,
+                        annotation.LineNumber, annotation.EndLine, warningLevel, annotation.Message)
+                    {
+                        Title = annotation.Title
+                    };
 
-                return newCheckRunAnnotation;
-            }).Batch(50).ToArray();
+                    return newCheckRunAnnotation;
+                }).Batch(AnnotationBatchSize).ToArray();
 
-            var checkConclusion = buildDetails.Annotations
-                .Any(annotation => annotation.AnnotationWarningLevel == AnnotationWarningLevel.Failure) ? CheckConclusion.Failure : CheckConclusion.Success;
+                Logger.LogDebug("BuildDetails contains {0} annotations. Will be broken up in {1} batches of {2}",
+                    buildDetails.Annotations.Count, newCheckRunAnnotations.Length, AnnotationBatchSize);
 
-            var newCheckRun = new NewCheckRun(checkRunName, headSha)
-            {
-                Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
-                {
-                    Annotations = newCheckRunAnnotations.FirstOrDefault()?.ToArray()
-                },
-                Status = CheckStatus.Completed,
-                StartedAt = startedAt,
-                CompletedAt = completedAt,
-                Conclusion = checkConclusion
-            };
+                var checkConclusion = buildDetails.Annotations
+                    .Any(annotation => annotation.AnnotationWarningLevel == AnnotationWarningLevel.Failure)
+                    ? CheckConclusion.Failure
+                    : CheckConclusion.Success;
 
-            var checkRun = await CheckRunsClient.Create(owner, name, newCheckRun);
+                Logger.LogTrace("BuildDetails Conclusion {0}", checkConclusion);
 
-            foreach (var newCheckRunAnnotation in newCheckRunAnnotations.Skip(1))
-            {
-                await CheckRunsClient.Update(owner, name, checkRun.Id, new CheckRunUpdate()
+                var newCheckRun = new NewCheckRun(checkRunName, headSha)
                 {
                     Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
                     {
-                        Annotations = newCheckRunAnnotation.ToArray()
+                        Annotations = newCheckRunAnnotations.FirstOrDefault()?.ToArray()
                     },
                     Status = CheckStatus.Completed,
                     StartedAt = startedAt,
                     CompletedAt = completedAt,
                     Conclusion = checkConclusion
-                });
-            }
+                };
 
-            return checkRun;
+                var checkRun = await CheckRunsClient.Create(owner, name, newCheckRun);
+
+                Logger.LogTrace("CheckRun Created with {0} annotations.", newCheckRun.Output?.Annotations?.Count());
+
+                foreach (var newCheckRunAnnotation in newCheckRunAnnotations.Skip(1))
+                {
+                    var annotations = newCheckRunAnnotation.ToArray();
+                    await CheckRunsClient.Update(owner, name, checkRun.Id, new CheckRunUpdate()
+                    {
+                        Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
+                        {
+                            Annotations = annotations
+                        },
+                        Status = CheckStatus.Completed,
+                        StartedAt = startedAt,
+                        CompletedAt = completedAt,
+                        Conclusion = checkConclusion
+                    });
+                    Logger.LogTrace("{0} annotation added to CheckRun.", annotations.Count());
+                }
+
+                Logger.LogInformation("CheckRun submitted sucessfully");
+
+                return checkRun;
+            }
         }
 
         private static string BlobHref(string owner, string repository, string sha, string file)
