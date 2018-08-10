@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using MSBLOC.Infrastructure.Models;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using Newtonsoft.Json.Linq;
@@ -32,7 +33,7 @@ namespace MSBLOC.Web.Services
                 Id = Guid.NewGuid(),
                 GitHubRepositoryId = githubRepositoryId,
                 IssuedAt = DateTimeOffset.UtcNow,
-                IssuedTo = user.Claims.First(c => c.Type.Equals(ClaimTypes.Email)).Value
+                IssuedTo = user.Claims.First(c => c.Type.Equals(ClaimTypes.NameIdentifier)).Value
             };
 
             var payload = new JObject()
@@ -41,7 +42,7 @@ namespace MSBLOC.Web.Services
                 { JwtRegisteredClaimNames.Jti, accessToken.Id },
                 { JwtRegisteredClaimNames.Iat, accessToken.IssuedAt.ToUnixTimeSeconds() },
                 { "urn:msbloc:repositoryId", githubRepositoryId },
-                { JwtRegisteredClaimNames.Email, accessToken.IssuedTo },
+                { JwtRegisteredClaimNames.Sub, accessToken.IssuedTo },
             };
 
             var accessTokenString = tokenHandler.CreateToken(payload, signingCredentials);

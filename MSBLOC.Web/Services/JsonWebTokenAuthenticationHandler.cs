@@ -37,10 +37,10 @@ namespace MSBLOC.Web.Services
                 return AuthenticateResult.Fail("Invalid Authorization Header.");
             }
 
-            var bearer = authorizationHeader.Substring("Bearer ".Length);
-
             try
             {
+                var bearer = authorizationHeader.Substring("Bearer ".Length);
+
                 var tokenValidationResult = _jsonWebTokenService.ValidateToken(bearer);
 
                 var jwt = tokenValidationResult.SecurityToken as JsonWebToken;

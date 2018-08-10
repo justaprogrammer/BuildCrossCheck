@@ -12,12 +12,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Services.Factories;
+using MSBLOC.Infrastructure.Extensions;
 using MSBLOC.Web.Attributes;
-using MSBLOC.Web.Contexts;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using MSBLOC.Web.Services;
@@ -89,6 +88,8 @@ namespace MSBLOC.Web
 
             services.AddHttpContextAccessor();
 
+            services.AddInfrastructure(Configuration["MongoDB:ConnectionString"], Configuration["MongoDB:Database"]);
+
             services.Configure<GitHubAppOptions>(Configuration.GetSection("GitHub:App"));
             services.Configure<AuthOptions>(Configuration.GetSection("Auth"));
 
@@ -108,9 +109,6 @@ namespace MSBLOC.Web
                 var privateKeySource = s.GetService<IPrivateKeySource>();
                 return new TokenGenerator(gitHubAppId, privateKeySource, s.GetService<ILogger<TokenGenerator>>());
             });
-            services.AddScoped<IMongoClient>(s => new MongoClient(Configuration["MongoDB:ConnectionString"]));
-            services.AddScoped<IMongoDatabase>(s => s.GetService<IMongoClient>().GetDatabase(Configuration["MongoDB:Database"]));
-            services.AddScoped<IPersistantDataContext, PersistantDataContext>();
             services.AddScoped<IGitHubClientFactory, GitHubClientFactory>();
             services.AddScoped<IGitHubAppClientFactory, GitHubAppClientFactory>();
             services.AddScoped<IGitHubUserClientFactory, GitHubUserClientFactory>();

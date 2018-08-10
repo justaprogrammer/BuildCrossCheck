@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Claims;
 using Microsoft.IdentityModel.JsonWebTokens;
-using MSBLOC.Web.Models;
+using MSBLOC.Infrastructure.Models;
 
 namespace MSBLOC.Web.Interfaces
 {

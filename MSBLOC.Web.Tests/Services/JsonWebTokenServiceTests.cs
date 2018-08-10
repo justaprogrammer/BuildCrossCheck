@@ -47,12 +47,12 @@ namespace MSBLOC.Web.Tests.Services
             optionsAccessor.Value.Returns(options);
 
             var githubRepositoryId = _faker.Random.Long();
-            var email = _faker.Internet.Email();
+            var githubUserId = _faker.Random.Long();
 
             var user = Substitute.For<ClaimsPrincipal>();
             user.Claims.Returns(new []
             {
-                new Claim(ClaimTypes.Email, email)
+                new Claim(ClaimTypes.NameIdentifier, githubUserId.ToString())
             });
 
             var service = new JsonWebTokenService(optionsAccessor);
@@ -63,7 +63,7 @@ namespace MSBLOC.Web.Tests.Services
             var jsonWebToken = tokenValidationResult?.SecurityToken as JsonWebToken;
 
             jsonWebToken.Should().NotBeNull();
-            jsonWebToken.Payload.Value<string>(JwtRegisteredClaimNames.Email).Should().Be(email);
+            jsonWebToken.Payload.Value<long>(JwtRegisteredClaimNames.Sub).Should().Be(githubUserId);
             jsonWebToken.Payload.Value<string>(JwtRegisteredClaimNames.Aud).Should().Be("MSBLOC.Api");
             jsonWebToken.Payload.Value<string>(JwtRegisteredClaimNames.Jti).Should().Be(accessToken.Id.ToString());
             DateTimeOffset.FromUnixTimeSeconds(jsonWebToken.Payload.Value<int>(JwtRegisteredClaimNames.Iat)).Should().BeCloseTo(DateTimeOffset.UtcNow, 1000);
@@ -78,12 +78,12 @@ namespace MSBLOC.Web.Tests.Services
             optionsAccessor.Value.Returns(options);
 
             var githubRepositoryId = _faker.Random.Long();
-            var email = _faker.Internet.Email();
+            var githubUserId = _faker.Random.Long();
 
             var user = Substitute.For<ClaimsPrincipal>();
             user.Claims.Returns(new[]
             {
-                new Claim(ClaimTypes.Email, email)
+                new Claim(ClaimTypes.NameIdentifier, githubUserId.ToString())
             });
 
             var service = new JsonWebTokenService(optionsAccessor);

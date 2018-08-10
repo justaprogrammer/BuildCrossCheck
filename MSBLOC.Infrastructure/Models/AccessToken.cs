@@ -6,7 +6,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
 
-namespace MSBLOC.Web.Models
+namespace MSBLOC.Infrastructure.Models
 {
     public class AccessToken
     {

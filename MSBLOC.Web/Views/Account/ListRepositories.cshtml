@@ -1,5 +1,5 @@
 ﻿@using Octokit
-@using AccessToken = MSBLOC.Web.Models.AccessToken
+@using AccessToken = MSBLOC.Infrastructure.Models.AccessToken
 @{
     var tokenLookup = ViewBag.TokenLookup as ILookup<long, AccessToken>;
     var repositories = ViewBag.Repositories as IEnumerable<Repository>;
