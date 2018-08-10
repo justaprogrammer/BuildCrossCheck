@@ -51,6 +51,13 @@ namespace MSBLOC.Infrastructure.Repositories
             return await Entities.Find(filter).FirstAsync();
         }
 
+        public async Task<T> GetAsync(TField value)
+        {
+            var filter = Builders<T>.Filter.Eq(_idExpression, value);
+
+            return await Entities.Find(filter).FirstAsync();
+        }
+
         public Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> expression)
         {
             var filter = Builders<T>.Filter.Where(expression);
