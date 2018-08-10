@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
-using MSBLOC.Core.Services;
 using MSBLOC.Web.Interfaces;
-using MSBLOC.Web.Models;
 using Octokit;
 using AccessToken = MSBLOC.Web.Models.AccessToken;
 
@@ -38,11 +32,22 @@ namespace MSBLOC.Web.Controllers
             return SignOut(authProperties);
         }
 
-        public async Task<IActionResult> ListRepositories([FromServices] IPersistantDataContext dbContext, [FromServices] IGitHubUserClientFactory gitHubClientFactory)
+        public async Task<IActionResult> ListRepositories(
+            [FromServices] IPersistantDataContext dbContext, 
+            [FromServices] IGitHubUserClientFactory gitHubUserClientFactory)
         {
-            var github = await gitHubClientFactory.CreateClient();
+            var userClient = await gitHubUserClientFactory.CreateClient();
+            var gitHubAppsUserClient = userClient.GitHubApps;
+            var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installations;
 
-            var repositories = (await github.Repository.GetAllForCurrent()).ToList();
+            var repositories = new List<Repository>();
+
+            var installationsResponse = await gitHubAppsUserClient.GetAllInstallationsForUser();
+            foreach (var installation in installationsResponse.Installations)
+            {
+                var repositoriesResponse = await gitHubAppsInstallationsUserClient.GetAllRepositoriesForUser(installation.Id);
+                repositories.AddRange(repositoriesResponse.Repositories);
+            }
 
             var filter = Builders<AccessToken>.Filter.In(nameof(AccessToken.GitHubRepositoryId), repositories.Select(r => r.Id));
 
