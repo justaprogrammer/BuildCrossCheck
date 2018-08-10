@@ -88,7 +88,7 @@ namespace MSBLOC.Web
 
             services.AddHttpContextAccessor();
 
-            services.AddInfrastructure(Configuration["MongoDB:ConnectionString"], Configuration["MongoDB:Database"]);
+            services.AddInfrastructure(Configuration.GetSection("Infrastructure"));
 
             services.Configure<GitHubAppOptions>(Configuration.GetSection("GitHub:App"));
             services.Configure<AuthOptions>(Configuration.GetSection("Auth"));
