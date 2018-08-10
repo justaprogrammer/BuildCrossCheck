@@ -34,36 +34,26 @@ namespace MSBLOC.Web.Controllers
 
         public async Task<IActionResult> ListRepositories(
             [FromServices] IPersistantDataContext dbContext, 
-            [FromServices] ITokenGenerator tokenGenerator, 
-            [FromServices] IGitHubAppClientFactory gitHubAppClientFactory, 
             [FromServices] IGitHubUserClientFactory gitHubUserClientFactory)
         {
-            var gitHubAppClient = gitHubAppClientFactory.CreateAppClient(tokenGenerator);
-
             var userClient = await gitHubUserClientFactory.CreateClient();
             var gitHubAppsUserClient = userClient.GitHubApps;
+            var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installations;
 
-            InstallationsResponse installations = await gitHubAppsUserClient.GetAllInstallationsForUser();
             var repositories = new List<Repository>();
-            foreach (var installation in installations.Installations)
+
+            var installationsResponse = await gitHubAppsUserClient.GetAllInstallationsForUser();
+            foreach (var installation in installationsResponse.Installations)
             {
-                switch (installation.TargetType.Value)
-                {
-                    case AccountType.Organization:
-                        repositories.AddRange(await userClient.Repository.GetAllForOrg(installation.Account.Login));
-                        break;
-
-                    case AccountType.User:
-                    case AccountType.Bot:
-                        throw new NotSupportedException();
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                var repositoriesResponse = await gitHubAppsInstallationsUserClient.GetAllRepositoriesForUser(installation.Id);
+                repositories.AddRange(repositoriesResponse.Repositories);
             }
 
-            var tokenLookup = new Dictionary<long, AccessToken>()
-                .ToLookup(pair => pair.Key, pair => pair.Value);
+            var filter = Builders<AccessToken>.Filter.In(nameof(AccessToken.GitHubRepositoryId), repositories.Select(r => r.Id));
+
+            var issuedAccessTokens = await dbContext.AccessTokens.Find(filter).ToListAsync();
+
+            var tokenLookup = issuedAccessTokens.ToLookup(t => t.GitHubRepositoryId, r => r);
 
             ViewBag.TokenLookup = tokenLookup;
             ViewBag.Repositories = repositories;
