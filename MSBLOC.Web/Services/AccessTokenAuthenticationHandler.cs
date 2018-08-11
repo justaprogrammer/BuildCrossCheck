@@ -11,14 +11,14 @@ using MSBLOC.Web.Interfaces;
 
 namespace MSBLOC.Web.Services
 {
-    public class JsonWebTokenAuthenticationHandler : AuthenticationHandler<JsonWebTokenAuthenticationOptions>
+    public class AccessTokenAuthenticationHandler : AuthenticationHandler<AccessTokenAuthenticationOptions>
     {
         public const string SchemeName = "MSBLOC.Api.Scheme";
-        private readonly IJsonWebTokenService _jsonWebTokenService;
+        private readonly IAccessTokenService _accessTokenService;
 
-        public JsonWebTokenAuthenticationHandler(IOptionsMonitor<JsonWebTokenAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, IJsonWebTokenService jsonWebTokenService) : base(options, logger, encoder, clock)
+        public AccessTokenAuthenticationHandler(IOptionsMonitor<AccessTokenAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, IAccessTokenService accessTokenService) : base(options, logger, encoder, clock)
         {
-            _jsonWebTokenService = jsonWebTokenService;
+            _accessTokenService = accessTokenService;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -41,7 +41,7 @@ namespace MSBLOC.Web.Services
             {
                 var bearer = authorizationHeader.Substring("Bearer ".Length);
 
-                var jwt = await _jsonWebTokenService.ValidateTokenAsync(bearer);
+                var jwt = await _accessTokenService.ValidateTokenAsync(bearer);
 
                 var identity = new ClaimsIdentity(jwt.Claims, SchemeName);
 
@@ -58,7 +58,7 @@ namespace MSBLOC.Web.Services
         }
     }
 
-    public class JsonWebTokenAuthenticationOptions : AuthenticationSchemeOptions
+    public class AccessTokenAuthenticationOptions : AuthenticationSchemeOptions
     {
         
     }

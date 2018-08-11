@@ -59,7 +59,7 @@ namespace MSBLOC.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CreateToken([FromServices] IAccessTokenRepository accessTokenRepository, [FromServices] IGitHubUserClientFactory gitHubClientFactory, [FromServices] IJsonWebTokenService tokenService, [FromQuery] long gitHubRepositoryId)
+        public async Task<IActionResult> CreateToken([FromServices] IAccessTokenRepository accessTokenRepository, [FromServices] IGitHubUserClientFactory gitHubClientFactory, [FromServices] IAccessTokenService tokenService, [FromQuery] long gitHubRepositoryId)
         {
             var github = await gitHubClientFactory.CreateClient();
 

@@ -8,14 +8,13 @@ using MongoDB.Bson.Serialization.IdGenerators;
 
 namespace MSBLOC.Infrastructure.Models
 {
+    [BsonIgnoreExtraElements]
     public class AccessToken
     {
         [BsonId(IdGenerator = typeof(GuidGenerator))]
         public Guid Id { get; set; }
 
         public long GitHubRepositoryId { get; set; }
-
-        public string RepositoryName { get; set; }
 
         public string IssuedTo { get; set; }
 

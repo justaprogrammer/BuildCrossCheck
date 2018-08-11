@@ -262,3 +262,4 @@ __pycache__/
 
 /MSBLOC.Web/wwwroot/js/*.min.js
 /MSBLOC.Web/wwwroot/css/*.min.css
+/MSBLOC.Web/Properties/PublishProfiles/*.pubxml

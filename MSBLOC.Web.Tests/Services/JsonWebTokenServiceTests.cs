@@ -57,7 +57,7 @@ namespace MSBLOC.Web.Tests.Services
                 new Claim(ClaimTypes.NameIdentifier, githubUserId.ToString())
             });
 
-            var service = new JsonWebTokenService(optionsAccessor, tokenRepository);
+            var service = new AccessTokenService(optionsAccessor, tokenRepository);
 
             var jwt = await service.CreateTokenAsync(user, githubRepositoryId);
 
@@ -94,7 +94,7 @@ namespace MSBLOC.Web.Tests.Services
                 new Claim(ClaimTypes.NameIdentifier, githubUserId.ToString())
             });
 
-            var service = new JsonWebTokenService(optionsAccessor, tokenRepository);
+            var service = new AccessTokenService(optionsAccessor, tokenRepository);
             var jwt = await service.CreateTokenAsync(user, githubRepositoryId);
 
             var jsonWebToken = await service.ValidateTokenAsync(jwt);
@@ -126,7 +126,7 @@ namespace MSBLOC.Web.Tests.Services
                 new Claim(ClaimTypes.NameIdentifier, githubUserId.ToString())
             });
 
-            var service = new JsonWebTokenService(optionsAccessor, tokenRepository);
+            var service = new AccessTokenService(optionsAccessor, tokenRepository);
             var jwt = await service.CreateTokenAsync(user, githubRepositoryId);
 
             service.Awaiting(async s => await s.ValidateTokenAsync(jwt)).Should().Throw<InvalidOperationException>();

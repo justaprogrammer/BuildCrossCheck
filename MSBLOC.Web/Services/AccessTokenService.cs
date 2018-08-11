@@ -15,12 +15,12 @@ using Newtonsoft.Json.Linq;
 
 namespace MSBLOC.Web.Services
 {
-    public class JsonWebTokenService : IJsonWebTokenService
+    public class AccessTokenService : IAccessTokenService
     {
         private readonly IOptions<AuthOptions> _optionsAccessor;
         private readonly IAccessTokenRepository _tokenRepository;
 
-        public JsonWebTokenService(IOptions<AuthOptions> optionsAccessor, IAccessTokenRepository tokenRepository)
+        public AccessTokenService(IOptions<AuthOptions> optionsAccessor, IAccessTokenRepository tokenRepository)
         {
             _optionsAccessor = optionsAccessor;
             _tokenRepository = tokenRepository;

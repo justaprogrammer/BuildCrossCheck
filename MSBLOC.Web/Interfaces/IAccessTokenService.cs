@@ -6,7 +6,7 @@ using MSBLOC.Infrastructure.Models;
 
 namespace MSBLOC.Web.Interfaces
 {
-    public interface IJsonWebTokenService
+    public interface IAccessTokenService
     {
         Task<string> CreateTokenAsync(ClaimsPrincipal user, long githubRepositoryId);
         Task<JsonWebToken> ValidateTokenAsync(string accessToken);
