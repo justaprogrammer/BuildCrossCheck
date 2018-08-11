@@ -17,6 +17,13 @@ namespace MSBLOC.Web.Controllers
     [ApiExplorerSettings(IgnoreApi = true)]
     public class AccountController : Controller
     {
+        private readonly IAccessTokenService _accessTokenService;
+
+        public AccountController(IAccessTokenService accessTokenService)
+        {
+            _accessTokenService = accessTokenService;
+        }
+        
         [HttpGet("~/signin")]
         [AllowAnonymous]
         public IActionResult SignIn()
@@ -32,8 +39,10 @@ namespace MSBLOC.Web.Controllers
             return SignOut(authProperties);
         }
 
-        public async Task<IActionResult> ListRepositories([FromServices] IAccessTokenRepository accessTokenRepository, [FromServices] IGitHubUserClientFactory gitHubUserClientFactory)
+        [HttpGet]
+        public async Task<IActionResult> ListRepositories([FromServices] IGitHubUserClientFactory gitHubUserClientFactory)
         {
+            //TODO: We need to come up with a caching mechanism for storing the user's repositories as we run this code twice on this request. Once here and once in the `GetTokensForUserRepositoriesAsync()` method.
             var userClient = await gitHubUserClientFactory.CreateClient();
             var gitHubAppsUserClient = userClient.GitHubApps;
             var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installations;
@@ -47,8 +56,7 @@ namespace MSBLOC.Web.Controllers
                 repositories.AddRange(repositoriesResponse.Repositories);
             }
 
-            var repositoryIds = repositories.Select(r => r.Id).ToList();
-            var issuedAccessTokens = await accessTokenRepository.GetAllAsync(r => repositoryIds.Contains(r.GitHubRepositoryId));
+            var issuedAccessTokens = await _accessTokenService.GetTokensForUserRepositoriesAsync();
 
             var tokenLookup = issuedAccessTokens.ToLookup(t => t.GitHubRepositoryId, r => r);
 
@@ -59,32 +67,17 @@ namespace MSBLOC.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CreateToken([FromServices] IAccessTokenRepository accessTokenRepository, [FromServices] IGitHubUserClientFactory gitHubClientFactory, [FromServices] IAccessTokenService tokenService, [FromQuery] long gitHubRepositoryId)
+        public async Task<IActionResult> CreateToken([FromQuery] long gitHubRepositoryId)
         {
-            var github = await gitHubClientFactory.CreateClient();
-
-            var repository = await github.Repository.Get(gitHubRepositoryId);
-
-            if (repository == null)
-            {
-                return NotFound();
-            }
-
-            var jsonWebToken = await tokenService.CreateTokenAsync(User, repository.Id);
+            var jsonWebToken = await _accessTokenService.CreateTokenAsync(gitHubRepositoryId);
 
             return Content(jsonWebToken);
         }
 
         [HttpGet]
-        public async Task<IActionResult> RevokeToken([FromServices] IAccessTokenRepository accessTokenRepository, [FromServices] IGitHubUserClientFactory gitHubClientFactory, [FromQuery] Guid tokenId)
+        public async Task<IActionResult> RevokeToken([FromQuery] Guid tokenId)
         {
-            var github = await gitHubClientFactory.CreateClient();
-
-            var repositories = (await github.Repository.GetAllForCurrent()).ToList();
-
-            var repositoryIds = repositories.Select(r => r.Id).ToList();
-
-            await accessTokenRepository.DeleteAsync(r => r.Id == tokenId && repositoryIds.Contains(r.GitHubRepositoryId));
+            await _accessTokenService.RevokeTokenAsync(tokenId);
 
             return RedirectToAction("ListRepositories");
         }
