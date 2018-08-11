@@ -11,17 +11,17 @@ using MSBLOC.Web.Interfaces;
 
 namespace MSBLOC.Web.Services
 {
-    public class JsonWebTokenAuthenticationHandler : AuthenticationHandler<JsonWebTokenAuthenticationOptions>
+    public class AccessTokenAuthenticationHandler : AuthenticationHandler<AccessTokenAuthenticationOptions>
     {
         public const string SchemeName = "MSBLOC.Api.Scheme";
-        private readonly IJsonWebTokenService _jsonWebTokenService;
+        private readonly IAccessTokenService _accessTokenService;
 
-        public JsonWebTokenAuthenticationHandler(IOptionsMonitor<JsonWebTokenAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, IJsonWebTokenService jsonWebTokenService) : base(options, logger, encoder, clock)
+        public AccessTokenAuthenticationHandler(IOptionsMonitor<AccessTokenAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, IAccessTokenService accessTokenService) : base(options, logger, encoder, clock)
         {
-            _jsonWebTokenService = jsonWebTokenService;
+            _accessTokenService = accessTokenService;
         }
 
-        protected async override Task<AuthenticateResult> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             if (!Request.Headers.ContainsKey("Authorization"))
             {
@@ -37,15 +37,11 @@ namespace MSBLOC.Web.Services
                 return AuthenticateResult.Fail("Invalid Authorization Header.");
             }
 
-            var bearer = authorizationHeader.Substring("Bearer ".Length);
-
             try
             {
-                var tokenValidationResult = _jsonWebTokenService.ValidateToken(bearer);
+                var bearer = authorizationHeader.Substring("Bearer ".Length);
 
-                var jwt = tokenValidationResult.SecurityToken as JsonWebToken;
-
-                if(jwt == null) throw new Exception("Invalid token format.");
+                var jwt = await _accessTokenService.ValidateTokenAsync(bearer);
 
                 var identity = new ClaimsIdentity(jwt.Claims, SchemeName);
 
@@ -62,7 +58,7 @@ namespace MSBLOC.Web.Services
         }
     }
 
-    public class JsonWebTokenAuthenticationOptions : AuthenticationSchemeOptions
+    public class AccessTokenAuthenticationOptions : AuthenticationSchemeOptions
     {
         
     }

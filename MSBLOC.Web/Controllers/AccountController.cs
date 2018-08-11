@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
+using MSBLOC.Infrastructure.Interfaces;
 using MSBLOC.Web.Interfaces;
-using AccessToken = MSBLOC.Web.Models.AccessToken;
 
 namespace MSBLOC.Web.Controllers
 {
@@ -15,6 +15,13 @@ namespace MSBLOC.Web.Controllers
     [ApiExplorerSettings(IgnoreApi = true)]
     public class AccountController : Controller
     {
+        private readonly IAccessTokenService _accessTokenService;
+
+        public AccountController(IAccessTokenService accessTokenService)
+        {
+            _accessTokenService = accessTokenService;
+        }
+        
         [HttpGet("~/signin")]
         [AllowAnonymous]
         public IActionResult SignIn()
@@ -37,9 +44,7 @@ namespace MSBLOC.Web.Controllers
             var userInstallations = await gitHubUserModelService.GetUserInstallations();
             var repositories = userInstallations.SelectMany(installation => installation.Repositories).ToArray();
 
-            var filter = Builders<AccessToken>.Filter.In(nameof(AccessToken.GitHubRepositoryId), repositories.Select(r => r.Id));
-
-            var issuedAccessTokens = await dbContext.AccessTokens.Find(filter).ToListAsync();
+            var issuedAccessTokens = await _accessTokenService.GetTokensForUserRepositoriesAsync();
 
             var tokenLookup = issuedAccessTokens.ToLookup(t => t.GitHubRepositoryId, r => r);
 
@@ -50,45 +55,17 @@ namespace MSBLOC.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CreateToken(
-            [FromServices] IPersistantDataContext dbContext,
-            [FromServices] IGitHubUserModelService gitHubUserModelService,
-            [FromServices] IJsonWebTokenService tokenService,
-            [FromQuery] long installationId,
-            [FromQuery] long repositoryId)
+        public async Task<IActionResult> CreateToken([FromQuery] long gitHubRepositoryId)
         {
-
-            var userInstallation = await gitHubUserModelService.GetUserInstallation(installationId);
-            var repository = userInstallation.Repositories.FirstOrDefault(userRepository => userRepository.Id == repositoryId);
-            if (repository == null)
-            {
-                return NotFound();
-            }
-
-            var (accessToken, jsonWebToken) = tokenService.CreateToken(User, repository.Id);
-
-            await dbContext.AccessTokens.InsertOneAsync(accessToken);
+            var jsonWebToken = await _accessTokenService.CreateTokenAsync(gitHubRepositoryId);
 
             return Content(jsonWebToken);
         }
 
         [HttpGet]
-        public async Task<IActionResult> RevokeToken(
-            [FromServices] IPersistantDataContext dbContext,
-            [FromServices] IGitHubUserModelService gitHubUserModelService, 
-            [FromQuery] Guid tokenId)
+        public async Task<IActionResult> RevokeToken([FromQuery] Guid tokenId)
         {
-            var userInstallations = await gitHubUserModelService.GetUserInstallations();
-            var repositories = userInstallations.SelectMany(installation => installation.Repositories).ToArray();
-
-            var filter = Builders<AccessToken>.Filter.Eq(nameof(AccessToken.Id), tokenId);
-
-            var token = await dbContext.AccessTokens.Find(filter).FirstAsync();
-
-            if (repositories.Select(r => r.Id).Contains(token.GitHubRepositoryId))
-            {
-                await dbContext.AccessTokens.DeleteOneAsync(filter);
-            }
+            await _accessTokenService.RevokeTokenAsync(tokenId);
 
             return RedirectToAction("ListRepositories");
         }

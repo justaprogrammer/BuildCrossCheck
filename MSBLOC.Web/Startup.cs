@@ -12,12 +12,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Services.Factories;
+using MSBLOC.Infrastructure.Extensions;
 using MSBLOC.Web.Attributes;
-using MSBLOC.Web.Contexts;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using MSBLOC.Web.Services;
@@ -49,7 +48,7 @@ namespace MSBLOC.Web
                         if (context.Request.Path.StartsWithSegments("/api"))
                         {
                             // JWT bearer
-                            return JsonWebTokenAuthenticationHandler.SchemeName;
+                            return AccessTokenAuthenticationHandler.SchemeName;
                         }
                         return CookieAuthenticationDefaults.AuthenticationScheme;
                     };
@@ -67,8 +66,9 @@ namespace MSBLOC.Web
                     options.Scope.Add("user:email");
                     options.Scope.Add("read:org");
 
-                    options.ClaimActions.Clear();
+                    options.ClaimActions.MapAll();
                     options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+                    options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
                     options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
                     options.ClaimActions.MapJsonKey("urn:github:login", "login");
                     options.ClaimActions.MapJsonKey("urn:github:url", "html_url");
@@ -76,10 +76,10 @@ namespace MSBLOC.Web
 
                     options.SaveTokens = true;
                 })
-                .AddScheme<JsonWebTokenAuthenticationOptions, JsonWebTokenAuthenticationHandler>(JsonWebTokenAuthenticationHandler.SchemeName, options =>
+                .AddScheme<AccessTokenAuthenticationOptions, AccessTokenAuthenticationHandler>(AccessTokenAuthenticationHandler.SchemeName, options =>
                 {
-                    options.ForwardChallenge = JsonWebTokenAuthenticationHandler.SchemeName;
-                    options.ForwardAuthenticate = JsonWebTokenAuthenticationHandler.SchemeName;
+                    options.ForwardChallenge = AccessTokenAuthenticationHandler.SchemeName;
+                    options.ForwardAuthenticate = AccessTokenAuthenticationHandler.SchemeName;
                 });
 
             services.AddMvc().AddJsonOptions(options =>
@@ -88,6 +88,8 @@ namespace MSBLOC.Web
             });
 
             services.AddHttpContextAccessor();
+
+            services.AddInfrastructure(Configuration.GetSection("Infrastructure"));
 
             services.Configure<GitHubAppOptions>(Configuration.GetSection("GitHub:App"));
             services.Configure<AuthOptions>(Configuration.GetSection("Auth"));
@@ -108,14 +110,11 @@ namespace MSBLOC.Web
                 var privateKeySource = s.GetService<IPrivateKeySource>();
                 return new TokenGenerator(gitHubAppId, privateKeySource, s.GetService<ILogger<TokenGenerator>>());
             });
-            services.AddScoped<IMongoClient>(s => new MongoClient(Configuration["MongoDB:ConnectionString"]));
-            services.AddScoped<IMongoDatabase>(s => s.GetService<IMongoClient>().GetDatabase(Configuration["MongoDB:Database"]));
-            services.AddScoped<IPersistantDataContext, PersistantDataContext>();
             services.AddScoped<IGitHubClientFactory, GitHubClientFactory>();
             services.AddScoped<IGitHubAppClientFactory, GitHubAppClientFactory>();
             services.AddScoped<IGitHubUserClientFactory, GitHubUserClientFactory>();
             services.AddScoped<IGitHubUserModelService, GitHubUserModelService>();
-            services.AddScoped<IJsonWebTokenService, JsonWebTokenService>();
+            services.AddScoped<IAccessTokenService, AccessTokenService>();
 
             services.AddTransient<IMSBLOCService, MSBLOCService>();
 
@@ -123,7 +122,6 @@ namespace MSBLOC.Web
             {
                 c.SwaggerDoc("0.0.1", new Info { Title = "MSBLOC Web API", Version = "0.0.1" });
                 c.OperationFilter<MultiPartFormBindingAttribute.MultiPartFormBindingFilter>();
-                //c.OperationFilter<SecurityRequirementsOperationFilter>();
 
                 c.AddSecurityDefinition("Bearer", new ApiKeyScheme
                 {
