@@ -42,7 +42,6 @@ namespace MSBLOC.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> ListRepositories([FromServices] IGitHubUserClientFactory gitHubUserClientFactory)
         {
-            //TODO: We need to come up with a caching mechanism for storing the user's repositories as we run this code twice on this request. Once here and once in the `GetTokensForUserRepositoriesAsync()` method.
             var userClient = await gitHubUserClientFactory.CreateClient();
             var gitHubAppsUserClient = userClient.GitHubApps;
             var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installations;
