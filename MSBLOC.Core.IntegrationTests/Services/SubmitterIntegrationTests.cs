@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using MSBLOC.Core.IntegrationTests.Utilities;
 using MSBLOC.Core.Model;
 using MSBLOC.Core.Services;
+using MSBLOC.Core.Services.Factories;
 using MSBLOC.Core.Tests.Util;
 using Octokit;
 using Xunit.Abstractions;
@@ -58,8 +59,8 @@ namespace MSBLOC.Core.IntegrationTests.Services
 
             var privateKeySource = new EnvironmentVariablePrivateKeySource(privateKeyEnvironmentVariableName);
             var tokenGenerator = new TokenGenerator(gitHubAppId, privateKeySource);
-            var gitHubClientFactory = new GitHubClientFactory(tokenGenerator);
-            var gitHubClient = await gitHubClientFactory.CreateAppClient(integrationTestAppOwner);
+            var gitHubClientFactory = new GitHubAppClientFactory();
+            var gitHubClient = await gitHubClientFactory.CreateClient(tokenGenerator, integrationTestAppOwner);
             var checkRunsClient = gitHubClient.Check.Run;
 
             var submitter = new CheckRunSubmitter(checkRunsClient);

@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace MSBLOC.Web.Models
 {
-    public class EnvOptions
+    public class GitHubAppOptions
     {
-        public string GitHubAppPrivateKey { get; set; }
-        public int GitHubAppId { get; set; }
+        public string PrivateKey { get; set; }
+        public int Id { get; set; }
     }
 }

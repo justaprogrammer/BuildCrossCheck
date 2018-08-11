@@ -10,18 +10,18 @@ using MSBLOC.Web.Models;
 
 namespace MSBLOC.Web.Services
 {
-    public class OptionsPrivateKeySource : IPrivateKeySource
+    public class GitHubAppOptionsPrivateKeySource : IPrivateKeySource
     {
-        private readonly IOptions<EnvOptions> _optionsAccessor;
+        private readonly IOptions<GitHubAppOptions> _optionsAccessor;
 
-        public OptionsPrivateKeySource(IOptions<EnvOptions> optionsAccessor)
+        public GitHubAppOptionsPrivateKeySource(IOptions<GitHubAppOptions> optionsAccessor)
         {
             _optionsAccessor = optionsAccessor;
         }
 
         public TextReader GetPrivateKeyReader()
         {
-            return new StringReader(CreatePem(_optionsAccessor.Value.GitHubAppPrivateKey));
+            return new StringReader(CreatePem(_optionsAccessor.Value.PrivateKey));
         }
 
         private static string CreatePem(string input)

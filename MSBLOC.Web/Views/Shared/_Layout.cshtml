@@ -24,7 +24,25 @@
         <div class="collapse navbar-collapse" id="navbarsDefault">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="#">Home</a>
+                    <a asp-action="Index" asp-controller="Home" class="nav-link">Home</a>
+                </li>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li class="nav-item active">
+                        <a asp-action="ListRepositories" asp-controller="Account" class="nav-link">Repositories</a>
+                    </li>
+                }
+            </ul>
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a asp-action="SignOut" asp-controller="Account" class="nav-link">Log Out</a>
+                    }
+                    else
+                    {
+                        <a asp-action="SignIn" asp-controller="Account" class="nav-link">Sign In</a>
+                    }
                 </li>
             </ul>
         </div>

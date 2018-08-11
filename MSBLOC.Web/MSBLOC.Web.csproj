@@ -6,11 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="2.0.0" />
     <PackageReference Include="BuildBundlerMinifier" Version="2.8.391" />
     <PackageReference Include="GitHubJwt" Version="0.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.1.1" />
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.AzureKeyVault" Version="2.1.1" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="5.2.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="3.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="3.0.0" />
   </ItemGroup>
@@ -21,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MSBLOC.Core\MSBLOC.Core.csproj" />
+    <ProjectReference Include="..\MSBLOC.Infrastructure\MSBLOC.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

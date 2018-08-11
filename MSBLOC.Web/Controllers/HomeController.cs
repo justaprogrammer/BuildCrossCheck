@@ -16,6 +16,7 @@ using Activity = System.Diagnostics.Activity;
 
 namespace MSBLOC.Web.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class HomeController : Controller
     {
         public IActionResult Index()
@@ -28,10 +29,5 @@ namespace MSBLOC.Web.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        [HttpGet]
-        public IActionResult Login(string returnUrl = "/")
-        {
-            return Challenge(new AuthenticationProperties() { RedirectUri = returnUrl });
-        }
     }
 }

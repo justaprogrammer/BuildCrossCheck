@@ -15,20 +15,20 @@ namespace MSBLOC.Web.Tests.Services
         [Fact]
         public void GetPrivateKeyReaderTest()
         {
-            var options = new EnvOptions
+            var options = new GitHubAppOptions
             {
-                GitHubAppPrivateKey = "123456"
+                PrivateKey = "123456"
             };
-            var optionsAccessor = Substitute.For<IOptions<EnvOptions>>();
+            var optionsAccessor = Substitute.For<IOptions<GitHubAppOptions>>();
             optionsAccessor.Value.Returns(options);
 
-            var keySource = new OptionsPrivateKeySource(optionsAccessor);
+            var keySource = new GitHubAppOptionsPrivateKeySource(optionsAccessor);
 
             var reader = keySource.GetPrivateKeyReader();
 
             var privateKey = reader.ReadToEnd();
 
-            privateKey.Should().Be($"-----BEGIN RSA PRIVATE KEY-----\r\n{options.GitHubAppPrivateKey}\r\n-----END RSA PRIVATE KEY-----\r\n");
+            privateKey.Should().Be($"-----BEGIN RSA PRIVATE KEY-----\r\n{options.PrivateKey}\r\n-----END RSA PRIVATE KEY-----\r\n");
         }
     }
 }
