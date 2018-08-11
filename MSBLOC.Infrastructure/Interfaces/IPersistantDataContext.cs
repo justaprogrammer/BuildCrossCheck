@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
-using MSBLOC.Web.Models;
+using MSBLOC.Infrastructure.Models;
 
-namespace MSBLOC.Web.Interfaces
+namespace MSBLOC.Infrastructure.Interfaces
 {
     public interface IPersistantDataContext
     {

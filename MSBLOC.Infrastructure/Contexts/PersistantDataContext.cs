@@ -1,8 +1,8 @@
 ﻿using MongoDB.Driver;
-using MSBLOC.Web.Interfaces;
-using MSBLOC.Web.Models;
+using MSBLOC.Infrastructure.Models;
+using MSBLOC.Infrastructure.Interfaces;
 
-namespace MSBLOC.Web.Contexts
+namespace MSBLOC.Infrastructure.Contexts
 {
     public class PersistantDataContext : IPersistantDataContext
     {
