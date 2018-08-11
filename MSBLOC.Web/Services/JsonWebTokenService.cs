@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using MSBLOC.Infrastructure.Interfaces;
 using MSBLOC.Infrastructure.Models;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
@@ -17,13 +18,15 @@ namespace MSBLOC.Web.Services
     public class JsonWebTokenService : IJsonWebTokenService
     {
         private readonly IOptions<AuthOptions> _optionsAccessor;
+        private readonly IAccessTokenRepository _tokenRepository;
 
-        public JsonWebTokenService(IOptions<AuthOptions> optionsAccessor)
+        public JsonWebTokenService(IOptions<AuthOptions> optionsAccessor, IAccessTokenRepository tokenRepository)
         {
             _optionsAccessor = optionsAccessor;
+            _tokenRepository = tokenRepository;
         }
 
-        public (AccessToken AccessToken, string JsonWebToken) CreateToken(ClaimsPrincipal user, long githubRepositoryId)
+        public async Task<string> CreateTokenAsync(ClaimsPrincipal user, long githubRepositoryId)
         {
             var tokenHandler = new JsonWebTokenHandler();
             var signingCredentials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256Signature);
@@ -36,6 +39,8 @@ namespace MSBLOC.Web.Services
                 IssuedTo = user.Claims.First(c => c.Type.Equals(ClaimTypes.NameIdentifier)).Value
             };
 
+            await _tokenRepository.AddAsync(accessToken);
+
             var payload = new JObject()
             {
                 { JwtRegisteredClaimNames.Aud, "MSBLOC.Api" },
@@ -46,10 +51,11 @@ namespace MSBLOC.Web.Services
             };
 
             var accessTokenString = tokenHandler.CreateToken(payload, signingCredentials);
-            return (accessToken, accessTokenString);
+
+            return accessTokenString;
         }
 
-        public TokenValidationResult ValidateToken(string accessToken)
+        public async Task<JsonWebToken> ValidateTokenAsync(string accessToken)
         {
             var tokenHandler = new JsonWebTokenHandler();
             var tokenValidationParameters = new TokenValidationParameters()
@@ -63,7 +69,13 @@ namespace MSBLOC.Web.Services
 
             var tokenValidationResult = tokenHandler.ValidateToken(accessToken, tokenValidationParameters);
 
-            return tokenValidationResult;
+            var jwt = tokenValidationResult.SecurityToken as JsonWebToken;
+
+            if (jwt == null) throw new Exception("Invalid token format.");
+
+            await _tokenRepository.GetAsync(new Guid(jwt.Id));
+
+            return jwt;
         }
 
         private SecurityKey SecurityKey => new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_optionsAccessor.Value.Secret));

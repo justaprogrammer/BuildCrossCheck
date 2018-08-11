@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 using Bogus;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -9,6 +10,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using MSBLOC.Infrastructure.Interfaces;
+using MSBLOC.Infrastructure.Models;
 using MSBLOC.Web.Models;
 using MSBLOC.Web.Services;
 using MSBLOC.Web.Tests.Util;
@@ -24,7 +27,7 @@ namespace MSBLOC.Web.Tests.Services
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly ILogger<JsonWebTokenServiceTests> _logger;
 
-        private static Faker _faker;
+        private static readonly Faker Faker = new Faker();
 
         public JsonWebTokenServiceTests(ITestOutputHelper testOutputHelper)
         {
@@ -34,20 +37,19 @@ namespace MSBLOC.Web.Tests.Services
             IdentityModelEventSource.ShowPII = true;
         }
 
-        static JsonWebTokenServiceTests()
-        {
-            _faker = new Faker();
-        }
-
         [Fact]
-        public void CreateValidTokenTest()
+        public async Task CreateValidTokenTest()
         {
             var options = new AuthOptions {Secret = new Faker().Random.AlphaNumeric(32)};
             var optionsAccessor = Substitute.For<IOptions<AuthOptions>>();
             optionsAccessor.Value.Returns(options);
 
-            var githubRepositoryId = _faker.Random.Long();
-            var githubUserId = _faker.Random.Long();
+            AccessToken accessToken = null;
+            var tokenRepository = Substitute.For<IAccessTokenRepository>();
+            await tokenRepository.AddAsync(Arg.Do<AccessToken>(t => { accessToken = t; }));
+
+            var githubRepositoryId = Faker.Random.Long();
+            var githubUserId = Faker.Random.Long();
 
             var user = Substitute.For<ClaimsPrincipal>();
             user.Claims.Returns(new []
@@ -55,12 +57,16 @@ namespace MSBLOC.Web.Tests.Services
                 new Claim(ClaimTypes.NameIdentifier, githubUserId.ToString())
             });
 
-            var service = new JsonWebTokenService(optionsAccessor);
-            var (accessToken, jwt) = service.CreateToken(user, githubRepositoryId);
+            var service = new JsonWebTokenService(optionsAccessor, tokenRepository);
 
-            var tokenValidationResult = service.ValidateToken(jwt);
+            var jwt = await service.CreateTokenAsync(user, githubRepositoryId);
 
-            var jsonWebToken = tokenValidationResult?.SecurityToken as JsonWebToken;
+            await tokenRepository.Received().AddAsync(Arg.Any<AccessToken>());
+            accessToken.Should().NotBeNull();
+
+            var jsonWebToken = await service.ValidateTokenAsync(jwt);
+
+            await tokenRepository.Received().GetAsync(accessToken.Id);
 
             jsonWebToken.Should().NotBeNull();
             jsonWebToken.Payload.Value<long>(JwtRegisteredClaimNames.Sub).Should().Be(githubUserId);
@@ -71,14 +77,16 @@ namespace MSBLOC.Web.Tests.Services
         }
 
         [Fact]
-        public void InvalidTokenVerficationTest()
+        public async Task InvalidTokenVerficationTest()
         {
             var options = new AuthOptions { Secret = new Faker().Random.AlphaNumeric(32) };
             var optionsAccessor = Substitute.For<IOptions<AuthOptions>>();
             optionsAccessor.Value.Returns(options);
 
-            var githubRepositoryId = _faker.Random.Long();
-            var githubUserId = _faker.Random.Long();
+            var tokenRepository = Substitute.For<IAccessTokenRepository>();
+
+            var githubRepositoryId = Faker.Random.Long();
+            var githubUserId = Faker.Random.Long();
 
             var user = Substitute.For<ClaimsPrincipal>();
             user.Claims.Returns(new[]
@@ -86,18 +94,42 @@ namespace MSBLOC.Web.Tests.Services
                 new Claim(ClaimTypes.NameIdentifier, githubUserId.ToString())
             });
 
-            var service = new JsonWebTokenService(optionsAccessor);
-            var (accessToken, jwt) = service.CreateToken(user, githubRepositoryId);
+            var service = new JsonWebTokenService(optionsAccessor, tokenRepository);
+            var jwt = await service.CreateTokenAsync(user, githubRepositoryId);
 
-            var tokenValidationResult = service.ValidateToken(jwt);
-
-            var jsonWebToken = tokenValidationResult?.SecurityToken as JsonWebToken;
+            var jsonWebToken = await service.ValidateTokenAsync(jwt);
 
             jsonWebToken.Should().NotBeNull();
-            jsonWebToken.Payload.Value<string>(JwtRegisteredClaimNames.Jti).Should().Be(accessToken.Id.ToString());
+            jsonWebToken.Payload.Value<string>(JwtRegisteredClaimNames.Jti).Should().NotBeNullOrWhiteSpace();
+            jsonWebToken.Payload.Value<string>(JwtRegisteredClaimNames.Jti).Should().HaveLength(36);
 
             var modifiedToken = jwt + " ";
-            service.Invoking(s => s.ValidateToken(modifiedToken)).Should().Throw<SecurityTokenException>();
+            service.Awaiting(async s => await s.ValidateTokenAsync(modifiedToken)).Should().Throw<SecurityTokenException>();
+        }
+
+        [Fact]
+        public async Task RevokedTokenVerficationTest()
+        {
+            var options = new AuthOptions { Secret = new Faker().Random.AlphaNumeric(32) };
+            var optionsAccessor = Substitute.For<IOptions<AuthOptions>>();
+            optionsAccessor.Value.Returns(options);
+
+            var tokenRepository = Substitute.For<IAccessTokenRepository>();
+            tokenRepository.GetAsync(Arg.Any<Guid>()).Throws(new InvalidOperationException());
+
+            var githubRepositoryId = Faker.Random.Long();
+            var githubUserId = Faker.Random.Long();
+
+            var user = Substitute.For<ClaimsPrincipal>();
+            user.Claims.Returns(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, githubUserId.ToString())
+            });
+
+            var service = new JsonWebTokenService(optionsAccessor, tokenRepository);
+            var jwt = await service.CreateTokenAsync(user, githubRepositoryId);
+
+            service.Awaiting(async s => await s.ValidateTokenAsync(jwt)).Should().Throw<InvalidOperationException>();
         }
     }
 }

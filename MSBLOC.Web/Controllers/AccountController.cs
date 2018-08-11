@@ -70,9 +70,7 @@ namespace MSBLOC.Web.Controllers
                 return NotFound();
             }
 
-            var (accessToken, jsonWebToken) = tokenService.CreateToken(User, repository.Id);
-
-            await accessTokenRepository.AddAsync(accessToken);
+            var jsonWebToken = await tokenService.CreateTokenAsync(User, repository.Id);
 
             return Content(jsonWebToken);
         }

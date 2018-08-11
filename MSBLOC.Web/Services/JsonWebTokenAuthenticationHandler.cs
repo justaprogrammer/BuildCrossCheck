@@ -21,7 +21,7 @@ namespace MSBLOC.Web.Services
             _jsonWebTokenService = jsonWebTokenService;
         }
 
-        protected async override Task<AuthenticateResult> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             if (!Request.Headers.ContainsKey("Authorization"))
             {
@@ -41,11 +41,7 @@ namespace MSBLOC.Web.Services
             {
                 var bearer = authorizationHeader.Substring("Bearer ".Length);
 
-                var tokenValidationResult = _jsonWebTokenService.ValidateToken(bearer);
-
-                var jwt = tokenValidationResult.SecurityToken as JsonWebToken;
-
-                if(jwt == null) throw new Exception("Invalid token format.");
+                var jwt = await _jsonWebTokenService.ValidateTokenAsync(bearer);
 
                 var identity = new ClaimsIdentity(jwt.Claims, SchemeName);
 
