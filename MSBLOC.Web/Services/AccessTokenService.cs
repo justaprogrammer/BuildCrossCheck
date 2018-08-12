@@ -109,7 +109,7 @@ namespace MSBLOC.Web.Services
 
             var repositoryIds = repositories.Select(r => r.Id).ToList();
 
-            await _tokenRepository.DeleteAsync(r => r.Id == tokenId && repositoryIds.Contains(r.GitHubRepositoryId));
+            await _tokenRepository.DeleteAsync(tokenId, repositoryIds);
         }
 
         public async Task<IEnumerable<AccessToken>> GetTokensForUserRepositoriesAsync()
@@ -129,9 +129,7 @@ namespace MSBLOC.Web.Services
 
             var repositoryIds = repositories.Select(r => r.Id).ToList();
 
-            var issuedAccessTokens = await _tokenRepository.GetAllAsync(r => repositoryIds.Contains(r.GitHubRepositoryId));
-
-            return issuedAccessTokens;
+            return await _tokenRepository.GetByRepositoryIdsAsync(repositoryIds);
         }
 
         private SecurityKey SecurityKey => new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_optionsAccessor.Value.Secret));
