@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bogus" Version="22.3.2" />
     <PackageReference Include="FluentAssertions" Version="5.4.1" />
     <PackageReference Include="GitHubJwt" Version="0.0.2" />
     <PackageReference Include="jose-jwt" Version="2.4.0" />
@@ -20,12 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MSBLOC.Core\MSBLOC.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Bogus">
-      <HintPath>..\..\..\.nuget\packages\bogus\22.3.1\lib\netstandard2.0\Bogus.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>

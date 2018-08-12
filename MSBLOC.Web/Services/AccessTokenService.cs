@@ -24,16 +24,19 @@ namespace MSBLOC.Web.Services
         private readonly IAccessTokenRepository _tokenRepository;
         private readonly IGitHubUserClientFactory _gitHubUserClientFactory;
         private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IGitHubUserModelService _gitHubUserModelService;
 
         public AccessTokenService(IOptions<AuthOptions> optionsAccessor, 
             IAccessTokenRepository tokenRepository, 
             IGitHubUserClientFactory gitHubUserClientFactory, 
-            IHttpContextAccessor contextAccessor)
+            IHttpContextAccessor contextAccessor,
+            IGitHubUserModelService gitHubUserModelService)
         {
             _optionsAccessor = optionsAccessor;
             _tokenRepository = tokenRepository;
             _gitHubUserClientFactory = gitHubUserClientFactory;
             _contextAccessor = contextAccessor;
+            _gitHubUserModelService = gitHubUserModelService;
         }
 
         public async Task<string> CreateTokenAsync(long githubRepositoryId)
@@ -114,18 +117,8 @@ namespace MSBLOC.Web.Services
 
         public async Task<IEnumerable<AccessToken>> GetTokensForUserRepositoriesAsync()
         {
-            var userClient = await _gitHubUserClientFactory.CreateClient();
-            var gitHubAppsUserClient = userClient.GitHubApps;
-            var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installations;
-
-            var repositories = new List<Repository>();
-
-            var installationsResponse = await gitHubAppsUserClient.GetAllInstallationsForUser();
-            foreach (var installation in installationsResponse.Installations)
-            {
-                var repositoriesResponse = await gitHubAppsInstallationsUserClient.GetAllRepositoriesForUser(installation.Id);
-                repositories.AddRange(repositoriesResponse.Repositories);
-            }
+            var userInstallations = await _gitHubUserModelService.GetUserInstallations();
+            var repositories = userInstallations.SelectMany(installation => installation.Repositories).ToArray();
 
             var repositoryIds = repositories.Select(r => r.Id).ToList();
 
