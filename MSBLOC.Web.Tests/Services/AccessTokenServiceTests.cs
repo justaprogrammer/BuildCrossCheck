@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using Bogus;
 using FluentAssertions;
@@ -33,6 +31,9 @@ namespace MSBLOC.Web.Tests.Services
         private readonly ILogger<AccessTokenServiceTests> _logger;
 
         private static readonly Faker Faker = new Faker();
+        private static readonly Faker<Repository> FakeRepository;
+        private static readonly Faker<AccessToken> FakeAccessToken;
+        private static readonly Faker<Installation> FakeInstallation;
 
         public AccessTokenServiceTests(ITestOutputHelper testOutputHelper)
         {
@@ -40,6 +41,20 @@ namespace MSBLOC.Web.Tests.Services
             _logger = TestLogger.Create<AccessTokenServiceTests>(testOutputHelper);
 
             IdentityModelEventSource.ShowPII = true;
+        }
+
+        static AccessTokenServiceTests()
+        {
+            FakeRepository = new Faker<Repository>()
+                .RuleFor(r => r.Id, (f, r) => f.Random.Long());
+
+            FakeAccessToken = new Faker<AccessToken>()
+                .RuleFor(token => token.Id, (f, t) => f.Random.Guid())
+                .RuleFor(token => token.GitHubRepositoryId, (f, t) => f.Random.Long())
+                .RuleFor(token => token.IssuedTo, (f, t) => f.Internet.UserName())
+                .RuleFor(token => token.IssuedAt, (f, t) => f.Date.PastOffset());
+            FakeInstallation = new Faker<Installation>()
+                .RuleFor(i => i.Id, f => f.IndexGlobal);
         }
 
         [Fact]
@@ -161,7 +176,9 @@ namespace MSBLOC.Web.Tests.Services
             var service = new AccessTokenService(optionsAccessor, tokenRepository, gitHubUserClientFactory, contextAccessor);
             var jwt = await service.CreateTokenAsync(githubRepositoryId);
 
-            service.Awaiting(async s => await s.ValidateTokenAsync(jwt)).Should().Throw<InvalidOperationException>();
+            service.Awaiting(async s => await s.ValidateTokenAsync(jwt))
+                .Should().Throw<InvalidOperationException>()
+                .WithMessage("Operation is not valid due to the current state of the object.");
         }
 
         [Fact]
@@ -177,7 +194,9 @@ namespace MSBLOC.Web.Tests.Services
             repositoriesClient.Get(Arg.Is(githubRepositoryId)).Returns(Task.FromResult<Repository>(null));
 
             var service = new AccessTokenService(optionsAccessor, tokenRepository, gitHubUserClientFactory, contextAccessor);
-            service.Awaiting(async s => await s.CreateTokenAsync(githubRepositoryId)).Should().Throw<ArgumentException>();
+            service.Awaiting(async s => await s.CreateTokenAsync(githubRepositoryId))
+                .Should().Throw<ArgumentException>()
+                .WithMessage("Repository does not exist or no permission to access given repository.");
         }
 
         [Fact]
@@ -189,50 +208,52 @@ namespace MSBLOC.Web.Tests.Services
 
             var (gitHubUserClientFactory, gitHubClient, appsClient) = MockGitHubWithApps();
 
-            var installations = new Faker<Installation>()
-                .RuleFor(i => i.Id, f => f.IndexGlobal)
-                .Generate(3);
+            var installation0 = FakeInstallation.Generate();
+            var repositories0 = FakeRepository.Generate(Faker.Random.Int(2, 3));
 
-            var installationResults = new InstallationsResponse(installations.Count, installations);
+            var installation1 = FakeInstallation.Generate();
+            var repositories1 = FakeRepository.Generate(Faker.Random.Int(2, 3));
+
+            var installations = new[] { installation0, installation1 };
+
+            var installationResults = new InstallationsResponse(installations.Length, installations);
             appsClient.GetAllInstallationsForUser().Returns(installationResults);
 
             var installationsClient = Substitute.For<IGitHubAppsInstallationsClient>();
 
-            var repositoryIds = new List<long>();
+            var repositories = repositories0.Union(repositories1).ToArray();
+            var repositoryIds = repositories.Select(repository => repository.Id).ToArray();
 
-            var respositories = new Faker<Repository>()
-                .RuleFor(r => r.Id, f =>
-                {
-                    var id = f.IndexGlobal;
-                    repositoryIds.Add(id);
-                    return id;
-                });
-                
-            installationsClient.GetAllRepositoriesForUser(Arg.Any<long>()).Returns(callInfo => new RepositoriesResponse(5, respositories.Generate(5)));
+            installationsClient.GetAllRepositoriesForUser(installation0.Id).Returns(new RepositoriesResponse(repositories0.Count, repositories0));
+            installationsClient.GetAllRepositoriesForUser(installation1.Id).Returns(new RepositoriesResponse(repositories1.Count, repositories1));
 
             appsClient.Installations.Returns(installationsClient);
 
-            var accessTokens = Enumerable.Empty<AccessToken>();
-
-            tokenRepository.GetAllAsync(Arg.Any<Expression<Func<AccessToken, bool>>>()).Returns(arg =>
-            {
-                var predicate = arg.ArgAt<Expression<Func<AccessToken, bool>>>(0).Compile();
-
-                accessTokens = Faker.Random.ListItems(repositoryIds, 3).Select(rid => new AccessToken()
+            var accessTokens = Faker.PickRandom(repositories, Faker.Random.Int(1, repositories.Length))
+                .Select(repository =>
                 {
-                    GitHubRepositoryId = rid
-                });
+                    var accessToken = FakeAccessToken.Generate();
+                    accessToken.GitHubRepositoryId = repository.Id;
+                    return accessToken;
+                }).ToArray();
 
-                return accessTokens.Where(predicate);
-            });
+            tokenRepository.GetByRepositoryIdsAsync(Arg.Is<List<long>>(r => r.SequenceEqual(repositoryIds))).Returns(accessTokens);
 
             var service = new AccessTokenService(optionsAccessor, tokenRepository, gitHubUserClientFactory, contextAccessor);
 
             var tokens = await service.GetTokensForUserRepositoriesAsync();
 
-            tokens.Select(t => t.GitHubRepositoryId).Should().BeEquivalentTo(accessTokens.Select(t => t.GitHubRepositoryId));
+            tokens.Should().BeEquivalentTo(accessTokens);
 
-            await installationsClient.Received(3).GetAllRepositoriesForUser(Arg.Any<long>());
+            Received.InOrder(async () =>
+            {
+                foreach (var installation in installations)
+                {
+                    await installationsClient.Received().GetAllRepositoriesForUser(installation.Id);
+                }
+
+                await tokenRepository.Received().GetByRepositoryIdsAsync(Arg.Is<IEnumerable<long>>(longs => longs.SequenceEqual(repositoryIds)));
+            });
         }
 
         private (IGitHubUserClientFactory gitHubUserClientFactory, IGitHubClient gitHubClient) MockGitHub()

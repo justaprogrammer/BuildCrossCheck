@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using MSBLOC.Infrastructure.Interfaces;
@@ -11,21 +9,13 @@ namespace MSBLOC.Infrastructure.Repositories
 {
     public class MongoDbRepository<T, TField> : IRepository<T, TField> where T : class, new()
     {
-        protected readonly IMongoCollection<T> Entities;
-
         private readonly Expression<Func<T, TField>> _idExpression;
+        protected readonly IMongoCollection<T> Entities;
 
         public MongoDbRepository(IMongoCollection<T> entities, Expression<Func<T, TField>> idExpression)
         {
             Entities = entities;
             _idExpression = idExpression;
-        }
-
-        public async Task DeleteAsync(TField value)
-        {
-            var filter = Builders<T>.Filter.Eq(_idExpression, value);
-
-            await Entities.DeleteOneAsync(filter);
         }
 
         public async Task DeleteAsync(T item)
@@ -37,18 +27,11 @@ namespace MSBLOC.Infrastructure.Repositories
             await DeleteAsync(value);
         }
 
-        public async Task DeleteAsync(Expression<Func<T, bool>> expression)
+        public async Task DeleteAsync(TField value)
         {
-            var filter = Builders<T>.Filter.Where(expression);
+            var filter = Builders<T>.Filter.Eq(_idExpression, value);
 
-            await Entities.DeleteManyAsync(filter);
-        }
-
-        public async Task<T> GetAsync(Expression<Func<T, bool>> expression)
-        {
-            var filter = Builders<T>.Filter.Where(expression);
-
-            return await Entities.Find(filter).FirstAsync();
+            await Entities.DeleteOneAsync(filter);
         }
 
         public async Task<T> GetAsync(TField value)
@@ -58,22 +41,14 @@ namespace MSBLOC.Infrastructure.Repositories
             return await Entities.Find(filter).FirstAsync();
         }
 
-        public Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> expression)
+        public Task<IEnumerable<T>> GetAllAsync()
         {
-            var filter = Builders<T>.Filter.Where(expression);
-
-            var items = Entities.Find(filter).ToEnumerable();
-
-            return Task.FromResult(items);
+            return GetAllAsync(FilterDefinition<T>.Empty);
         }
 
-        public Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> expression, int skip, int take)
+        public Task<IEnumerable<T>> GetAllAsync(int skip, int take)
         {
-            var filter = Builders<T>.Filter.Where(expression);
-
-            var items = Entities.Find(filter).Skip(skip).Limit(take).ToEnumerable();
-
-            return Task.FromResult(items);
+            return GetAllAsync(FilterDefinition<T>.Empty, skip, take);
         }
 
         public async Task AddAsync(T item)
@@ -84,6 +59,25 @@ namespace MSBLOC.Infrastructure.Repositories
         public async Task AddAsync(IEnumerable<T> items)
         {
             await Entities.InsertManyAsync(items);
+        }
+
+        protected async Task DeleteAsync(FilterDefinition<T> filter)
+        {
+            await Entities.DeleteManyAsync(filter);
+        }
+
+        protected Task<IEnumerable<T>> GetAllAsync(FilterDefinition<T> filter)
+        {
+            var items = Entities.Find(filter).ToEnumerable();
+
+            return Task.FromResult(items);
+        }
+
+        protected Task<IEnumerable<T>> GetAllAsync(FilterDefinition<T> filter, int skip, int take)
+        {
+            var items = Entities.Find(filter).Skip(skip).Limit(take).ToEnumerable();
+
+            return Task.FromResult(items);
         }
     }
 }
