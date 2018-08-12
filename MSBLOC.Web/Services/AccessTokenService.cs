@@ -128,7 +128,7 @@ namespace MSBLOC.Web.Services
 
             var repositoryIds = repositories.Select(r => r.Id).ToList();
 
-            return await _tokenRepository.GetByRepositoryIds(repositoryIds);
+            return await _tokenRepository.GetByRepositoryIdsAsync(repositoryIds);
         }
 
         private SecurityKey SecurityKey => new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_optionsAccessor.Value.Secret));

@@ -13,7 +13,7 @@ namespace MSBLOC.Infrastructure.Repositories
         {
         }
 
-        public Task<IEnumerable<AccessToken>> GetByRepositoryIds(IEnumerable<long> repositoryIds)
+        public Task<IEnumerable<AccessToken>> GetByRepositoryIdsAsync(IEnumerable<long> repositoryIds)
         { 
             var filter = Builders<AccessToken>.Filter;
             var filterDefinition = filter.In(token => token.GitHubRepositoryId, repositoryIds);

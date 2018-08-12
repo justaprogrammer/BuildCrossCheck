@@ -6,11 +6,9 @@ using MSBLOC.Infrastructure.Models;
 
 namespace MSBLOC.Infrastructure.Interfaces
 {
-    public interface IAccessTokenRepository
+    public interface IAccessTokenRepository : IRepository<AccessToken, Guid>
     {
         Task DeleteAsync(Guid tokenId, IEnumerable<long> repositoryIds);
-        Task<AccessToken> GetAsync(Guid tokenId);
-        Task<IEnumerable<AccessToken>> GetByRepositoryIds(IEnumerable<long> repositoryIds);
-        Task AddAsync(AccessToken accessToken);
+        Task<IEnumerable<AccessToken>> GetByRepositoryIdsAsync(IEnumerable<long> repositoryIds);
     }
 }

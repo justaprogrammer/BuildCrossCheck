@@ -237,7 +237,7 @@ namespace MSBLOC.Web.Tests.Services
                     return accessToken;
                 }).ToArray();
 
-            tokenRepository.GetByRepositoryIds(Arg.Is<List<long>>(r => r.SequenceEqual(repositoryIds))).Returns(accessTokens);
+            tokenRepository.GetByRepositoryIdsAsync(Arg.Is<List<long>>(r => r.SequenceEqual(repositoryIds))).Returns(accessTokens);
 
             var service = new AccessTokenService(optionsAccessor, tokenRepository, gitHubUserClientFactory, contextAccessor);
 
@@ -252,7 +252,7 @@ namespace MSBLOC.Web.Tests.Services
                     await installationsClient.Received().GetAllRepositoriesForUser(installation.Id);
                 }
 
-                await tokenRepository.Received().GetByRepositoryIds(Arg.Is<IEnumerable<long>>(longs => longs.SequenceEqual(repositoryIds)));
+                await tokenRepository.Received().GetByRepositoryIdsAsync(Arg.Is<IEnumerable<long>>(longs => longs.SequenceEqual(repositoryIds)));
             });
         }
 
