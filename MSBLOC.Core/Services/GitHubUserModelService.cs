@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
 using Nito.AsyncEx;
 using Octokit;
+using AccountType = MSBLOC.Core.Model.AccountType;
 
 namespace MSBLOC.Core.Services
 {
@@ -17,7 +19,7 @@ namespace MSBLOC.Core.Services
             _lazyGitHubUserClient = new AsyncLazy<IGitHubClient>(() => gitHubUserClientFactory.CreateClient());
         }
 
-        public async Task<IReadOnlyList<UserInstallation>> GetUserInstallations()
+        public async Task<IReadOnlyList<UserInstallation>> GetUserInstallationsAsync()
         {
             var gitHubUserClient = await _lazyGitHubUserClient;
             var gitHubAppsUserClient = gitHubUserClient.GitHubApps;
@@ -40,9 +42,13 @@ namespace MSBLOC.Core.Services
                         .Select(repository => new UserRepository
                         {
                             Id = repository.Id,
+                            NodeId = repository.NodeId,
+                            OwnerId = repository.Owner.Id,
+                            OwnerNodeId = repository.Owner.NodeId,
+                            OwnerType = GetOwnerType(repository),
                             Owner = repository.Owner.Login,
                             Name = repository.Name,
-                            Url = repository.Url
+                            Url = repository.HtmlUrl
                         })
                         .ToArray()
                 };
@@ -53,7 +59,7 @@ namespace MSBLOC.Core.Services
             return userInstallations;
         }
 
-        public async Task<UserInstallation> GetUserInstallation(long installationId)
+        public async Task<UserInstallation> GetUserInstallationAsync(long installationId)
         {
             var gitHubUserClient = await _lazyGitHubUserClient.ConfigureAwait(false);
             var gitHubAppsUserClient = gitHubUserClient.GitHubApps;
@@ -70,13 +76,13 @@ namespace MSBLOC.Core.Services
             return userInstallation;
         }
 
-        public async Task<IReadOnlyList<UserRepository>> GetUserRepositories()
+        public async Task<IReadOnlyList<UserRepository>> GetUserRepositoriesAsync()
         {
-            var userInstallations = await GetUserInstallations().ConfigureAwait(false);
+            var userInstallations = await GetUserInstallationsAsync().ConfigureAwait(false);
             return userInstallations.SelectMany(installation => installation.Repositories).ToArray();
         }
 
-        public async Task<UserRepository> GetUserRepository(long repositoryId)
+        public async Task<UserRepository> GetUserRepositoryAsync(long repositoryId)
         {
             var gitHubUserClient = await _lazyGitHubUserClient.ConfigureAwait(false);
             var repositoriesClient = gitHubUserClient.Repository;
@@ -107,6 +113,27 @@ namespace MSBLOC.Core.Services
                 Name = repository.Name,
                 Url = repository.Url
             };
+        }
+
+        private static AccountType GetOwnerType(Repository repository)
+        {
+            if (!repository.Owner.Type.HasValue)
+                throw new InvalidOperationException("Repository owner does not have a type.");
+
+            switch (repository.Owner.Type.Value)
+            {
+                case Octokit.AccountType.User:
+                    return AccountType.User;
+
+                case Octokit.AccountType.Organization:
+                    return AccountType.Organization;
+
+                case Octokit.AccountType.Bot:
+                    throw new InvalidOperationException("A bot cannot own a repository.");
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }
