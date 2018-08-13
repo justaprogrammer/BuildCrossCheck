@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Castle.DynamicProxy;
 using GitHubJwt;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -101,6 +102,7 @@ namespace MSBLOC.Web
                 var gitHubClient = await s.GetService<IGitHubAppClientFactory>().CreateClient(tokenGenerator, repoOwner);
                 return new CheckRunSubmitter(gitHubClient.Check.Run, s.GetService<ILogger<CheckRunSubmitter>>());
             });
+            services.AddSingleton<IProxyGenerator, ProxyGenerator>();
             
             services.AddScoped<ITempFileService, LocalTempFileService>();
             services.AddScoped<IBinaryLogProcessor, BinaryLogProcessor>();
@@ -113,6 +115,14 @@ namespace MSBLOC.Web
             services.AddScoped<IGitHubClientFactory, GitHubClientFactory>();
             services.AddScoped<IGitHubAppClientFactory, GitHubAppClientFactory>();
             services.AddScoped<IGitHubUserClientFactory, GitHubUserClientFactory>();
+            services.AddScoped<GitHubUserModelService>();
+            services.AddScoped<IGitHubUserModelService>(s =>
+            {
+                var proxyGenerator = s.GetService<IProxyGenerator>();
+                var target = s.GetService<GitHubUserModelService>();
+                var interceptor = new InMemoryCachingInterceptor();
+                return proxyGenerator.CreateInterfaceProxyWithTarget<IGitHubUserModelService>(target, interceptor);
+            });
             services.AddScoped<IAccessTokenService, AccessTokenService>();
 
             services.AddTransient<IMSBLOCService, MSBLOCService>();
