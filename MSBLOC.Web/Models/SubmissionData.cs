@@ -11,10 +11,6 @@ namespace MSBLOC.Web.Models
     public class SubmissionData
     {
         [Required]
-        public string RepoOwner { get; set; }
-        [Required]
-        public string RepoName { get; set; }
-        [Required]
         public string CommitSha { get; set; }
         [Required]
         public string CloneRoot { get; set; }

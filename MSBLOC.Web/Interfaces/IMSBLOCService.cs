@@ -9,8 +9,10 @@ namespace MSBLOC.Web.Interfaces
         /// <summary>
         /// Submits the provided SubmissionData to GitHub
         /// </summary>
+        /// <param name="repositoryOwner">The owner of the repository.</param>
+        /// <param name="repositoryName">The name of the repository.</param>
         /// <param name="submissionData">The submission data.</param>
         /// <returns>An Octokit CheckRun object</returns>
-        Task<CheckRun> SubmitAsync(SubmissionData submissionData);
+        Task<CheckRun> SubmitAsync(string repositoryOwner, string repositoryName, SubmissionData submissionData);
     }
 }

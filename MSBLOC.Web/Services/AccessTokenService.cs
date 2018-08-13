@@ -46,8 +46,6 @@ namespace MSBLOC.Web.Services
                 throw new ArgumentException("Repository does not exist or no permission to access given repository.");
             }
 
-            githubRepositoryId = repository.Id;
-
             var tokenHandler = new JsonWebTokenHandler();
             var signingCredentials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256Signature);
 
@@ -56,7 +54,7 @@ namespace MSBLOC.Web.Services
             var accessToken = new AccessToken()
             {
                 Id = Guid.NewGuid(),
-                GitHubRepositoryId = githubRepositoryId,
+                GitHubRepositoryId = repository.Id,
                 IssuedAt = DateTimeOffset.UtcNow,
                 IssuedTo = user.Claims.First(c => c.Type.Equals(ClaimTypes.NameIdentifier)).Value
             };
@@ -68,7 +66,10 @@ namespace MSBLOC.Web.Services
                 { JwtRegisteredClaimNames.Aud, "MSBLOC.Api" },
                 { JwtRegisteredClaimNames.Jti, accessToken.Id },
                 { JwtRegisteredClaimNames.Iat, accessToken.IssuedAt.ToUnixTimeSeconds() },
-                { "urn:msbloc:repositoryId", githubRepositoryId },
+                { "urn:msbloc:repositoryId", repository.Id },
+                { "urn:msbloc:repositoryName", repository.Name },
+                { "urn:msbloc:repositoryOwner", repository.Owner},
+                { "urn:msbloc:repositoryOwnerId", repository.OwnerId },
                 { JwtRegisteredClaimNames.Sub, accessToken.IssuedTo },
             };
 
