@@ -8,14 +8,9 @@ using MSBLOC.Web.Attributes;
 
 namespace MSBLOC.Web.Models
 {
-    public class SubmissionData
+    public class SubmissionData : SubmissionFormData
     {
-        [Required]
-        public string CommitSha { get; set; }
-        [Required]
-        public string CloneRoot { get; set; }
-        [Required]
-        [FormFile]
-        public string BinaryLogFile { get; set; }
+        public string RepoOwner { get; set; }
+        public string RepoName { get; set; }
     }
 }

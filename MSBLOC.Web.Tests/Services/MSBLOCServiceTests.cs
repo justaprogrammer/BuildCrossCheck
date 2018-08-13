@@ -39,10 +39,9 @@ namespace MSBLOC.Web.Tests.Services
                 .RuleFor(sd => sd.CloneRoot, f => f.System.DirectoryPath())
                 .RuleFor(sd => sd.CommitSha, f => f.Hashids.Encode())
                 .RuleFor(sd => sd.BinaryLogFile, f => f.System.FileName())
+                .RuleFor(sd => sd.RepoOwner, f => f.Person.FullName)
+                .RuleFor(sd => sd.RepoName, f => f.Hacker.Phrase())
                 .Generate();
-
-            var repoOwner = new Faker().Person.FullName;
-            var repoName = new Faker().Hacker.Phrase();
 
             var checkRun = new Faker<CheckRun>()
                 .RuleFor(c => c.HtmlUrl, f => f.Internet.UrlWithPath())
@@ -66,7 +65,7 @@ namespace MSBLOC.Web.Tests.Services
 
             var msblocService = new MSBLOCService(binaryLogProcessor, checkRunSubmitterFactory, tempFileService, TestLogger.Create<MSBLOCService>(_testOutputHelper));
 
-            var actualCheckRun = await msblocService.SubmitAsync(repoOwner, repoName, submissionData);
+            var actualCheckRun = await msblocService.SubmitAsync(submissionData);
 
             actualCheckRun.Should().BeSameAs(checkRun);
 
@@ -74,11 +73,11 @@ namespace MSBLOC.Web.Tests.Services
             {
                 tempFileService.GetFilePath(Arg.Is(submissionData.BinaryLogFile));
                 binaryLogProcessor.ProcessLog(Arg.Is(binaryLogFilePath), Arg.Is(submissionData.CloneRoot));
-                await checkRunSubmitterFactory.Invoke(Arg.Is(repoOwner));
+                await checkRunSubmitterFactory.Invoke(Arg.Is(submissionData.RepoOwner));
                 await checkRunSubmitter.SubmitCheckRun(
                     buildDetails: Arg.Is(buildDetails),
-                    owner: Arg.Is(repoOwner),
-                    name: Arg.Is(repoName),
+                    owner: Arg.Is(submissionData.RepoOwner),
+                    name: Arg.Is(submissionData.RepoName),
                     headSha: Arg.Is(submissionData.CommitSha),
                     checkRunName: Arg.Any<string>(),
                     checkRunTitle: Arg.Any<string>(),

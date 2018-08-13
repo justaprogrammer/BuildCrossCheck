@@ -254,7 +254,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 completedAt: DateTimeOffset.Now, output: new CheckRunOutputResponse("title", "summary", "text", 5),
                 name: "Name", checkSuite: new CheckSuite(), app: new GitHubApp(), pullRequests: null);
 
-            msblocService.SubmitAsync(null, null, null).ReturnsForAnyArgs(checkRun);
+            msblocService.SubmitAsync(null).ReturnsForAnyArgs(checkRun);
 
             var formData = new SubmissionData
             {
@@ -283,9 +283,9 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var result = await fileController.Upload() as JsonResult;
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
-            await msblocService.Received(1).SubmitAsync(Arg.Is(claims.First(c => c.Type == "urn:msbloc:repositoryOwner").Value), 
-                Arg.Is(claims.First(c => c.Type == "urn:msbloc:repositoryName").Value), 
-                Arg.Is<SubmissionData>(data =>
+            await msblocService.Received(1).SubmitAsync(
+                Arg.Is<SubmissionData>(data => data.RepoOwner.Equals(claims.First(c => c.Type == "urn:msbloc:repositoryOwner").Value) &&
+                    data.RepoName.Equals(claims.First(c => c.Type == "urn:msbloc:repositoryName").Value) &&
                     data.CloneRoot.Equals(formData.CloneRoot) &&
                     data.CommitSha.Equals(formData.CommitSha) &&
                     data.BinaryLogFile.Equals(receivedFiles.Keys.FirstOrDefault())));
@@ -347,11 +347,11 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             }
 
-            protected override Task<bool> BindDataAsync(SubmissionData model, Dictionary<string, StringValues> dataToBind)
+            protected override Task<bool> BindDataAsync(SubmissionFormData model, Dictionary<string, StringValues> dataToBind)
             {
                 foreach (var item in dataToBind)
                 {
-                    var propertyInfo = model.GetType().GetProperty(item.Key);
+                    var propertyInfo = typeof(SubmissionFormData).GetProperty(item.Key);
                     var value = Convert.ChangeType(item.Value.ToString(), propertyInfo.PropertyType);
                     propertyInfo.SetValue(model, value);
                 }
