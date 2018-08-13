@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Bogus;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -25,8 +26,44 @@ namespace MSBLOC.Core.Tests.Services
             var appId = Faker.Random.Long(0);
 
             var fakeUser = new Faker<User>()
-                .RuleFor(u => u.Id, (f, u) => f.Random.Int(0))
-                .RuleFor(u => u.Login, (f, u) => f.Person.UserName);
+                .CustomInstantiator(f =>
+                {
+                    string avatarUrl = f.Internet.Url();
+                    string bio = f.Lorem.Paragraph(1);
+                    string blog = f.Internet.Url();
+                    int collaborators = f.Random.Int(0);
+                    string company = f.Random.Bool() ? null : f.Company.CompanyName();
+                    DateTimeOffset createdAt = f.Date.PastOffset(2);
+                    DateTimeOffset updatedAt = f.Date.PastOffset(1);
+                    int diskUsage = f.Random.Int(0);
+                    string email = f.Internet.Email();
+                    int followers = f.Random.Int(0);
+                    int following = f.Random.Int(0);
+                    bool? hireable = f.Random.Bool() ? (bool?) null : f.Random.Bool();
+                    string htmlUrl = f.Internet.Url();
+                    int totalPrivateRepos = f.Random.Int(0);
+                    int id = f.Random.Int(0);
+                    string location = f.Address.City();
+                    string login = f.Internet.UserName();
+                    string name = f.Person.FullName;
+                    string nodeId = f.Random.String();
+                    int ownedPrivateRepos = f.Random.Int(0);
+                    Plan plan = null;
+                    int privateGists = f.Random.Int(0);
+                    int publicGists = f.Random.Int(0);
+                    int publicRepos = f.Random.Int(0);
+                    string url = f.Internet.Url();
+                    RepositoryPermissions permissions =
+                        new RepositoryPermissions(f.Random.Bool(), f.Random.Bool(), f.Random.Bool());
+                    bool siteAdmin = f.Random.Bool();
+                    string ldapDistinguishedName = f.Person.FullName;
+                    DateTimeOffset? suspendedAt = null;
+
+                    return new User(avatarUrl, bio, blog, collaborators, company, createdAt, updatedAt, diskUsage,
+                        email, followers, following, hireable, htmlUrl, totalPrivateRepos, id, location, login,
+                        name, nodeId, ownedPrivateRepos, plan, privateGists, publicGists, publicRepos, url,
+                        permissions, siteAdmin, ldapDistinguishedName, suspendedAt);
+                });
 
             FakeInstallation = new Faker<Installation>()
                 .RuleFor(i => i.Id, (f, i) => f.Random.Long(0))
@@ -92,7 +129,7 @@ namespace MSBLOC.Core.Tests.Services
                 gitHubAppsInstallationsClient: gitHubAppsInstallationsClient
             );
 
-            var userInstallation = await gitHubUserModelService.GetUserInstallation(installation1.Id);
+            var userInstallation = await gitHubUserModelService.GetUserInstallationAsync(installation1.Id);
 
             userInstallation.Id.Should().Be(installation1.Id);
             userInstallation.Repositories.Count.Should().Be(repositoriesResponse1.Repositories.Count);
@@ -127,7 +164,7 @@ namespace MSBLOC.Core.Tests.Services
                 gitHubAppsInstallationsClient: gitHubAppsInstallationsClient
             );
 
-            var userInstallations = await gitHubUserModelService.GetUserInstallations();
+            var userInstallations = await gitHubUserModelService.GetUserInstallationsAsync();
             userInstallations.Count.Should().Be(2);
 
             userInstallations[0].Id.Should().Be(installation1.Id);

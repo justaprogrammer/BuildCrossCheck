@@ -6,9 +6,9 @@ namespace MSBLOC.Core.Interfaces
 {
     public interface IGitHubUserModelService
     {
-        Task<IReadOnlyList<UserInstallation>> GetUserInstallations();
-        Task<UserInstallation> GetUserInstallation(long installationId);
-        Task<IReadOnlyList<UserRepository>> GetUserRepositories();
-        Task<UserRepository> GetUserRepository(long repositoryId);
+        Task<IReadOnlyList<UserInstallation>> GetUserInstallationsAsync();
+        Task<UserInstallation> GetUserInstallationAsync(long installationId);
+        Task<IReadOnlyList<UserRepository>> GetUserRepositoriesAsync();
+        Task<UserRepository> GetUserRepositoryAsync(long repositoryId);
     }
 }
