@@ -1,3 +1,4 @@
+using MSBLOC.Core.Interfaces;
 using Octokit.GraphQL;
 
 namespace MSBLOC.Core.Services

@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Model;
 using MSBLOC.Infrastructure.Interfaces;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
@@ -21,25 +23,23 @@ namespace MSBLOC.Web.Services
     {
         private readonly IOptions<AuthOptions> _optionsAccessor;
         private readonly IAccessTokenRepository _tokenRepository;
-        private readonly IGitHubUserClientFactory _gitHubUserClientFactory;
+        private readonly IGitHubUserModelService _gitHubUserModelService;
         private readonly IHttpContextAccessor _contextAccessor;
 
         public AccessTokenService(IOptions<AuthOptions> optionsAccessor, 
-            IAccessTokenRepository tokenRepository, 
-            IGitHubUserClientFactory gitHubUserClientFactory, 
+            IAccessTokenRepository tokenRepository,
+            IGitHubUserModelService gitHubUserModelService, 
             IHttpContextAccessor contextAccessor)
         {
             _optionsAccessor = optionsAccessor;
             _tokenRepository = tokenRepository;
-            _gitHubUserClientFactory = gitHubUserClientFactory;
+            _gitHubUserModelService = gitHubUserModelService;
             _contextAccessor = contextAccessor;
         }
 
         public async Task<string> CreateTokenAsync(long githubRepositoryId)
         {
-            var github = await _gitHubUserClientFactory.CreateClient();
-
-            var repository = await github.Repository.Get(githubRepositoryId);
+            UserRepository repository = await _gitHubUserModelService.GetUserRepositoryAsync(githubRepositoryId);
 
             if (repository == null)
             {
@@ -102,35 +102,18 @@ namespace MSBLOC.Web.Services
 
         public async Task RevokeTokenAsync(Guid tokenId)
         {
-            var github = await _gitHubUserClientFactory.CreateClient();
+            var userInstallations = await _gitHubUserModelService.GetUserRepositoriesAsync();
+            var repositoryIds = userInstallations.Select(r => r.Id).ToList();
 
-            var repositories = (await github.Repository.GetAllForCurrent()).ToList();
-
-            var repositoryIds = repositories.Select(r => r.Id).ToList();
-
-            await _tokenRepository.DeleteAsync(r => r.Id == tokenId && repositoryIds.Contains(r.GitHubRepositoryId));
+            await _tokenRepository.DeleteAsync(tokenId, repositoryIds);
         }
 
         public async Task<IEnumerable<AccessToken>> GetTokensForUserRepositoriesAsync()
         {
-            var userClient = await _gitHubUserClientFactory.CreateClient();
-            var gitHubAppsUserClient = userClient.GitHubApps;
-            var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installations;
+            var userRepositories = await _gitHubUserModelService.GetUserRepositoriesAsync();
+            var repositoryIds = userRepositories.Select(r => r.Id).ToList();
 
-            var repositories = new List<Repository>();
-
-            var installationsResponse = await gitHubAppsUserClient.GetAllInstallationsForUser();
-            foreach (var installation in installationsResponse.Installations)
-            {
-                var repositoriesResponse = await gitHubAppsInstallationsUserClient.GetAllRepositoriesForUser(installation.Id);
-                repositories.AddRange(repositoriesResponse.Repositories);
-            }
-
-            var repositoryIds = repositories.Select(r => r.Id).ToList();
-
-            var issuedAccessTokens = await _tokenRepository.GetAllAsync(r => repositoryIds.Contains(r.GitHubRepositoryId));
-
-            return issuedAccessTokens;
+            return await _tokenRepository.GetByRepositoryIdsAsync(repositoryIds);
         }
 
         private SecurityKey SecurityKey => new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_optionsAccessor.Value.Secret));

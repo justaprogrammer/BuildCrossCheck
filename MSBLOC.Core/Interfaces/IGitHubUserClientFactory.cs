@@ -1,8 +1,8 @@
-﻿using MSBLOC.Core.Services;
+﻿using System.Threading.Tasks;
+using MSBLOC.Core.Services;
 using Octokit;
-using System.Threading.Tasks;
 
-namespace MSBLOC.Web.Interfaces
+namespace MSBLOC.Core.Interfaces
 {
     public interface IGitHubUserClientFactory
     {

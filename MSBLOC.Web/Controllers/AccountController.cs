@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -9,7 +8,6 @@ using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Infrastructure.Interfaces;
 using MSBLOC.Web.Interfaces;
-using Octokit;
 
 namespace MSBLOC.Web.Controllers
 {
@@ -34,26 +32,17 @@ namespace MSBLOC.Web.Controllers
         [HttpGet("~/signout"), HttpPost("~/signout")]
         public async Task<IActionResult> SignOut()
         {
-            var authProperties = new AuthenticationProperties {RedirectUri = "/"};
+            var authProperties = new AuthenticationProperties { RedirectUri = "/" };
             await HttpContext.SignOutAsync(authProperties);
             return SignOut(authProperties);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ListRepositories([FromServices] IGitHubUserClientFactory gitHubUserClientFactory)
+        public async Task<IActionResult> ListRepositories(
+            [FromServices] IPersistantDataContext dbContext,
+            [FromServices] IGitHubUserModelService gitHubUserModelService)
         {
-            var userClient = await gitHubUserClientFactory.CreateClient();
-            var gitHubAppsUserClient = userClient.GitHubApps;
-            var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installations;
-
-            var repositories = new List<Repository>();
-
-            var installationsResponse = await gitHubAppsUserClient.GetAllInstallationsForUser();
-            foreach (var installation in installationsResponse.Installations)
-            {
-                var repositoriesResponse = await gitHubAppsInstallationsUserClient.GetAllRepositoriesForUser(installation.Id);
-                repositories.AddRange(repositoriesResponse.Repositories);
-            }
+            var userInstallations = await gitHubUserModelService.GetUserInstallationsAsync();
+            var repositories = userInstallations.SelectMany(installation => installation.Repositories).ToArray();
 
             var issuedAccessTokens = await _accessTokenService.GetTokensForUserRepositoriesAsync();
 
