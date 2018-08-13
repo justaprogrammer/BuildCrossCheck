@@ -8,5 +8,7 @@ namespace MSBLOC.Core.Interfaces
     {
         Task<IReadOnlyList<UserInstallation>> GetUserInstallations();
         Task<UserInstallation> GetUserInstallation(long installationId);
+        Task<IReadOnlyList<UserRepository>> GetUserRepositories();
+        Task<UserRepository> GetUserRepository(long repositoryId);
     }
 }
