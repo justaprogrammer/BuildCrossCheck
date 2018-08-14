@@ -48,7 +48,7 @@ namespace MSBLOC.Web.Controllers.api
 
         [HttpPost]
         [DisableFormValueModelBinding]
-        [MultiPartFormBinding(typeof(SubmissionData))]
+        [MultiPartFormBinding(typeof(SubmissionFormData))]
         [Route("upload")]
         [Produces("application/json")]
         public async Task<IActionResult> Upload()
@@ -146,9 +146,9 @@ namespace MSBLOC.Web.Controllers.api
             }
 
             // Bind form data to a model
-            var formData = new SubmissionData();
+            var submissionData = new SubmissionData();
 
-            var bindingSuccessful = await BindDataAsync(formData, formAccumulator.GetResults());
+            var bindingSuccessful = await BindDataAsync(submissionData, formAccumulator.GetResults());
 
             if (!bindingSuccessful)
             {
@@ -158,19 +158,25 @@ namespace MSBLOC.Web.Controllers.api
                 }
             }
 
-            var requiredFormFileProperties = typeof(SubmissionData).GetProperties()
+            var requiredFormFileProperties = typeof(SubmissionFormData).GetProperties()
                 .Where(p => p.GetCustomAttributes(typeof(RequiredAttribute), true).Any())
                 .Where(p => p.GetCustomAttributes(typeof(FormFileAttribute), true).Any());
 
             foreach (var requiredFormFileProperty in requiredFormFileProperties)
             {
-                var fileName = requiredFormFileProperty.GetValue(formData);
+                var fileName = requiredFormFileProperty.GetValue(submissionData);
                 if (!_tempFileService.Files.Contains(fileName))
                 {
                     ModelState.AddModelError(requiredFormFileProperty.Name, $"File '{requiredFormFileProperty.Name}' with name: '{fileName}' not found in request.");
                     return BadRequest(ModelState);
                 }
             }
+
+            var repositoryOwner = User.Claims.FirstOrDefault(c => c.Type == "urn:msbloc:repositoryOwner")?.Value;
+            var repositoryName = User.Claims.FirstOrDefault(c => c.Type == "urn:msbloc:repositoryName")?.Value;
+
+            submissionData.RepoOwner = repositoryOwner;
+            submissionData.RepoName = repositoryName;
 
             var checkRun = await _msblocService.SubmitAsync(
                 formData.RepoOwner,
@@ -182,7 +188,7 @@ namespace MSBLOC.Web.Controllers.api
             return Json(checkRun);
         }
 
-        protected virtual async Task<bool> BindDataAsync(SubmissionData model, Dictionary<string, StringValues> dataToBind)
+        protected virtual async Task<bool> BindDataAsync(SubmissionFormData model, Dictionary<string, StringValues> dataToBind)
         {
             var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(dataToBind), CultureInfo.CurrentCulture);
             var bindingSuccessful = await TryUpdateModelAsync(model, "", formValueProvider);
