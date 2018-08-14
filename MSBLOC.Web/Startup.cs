@@ -109,6 +109,7 @@ namespace MSBLOC.Web
             services.AddScoped<IGitHubClientFactory, GitHubClientFactory>();
             services.AddScoped<IGitHubAppClientFactory, GitHubAppClientFactory>();
             services.AddScoped<IGitHubUserClientFactory, GitHubUserClientFactory>();
+            services.AddScoped<IGitHubAppModelService, GitHubAppModelService>();
             services.AddScoped<GitHubUserModelService>();
             services.AddScoped<IGitHubUserModelService>(s =>
             {
