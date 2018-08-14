@@ -56,7 +56,7 @@ namespace MSBLOC.Core.Services
                     }
 
                     var projectItemPath = solutionDetails.GetProjectItemPath(buildWarning.ProjectFile, buildWarning.File);
-                    buildDetails.AddAnnotation(projectItemPath, buildWarning.LineNumber, endLine, AnnotationWarningLevel.Warning, buildWarning.Message, buildWarning.Code);
+                    buildDetails.AddAnnotation(projectItemPath, buildWarning.LineNumber, endLine, CheckWarningLevel.Warning, buildWarning.Message, buildWarning.Code);
                 }
 
                 if (buildEventArgs is BuildErrorEventArgs buildError)
@@ -68,7 +68,7 @@ namespace MSBLOC.Core.Services
                     }
 
                     var projectItemPath = solutionDetails.GetProjectItemPath(buildError.ProjectFile, buildError.File);
-                    buildDetails.AddAnnotation(projectItemPath, buildError.LineNumber, endLine, AnnotationWarningLevel.Failure, buildError.Message, buildError.Code);
+                    buildDetails.AddAnnotation(projectItemPath, buildError.LineNumber, endLine, CheckWarningLevel.Failure, buildError.Message, buildError.Code);
                 }
             }
 

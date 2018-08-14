@@ -15,13 +15,13 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using MSBLOC.Core.Model;
 using MSBLOC.Web.Controllers.api;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using MSBLOC.Web.Tests.Util;
 using Newtonsoft.Json;
 using NSubstitute;
-using Octokit;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -31,11 +31,17 @@ namespace MSBLOC.Web.Tests.Controllers.api
     {
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly ILogger<LogControllerTests> _logger;
+        private static readonly Faker Faker;
 
         public LogControllerTests(ITestOutputHelper testOutputHelper)
         {
             _logger = TestLogger.Create<LogControllerTests>(testOutputHelper);
             _testOutputHelper = testOutputHelper;
+        }
+
+        static LogControllerTests()
+        {
+            Faker = new Faker();
         }
 
         [Fact]
@@ -251,11 +257,11 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 });
             fileService.Files.Returns(new[] {name});
 
-            var checkRun = new CheckRun(
-                id: 1234, headSha: "123456", externalId: "", url: "", htmlUrl: "", status: CheckStatus.Completed,
-                conclusion: CheckConclusion.Failure, startedAt: DateTimeOffset.Now.AddMinutes(-10),
-                completedAt: DateTimeOffset.Now, output: new CheckRunOutputResponse("title", "summary", "text", 5),
-                name: "Name", checkSuite: new CheckSuite(), app: new GitHubApp(), pullRequests: null);
+            var checkRun = new CheckRun()
+            {
+                Id = Faker.Random.Long(),
+                Url = Faker.Internet.Url()
+            };
 
             msblocService.SubmitAsync(null).ReturnsForAnyArgs(checkRun);
 
@@ -292,7 +298,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             resultFormData.Should().NotBeNull();
             resultFormData.Id.Should().Be(checkRun.Id);
-            resultFormData.HeadSha.Should().Be(checkRun.HeadSha);
+            resultFormData.Url.Should().Be(checkRun.Url);
         }
 
         private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary,

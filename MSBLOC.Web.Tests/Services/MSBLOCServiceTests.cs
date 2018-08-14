@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using System.Threading.Tasks;
 using Bogus;
 using FluentAssertions;
@@ -11,10 +8,8 @@ using MSBLOC.Core.Model;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using MSBLOC.Web.Services;
-using MSBLOC.Web.Tests.Controllers.api;
 using MSBLOC.Web.Tests.Util;
 using NSubstitute;
-using Octokit;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -22,68 +17,82 @@ namespace MSBLOC.Web.Tests.Services
 {
     public class MSBLOCServiceTests
     {
-        private readonly ITestOutputHelper _testOutputHelper;
-        private readonly ILogger<MSBLOCServiceTests> _logger;
-
         public MSBLOCServiceTests(ITestOutputHelper testOutputHelper)
         {
             _logger = TestLogger.Create<MSBLOCServiceTests>(testOutputHelper);
             _testOutputHelper = testOutputHelper;
         }
 
+        static MSBLOCServiceTests()
+        {
+            Faker = new Faker();
+        }
+
+        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly ILogger<MSBLOCServiceTests> _logger;
+
+        private static readonly Faker Faker;
+
+        private MSBLOCService CreateTarget(
+            IBinaryLogProcessor binaryLogProcessor = null,
+            IGitHubAppModelService gitHubAppModelService = null,
+            ITempFileService tempFileService = null)
+        {
+            if (binaryLogProcessor == null) binaryLogProcessor = Substitute.For<IBinaryLogProcessor>();
+
+            if (gitHubAppModelService == null) gitHubAppModelService = Substitute.For<IGitHubAppModelService>();
+
+            if (tempFileService == null) tempFileService = Substitute.For<ITempFileService>();
+
+            return new MSBLOCService(binaryLogProcessor, gitHubAppModelService, tempFileService,
+                TestLogger.Create<MSBLOCService>(_testOutputHelper));
+        }
+
         [Fact]
-        [SuppressMessage("ReSharper", "AssignNullToNotNullAttribute")]
         public async Task SubmitTest()
         {
-            var submissionData = new Faker<SubmissionData>()
-                .RuleFor(sd => sd.RepoOwner, f => f.Person.FullName)
-                .RuleFor(sd => sd.RepoName, f => f.Hacker.Phrase())
-                .RuleFor(sd => sd.CloneRoot, f => f.System.DirectoryPath())
-                .RuleFor(sd => sd.CommitSha, f => f.Hashids.Encode())
-                .RuleFor(sd => sd.BinaryLogFile, f => f.System.FileName())
-                .Generate();
 
-            var checkRun = new Faker<CheckRun>()
-                .RuleFor(c => c.HtmlUrl, f => f.Internet.UrlWithPath())
-                .Generate();
-
-            var binaryLogFilePath = new Faker().System.FilePath();
+            var cloneRoot = Faker.System.DirectoryPath();
+            var buildDetails = new BuildDetails(new SolutionDetails(cloneRoot));
 
             var binaryLogProcessor = Substitute.For<IBinaryLogProcessor>();
-            var tempFileService = Substitute.For<ITempFileService>();
-            var checkRunSubmitter = Substitute.For<ICheckRunSubmitter>();
-
-            tempFileService.GetFilePath(null).ReturnsForAnyArgs(binaryLogFilePath);
-
-            var buildDetails = new BuildDetails(new SolutionDetails(submissionData.CloneRoot));
             binaryLogProcessor.ProcessLog(null, null).ReturnsForAnyArgs(buildDetails);
 
-            var checkRunSubmitterFactory = Substitute.For<Func<string, Task<ICheckRunSubmitter>>>();
-            checkRunSubmitterFactory.Invoke("").ReturnsForAnyArgs(checkRunSubmitter);
+            var tempBinaryLogFilePath = Faker.System.FilePath();
+            var tempFileService = Substitute.For<ITempFileService>();
+            tempFileService.GetFilePath(null).ReturnsForAnyArgs(tempBinaryLogFilePath);
 
-            checkRunSubmitter.SubmitCheckRun(null, null, null, null, null, null, null, DateTimeOffset.MinValue, DateTimeOffset.MinValue).ReturnsForAnyArgs(checkRun);
+            var id = Faker.Random.Long();
+            var url = Faker.Internet.Url();
 
-            var msblocService = new MSBLOCService(binaryLogProcessor, checkRunSubmitterFactory, tempFileService, TestLogger.Create<MSBLOCService>(_testOutputHelper));
+            var gitHubAppModelService = Substitute.For<IGitHubAppModelService>();
+            gitHubAppModelService.CreateCheckRun(null, null, null, null, null, null, null, null, null)
+                .ReturnsForAnyArgs(new CheckRun()
+                {
+                    Id = id,
+                    Url = url
+                });
 
-            var actualCheckRun = await msblocService.SubmitAsync(submissionData);
+            var msblocService = CreateTarget(binaryLogProcessor, gitHubAppModelService, tempFileService);
 
-            actualCheckRun.Should().BeSameAs(checkRun);
+            var submissionData = new SubmissionData()
+            {
+                BinaryLogFile = Faker.System.FilePath()
+            };
+
+            var checkRun = await msblocService.SubmitAsync(submissionData);
+            checkRun.Id.Should().Be(id);
+            checkRun.Url.Should().Be(url);
 
             Received.InOrder(async () =>
             {
-                tempFileService.GetFilePath(Arg.Is(submissionData.BinaryLogFile));
-                binaryLogProcessor.ProcessLog(Arg.Is(binaryLogFilePath), Arg.Is(submissionData.CloneRoot));
-                await checkRunSubmitterFactory.Invoke(Arg.Is(submissionData.RepoOwner));
-                await checkRunSubmitter.SubmitCheckRun(
-                    buildDetails: Arg.Is(buildDetails),
-                    owner: Arg.Is(submissionData.RepoOwner),
-                    name: Arg.Is(submissionData.RepoName),
-                    headSha: Arg.Is(submissionData.CommitSha),
-                    checkRunName: Arg.Any<string>(),
-                    checkRunTitle: Arg.Any<string>(),
-                    checkRunSummary: Arg.Any<string>(),
-                    startedAt: Arg.Any<DateTimeOffset>(),
-                    completedAt: Arg.Any<DateTimeOffset>());
+                tempFileService.GetFilePath(submissionData.BinaryLogFile);
+                binaryLogProcessor.ProcessLog(Arg.Is(tempBinaryLogFilePath), Arg.Is(submissionData.CloneRoot));
+                await gitHubAppModelService.CreateCheckRun(
+                    Arg.Is(submissionData.RepoOwner),
+                    Arg.Is(submissionData.RepoName),
+                    Arg.Is(submissionData.CommitSha),
+                    Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Annotation[]>(), Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>());
             });
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using GitHubJwt;
 using MSBLOC.Core.IntegrationTests.Utilities;
+using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Services.Factories;
 using Octokit;
@@ -9,7 +10,9 @@ namespace MSBLOC.Core.IntegrationTests
 {
     public class IntegrationTestsBase
     {
-        protected string GitHubAppPrivateKeyEnvironmentVariable { get; } = Helper.GitHubAppPrivateKeyEnvironmentVariable;
+        protected string GitHubAppPrivateKeyEnvironmentVariable { get; } =
+            Helper.GitHubAppPrivateKeyEnvironmentVariable;
+
         protected int GitHubAppId { get; } = Helper.GitHubAppId;
 
         protected string TestAppOwner { get; } = Helper.IntegrationTestAppOwner;
@@ -18,45 +21,52 @@ namespace MSBLOC.Core.IntegrationTests
         protected string TestToken { get; } = Helper.IntegrationTestToken;
         protected string TestUsername { get; } = Helper.IntegrationTestUsername;
 
-        protected IGitHubClient CreateGitHubAppClient()
+        protected IGitHubAppClientFactory CreateGitHubAppClientFactory()
+        {
+            return new GitHubAppClientFactory();
+        }
+
+        protected TokenGenerator CreateTokenGenerator()
         {
             var privateKeySource = new EnvironmentVariablePrivateKeySource(GitHubAppPrivateKeyEnvironmentVariable);
-            var tokenGenerator = new TokenGenerator(GitHubAppId, privateKeySource);
-            var gitHubClientFactory = new GitHubAppClientFactory();
+            return new TokenGenerator(GitHubAppId, privateKeySource);
+        }
+
+        protected IGitHubClient CreateGitHubAppClient()
+        {
+            var gitHubClientFactory = CreateGitHubAppClientFactory();
+            var tokenGenerator = CreateTokenGenerator();
             return gitHubClientFactory.CreateAppClient(tokenGenerator);
         }
 
         protected IGitHubGraphQLClient CreateGitHubAppGraphQLClient()
         {
-            var privateKeySource = new EnvironmentVariablePrivateKeySource(GitHubAppPrivateKeyEnvironmentVariable);
-            var tokenGenerator = new TokenGenerator(GitHubAppId, privateKeySource);
-            var gitHubClientFactory = new GitHubAppClientFactory();
+            var gitHubClientFactory = CreateGitHubAppClientFactory();
+            var tokenGenerator = CreateTokenGenerator();
             return gitHubClientFactory.CreateAppGraphQLClient(tokenGenerator);
         }
 
         protected async Task<IGitHubClient> CreateGitHubAppClientForLogin(string login)
         {
-            var privateKeySource = new EnvironmentVariablePrivateKeySource(GitHubAppPrivateKeyEnvironmentVariable);
-            var tokenGenerator = new TokenGenerator(GitHubAppId, privateKeySource);
-            var gitHubClientFactory = new GitHubAppClientFactory();
+            var gitHubClientFactory = CreateGitHubAppClientFactory();
+            var tokenGenerator = CreateTokenGenerator();
             return await gitHubClientFactory.CreateAppClientForLogin(tokenGenerator, login);
         }
 
         protected async Task<IGitHubGraphQLClient> CreateGitHubAppGraphQLClientForLogin(string login)
         {
-            var privateKeySource = new EnvironmentVariablePrivateKeySource(GitHubAppPrivateKeyEnvironmentVariable);
-            var tokenGenerator = new TokenGenerator(GitHubAppId, privateKeySource);
-            var gitHubClientFactory = new GitHubAppClientFactory();
+            var gitHubClientFactory = CreateGitHubAppClientFactory();
+            var tokenGenerator = CreateTokenGenerator();
             return await gitHubClientFactory.CreateAppGraphQLClientForLogin(tokenGenerator, login);
         }
 
-        protected IGitHubClient CreateGitHubUserClient()
+        protected IGitHubClient CreateGitHubTokenClient()
         {
             var gitHubClientFactory = new GitHubClientFactory();
             return gitHubClientFactory.CreateClient(TestToken);
         }
 
-        protected IGitHubGraphQLClient CreateGitHubQLClient()
+        protected IGitHubGraphQLClient CreateGitHubGraphQLTokenClient()
         {
             var gitHubClientFactory = new GitHubClientFactory();
             return gitHubClientFactory.CreateGraphQLClient(TestToken);

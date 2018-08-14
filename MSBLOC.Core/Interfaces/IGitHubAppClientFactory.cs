@@ -8,7 +8,7 @@ namespace MSBLOC.Core.Interfaces
     {
         Task<IGitHubClient> CreateAppClientForLogin(ITokenGenerator tokenGenerator, string login);
         Task<IGitHubGraphQLClient> CreateAppGraphQLClientForLogin(ITokenGenerator tokenGenerator, string login);
-        GitHubClient CreateAppClient(ITokenGenerator tokenGenerator);
+        IGitHubClient CreateAppClient(ITokenGenerator tokenGenerator);
         IGitHubGraphQLClient CreateAppGraphQLClient(ITokenGenerator tokenGenerator);
     }
 }

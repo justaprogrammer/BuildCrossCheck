@@ -50,20 +50,20 @@ namespace MSBLOC.Core.IntegrationTests.Concepts
             var gitHubClient = await CreateGitHubAppClientForLogin(TestAppOwner);
             var checkRunsClient = gitHubClient.Check.Run;
 
-            var submitter = new CheckRunSubmitter(checkRunsClient);
-            var checkRun = await submitter.SubmitCheckRun(buildDetails: buildDetails,
-                owner: TestAppOwner,
-                name: TestAppRepo,
-                headSha: sha,
-                checkRunName: "MSBuildLog Analyzer",
-                checkRunTitle: "MSBuildLog Analysis",
-                checkRunSummary: "",
-                startedAt: startedAt,
-                completedAt: DateTimeOffset.Now);
-
-            checkRun.Should().NotBeNull();
-
-            _logger.LogInformation($"CheckRun Created - {checkRun.HtmlUrl}");
+//            var submitter = new CheckRunSubmitter(checkRunsClient);
+//            var checkRun = await submitter.SubmitCheckRun(buildDetails: buildDetails,
+//                owner: TestAppOwner,
+//                name: TestAppRepo,
+//                headSha: sha,
+//                checkRunName: "MSBuildLog Analyzer",
+//                checkRunTitle: "MSBuildLog Analysis",
+//                checkRunSummary: "",
+//                startedAt: startedAt,
+//                completedAt: DateTimeOffset.Now);
+//
+//            checkRun.Should().NotBeNull();
+//
+//            _logger.LogInformation($"CheckRun Created - {checkRun.HtmlUrl}");
         }
     }
 }

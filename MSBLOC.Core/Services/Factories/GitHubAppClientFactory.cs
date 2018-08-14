@@ -14,7 +14,7 @@ namespace MSBLOC.Core.Services.Factories
             return GitHubClientFactoryHelper.GitHubClient(token, GetUserAgent(installation));
         }
 
-        public GitHubClient CreateAppClient(ITokenGenerator tokenGenerator)
+        public IGitHubClient CreateAppClient(ITokenGenerator tokenGenerator)
         {
             var token = tokenGenerator.GetToken();
 

@@ -5,30 +5,31 @@ using System.Threading.Tasks;
 using GitHubJwt;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MoreLinq;
 using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Model;
 using MSBLOC.Core.Services;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
-using Octokit;
 
 namespace MSBLOC.Web.Services
 {
     public class MSBLOCService : IMSBLOCService
     {
         private readonly IBinaryLogProcessor _binaryLogProcessor;
-        private readonly Func<string, Task<ICheckRunSubmitter>> _checkRunSubmitterFactoryAsync;
+        private readonly IGitHubAppModelService _gitHubAppModelService;
         private readonly ITempFileService _tempFileService;
         private readonly ILogger _logger;
 
         public MSBLOCService(
             IBinaryLogProcessor binaryLogProcessor,
-            Func<string, Task<ICheckRunSubmitter>> checkRunSubmitterFactoryAsync, 
+            IGitHubAppModelService gitHubAppModelService, 
             ITempFileService tempFileService,
-            ILogger<MSBLOCService> logger = null)
+            ILogger<MSBLOCService> logger)
         {
             _logger = logger;
             _binaryLogProcessor = binaryLogProcessor;
-            _checkRunSubmitterFactoryAsync = checkRunSubmitterFactoryAsync;
+            _gitHubAppModelService = gitHubAppModelService;
             _tempFileService = tempFileService;
         }
 
@@ -45,9 +46,7 @@ namespace MSBLOC.Web.Services
 
             var buildDetails = _binaryLogProcessor.ProcessLog(resourcePath, cloneRoot);
 
-            var submitter = await _checkRunSubmitterFactoryAsync(repoOwner);
-
-            var checkRun = await submitter.SubmitCheckRun(buildDetails: buildDetails,
+            var checkRun = await SubmitCheckRun(buildDetails: buildDetails,
                 owner: repoOwner,
                 name: repoName,
                 headSha: sha,
@@ -55,9 +54,27 @@ namespace MSBLOC.Web.Services
                 checkRunTitle: "MSBuildLog Analysis",
                 checkRunSummary: "",
                 startedAt: startedAt,
-                completedAt: DateTimeOffset.Now);
+                completedAt: DateTimeOffset.Now).ConfigureAwait(false);
 
-            _logger.LogInformation($"CheckRun Created - {checkRun.HtmlUrl}");
+            _logger.LogInformation($"CheckRun Created - {checkRun.Url}");
+
+            return checkRun;
+        }
+
+        protected async Task<CheckRun> SubmitCheckRun(BuildDetails buildDetails,
+            string owner, string name, string headSha,
+            string checkRunName, string checkRunTitle, string checkRunSummary,
+            DateTimeOffset startedAt, DateTimeOffset completedAt)
+        {
+            var annotations = buildDetails.Annotations?.Batch(50).ToArray();
+
+            var checkRun = await _gitHubAppModelService.CreateCheckRun(owner, name, headSha, checkRunName, checkRunTitle, checkRunSummary, annotations?.FirstOrDefault()?.ToArray(), startedAt, completedAt).ConfigureAwait(false);
+
+            foreach (var annotationBatch in annotations.Skip(1))
+            {
+                await _gitHubAppModelService.UpdateCheckRun(checkRun.Id, owner, name, headSha, checkRunTitle, checkRunSummary,
+                    annotationBatch.ToArray(), startedAt, completedAt).ConfigureAwait(false);
+            }
 
             return checkRun;
         }

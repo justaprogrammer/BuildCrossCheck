@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
+using MSBLOC.Core.Model;
 using MSBLOC.Web.Models;
-using Octokit;
 
 namespace MSBLOC.Web.Interfaces
 {

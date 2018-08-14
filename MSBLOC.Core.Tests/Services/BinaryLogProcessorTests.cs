@@ -43,7 +43,7 @@ namespace MSBLOC.Core.Tests.Services
             AssertParseLogs("testconsoleapp1-1warning.binlog",
                 solutionDetails, new[]
                 {
-                    new Annotation(@"TestConsoleApp1/Program.cs", AnnotationWarningLevel.Warning, "CS0219", "The variable 'hello' is assigned but its value is never used", 13, 13),
+                    new Annotation(@"TestConsoleApp1/Program.cs", CheckWarningLevel.Warning, "CS0219", "The variable 'hello' is assigned but its value is never used", 13, 13),
                 }, cloneRoot);
         }
 
@@ -64,7 +64,7 @@ namespace MSBLOC.Core.Tests.Services
             AssertParseLogs("testconsoleapp1-1error.binlog",
                 solutionDetails, new[]
                 {
-                    new Annotation(@"TestConsoleApp1/Program.cs", AnnotationWarningLevel.Failure, "CS1002", "; expected", 13, 13),
+                    new Annotation(@"TestConsoleApp1/Program.cs", CheckWarningLevel.Failure, "CS1002", "; expected", 13, 13),
                 }, cloneRoot);
         }
 
@@ -125,7 +125,7 @@ namespace MSBLOC.Core.Tests.Services
                 AssertParseLogs("testconsoleapp1-1warning.binlog",
                     solutionDetails, new[]
                     {
-                        new Annotation(@"TestConsoleApp1/Program.cs", AnnotationWarningLevel.Warning, "CS0219",
+                        new Annotation(@"TestConsoleApp1/Program.cs", CheckWarningLevel.Warning, "CS0219",
                             "The variable 'hello' is assigned but its value is never used", 13, 13),
                     }, "C:\\projects\\testconsoleapp2\\");
             });

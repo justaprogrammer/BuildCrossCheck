@@ -13,10 +13,12 @@ namespace MSBLOC.Core.Services
     public class GitHubUserModelService : IGitHubUserModelService
     {
         private readonly AsyncLazy<IGitHubClient> _lazyGitHubUserClient;
+        private readonly AsyncLazy<IGitHubGraphQLClient> _lazyGitHubUserGraphQLClient;
 
         public GitHubUserModelService(IGitHubUserClientFactory gitHubUserClientFactory)
         {
             _lazyGitHubUserClient = new AsyncLazy<IGitHubClient>(() => gitHubUserClientFactory.CreateClient());
+            _lazyGitHubUserGraphQLClient = new AsyncLazy<IGitHubGraphQLClient>(() => gitHubUserClientFactory.CreateGraphQLClient());
         }
 
         public async Task<IReadOnlyList<UserInstallation>> GetUserInstallationsAsync()
