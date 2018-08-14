@@ -1,50 +1,35 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GitHubJwt;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using MoreLinq;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
-using MSBLOC.Core.Services;
-using MSBLOC.Web.Interfaces;
-using MSBLOC.Web.Models;
 
-namespace MSBLOC.Web.Services
+namespace MSBLOC.Core.Services
 {
     public class MSBLOCService : IMSBLOCService
     {
         private readonly IBinaryLogProcessor _binaryLogProcessor;
         private readonly IGitHubAppModelService _gitHubAppModelService;
-        private readonly ITempFileService _tempFileService;
         private readonly ILogger _logger;
 
         public MSBLOCService(
             IBinaryLogProcessor binaryLogProcessor,
-            IGitHubAppModelService gitHubAppModelService, 
-            ITempFileService tempFileService,
+            IGitHubAppModelService gitHubAppModelService,
             ILogger<MSBLOCService> logger)
         {
             _logger = logger;
             _binaryLogProcessor = binaryLogProcessor;
             _gitHubAppModelService = gitHubAppModelService;
-            _tempFileService = tempFileService;
         }
 
-        public async Task<CheckRun> SubmitAsync(SubmissionData submissionData)
+        public async Task<CheckRun> SubmitAsync(string repoOwner, string repoName, string sha, string cloneRoot,
+            string resourcePath)
         {
-            var repoOwner = submissionData.RepoOwner;
-            var repoName = submissionData.RepoName;
-            var cloneRoot = submissionData.CloneRoot;
-            var sha = submissionData.CommitSha;
-
-            var resourcePath = _tempFileService.GetFilePath(submissionData.BinaryLogFile);
-
             var startedAt = DateTimeOffset.Now;
 
-            var buildDetails = _binaryLogProcessor.ProcessLog(resourcePath, cloneRoot);
+            var buildDetails = _binaryLogProcessor.ProcessLog(resourcePath, cloneRoot, repoOwner, repoName, sha);
 
             var checkRun = await SubmitCheckRun(buildDetails: buildDetails,
                 owner: repoOwner,

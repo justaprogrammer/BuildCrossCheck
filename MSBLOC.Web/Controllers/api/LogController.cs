@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
+using MSBLOC.Core.Interfaces;
 using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
@@ -171,7 +172,12 @@ namespace MSBLOC.Web.Controllers.api
                 }
             }
 
-            var checkRun = await _msblocService.SubmitAsync(formData);
+            var checkRun = await _msblocService.SubmitAsync(
+                formData.RepoOwner,
+                formData.RepoName,
+                formData.CommitSha,
+                formData.CloneRoot,
+                _tempFileService.GetFilePath(formData.BinaryLogFile));
 
             return Json(checkRun);
         }

@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
 using MSBLOC.Web.Controllers.api;
 using MSBLOC.Web.Interfaces;
@@ -263,7 +264,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 Url = Faker.Internet.Url()
             };
 
-            msblocService.SubmitAsync(null).ReturnsForAnyArgs(checkRun);
+            msblocService.SubmitAsync(null, null, null, null, null).ReturnsForAnyArgs(checkRun);
 
             var formData = new SubmissionData
             {
@@ -285,12 +286,12 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var result = await fileController.Upload() as JsonResult;
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
-            await msblocService.Received(1).SubmitAsync(Arg.Is<SubmissionData>(data =>
-                data.RepoOwner.Equals(formData.RepoOwner) &&
-                data.RepoName.Equals(formData.RepoName) && 
-                data.CloneRoot.Equals(formData.CloneRoot) &&
-                data.CommitSha.Equals(formData.CommitSha) &&
-                data.BinaryLogFile.Equals(receivedFiles.Keys.FirstOrDefault())));
+            await msblocService.Received(1).SubmitAsync(
+                formData.RepoOwner,
+                formData.RepoName,
+                formData.CommitSha,
+                formData.CloneRoot,
+                string.Empty);
 
             receivedFiles.Should().BeEquivalentTo(fileDictionary);
 

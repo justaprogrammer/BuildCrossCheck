@@ -11,10 +11,10 @@
         public string BlobHref { get; }
 
         public Annotation(string filename, CheckWarningLevel checkWarningLevel, string title, string message,
-            int lineNumber, int endLine)
+            int lineNumber, int endLine, string blobHref)
         {
             Filename = filename;
-            BlobHref = null;
+            BlobHref = blobHref;
             CheckWarningLevel = checkWarningLevel;
             Title = title;
             Message = message;

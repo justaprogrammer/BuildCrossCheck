@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Bogus;
 using FluentAssertions;
 using FluentAssertions.Equivalency;
 using Microsoft.Build.Framework;
@@ -20,10 +21,17 @@ namespace MSBLOC.Core.Tests.Services
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly ILogger<BinaryLogProcessorTests> _logger;
 
+        private static Faker Faker;
+
         public BinaryLogProcessorTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
             _logger = TestLogger.Create<BinaryLogProcessorTests>(testOutputHelper);
+        }
+
+        static BinaryLogProcessorTests()
+        {
+            Faker = new Faker();
         }
 
         [Fact]
@@ -40,11 +48,16 @@ namespace MSBLOC.Core.Tests.Services
             project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
             solutionDetails.Add(project);
 
+            var repoOwner = Faker.Lorem.Word();
+            var repoName = Faker.Lorem.Word();
+            var headSha = Faker.Lorem.Word();
+            var filename = @"TestConsoleApp1/Program.cs";
             AssertParseLogs("testconsoleapp1-1warning.binlog",
+
                 solutionDetails, new[]
                 {
-                    new Annotation(@"TestConsoleApp1/Program.cs", CheckWarningLevel.Warning, "CS0219", "The variable 'hello' is assigned but its value is never used", 13, 13),
-                }, cloneRoot);
+                    new Annotation(filename, CheckWarningLevel.Warning, "CS0219", "The variable 'hello' is assigned but its value is never used", 13, 13, BinaryLogProcessor.BlobHref(repoOwner, repoName, headSha, filename)),
+                }, cloneRoot, repoOwner, repoName, headSha);
         }
 
         [Fact]
@@ -61,11 +74,16 @@ namespace MSBLOC.Core.Tests.Services
             project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
             solutionDetails.Add(project);
 
+            var repoOwner = Faker.Lorem.Word();
+            var repoName = Faker.Lorem.Word();
+            var headSha = Faker.Lorem.Word();
+            var filename = @"TestConsoleApp1/Program.cs";
+
             AssertParseLogs("testconsoleapp1-1error.binlog",
                 solutionDetails, new[]
                 {
-                    new Annotation(@"TestConsoleApp1/Program.cs", CheckWarningLevel.Failure, "CS1002", "; expected", 13, 13),
-                }, cloneRoot);
+                    new Annotation(filename, CheckWarningLevel.Failure, "CS1002", "; expected", 13, 13, BinaryLogProcessor.BlobHref(repoOwner, repoName, headSha, filename)),
+                }, cloneRoot, repoOwner, repoName, headSha);
         }
 
         [Fact]
@@ -93,7 +111,7 @@ namespace MSBLOC.Core.Tests.Services
             project = new ProjectDetails(cloneRoot, @"C:\projects\msbuildlogoctokitchecker\MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj");
             solutionDetails.Add(project);
 
-            AssertParseLogs("msbloc.binlog", solutionDetails, new Annotation[0], cloneRoot, options => options.IncludingNestedObjects().IncludingProperties().Excluding(info => info.SelectedMemberInfo.Name == "Paths"));
+            AssertParseLogs("msbloc.binlog", solutionDetails, new Annotation[0], cloneRoot, Faker.Lorem.Word(), Faker.Lorem.Word(), Faker.Lorem.Word(), options => options.IncludingNestedObjects().IncludingProperties().Excluding(info => info.SelectedMemberInfo.Name == "Paths"));
         }
 
         [Fact]
@@ -105,7 +123,7 @@ namespace MSBLOC.Core.Tests.Services
             File.Exists(resourcePath).Should().BeTrue();
 
             var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
-            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot);
+            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot, Faker.Lorem.Word(), Faker.Lorem.Word(), Faker.Lorem.Word());
         }
 
         [Fact]
@@ -122,25 +140,29 @@ namespace MSBLOC.Core.Tests.Services
 
             var projectDetailsException = Assert.Throws<ProjectDetailsException>(() =>
             {
+                var repoOwner = Faker.Lorem.Word();
+                var repoName = Faker.Lorem.Word();
+                var headSha = Faker.Lorem.Word();
+                var filename = @"TestConsoleApp1/Program.cs";
+
                 AssertParseLogs("testconsoleapp1-1warning.binlog",
                     solutionDetails, new[]
                     {
-                        new Annotation(@"TestConsoleApp1/Program.cs", CheckWarningLevel.Warning, "CS0219",
-                            "The variable 'hello' is assigned but its value is never used", 13, 13),
-                    }, "C:\\projects\\testconsoleapp2\\");
+                        new Annotation(filename, CheckWarningLevel.Warning, "CS1002", "; expected", 13, 13, BinaryLogProcessor.BlobHref(repoOwner, repoName, headSha, filename)),
+                    }, "C:\\projects\\testconsoleapp2\\", repoOwner, repoName, headSha);
             });
 
             projectDetailsException.Message.Should().Be(@"Project file path ""C:\projects\testconsoleapp1\TestConsoleApp1.sln"" is not a subpath of ""C:\projects\testconsoleapp2\""");
         }
 
         private void AssertParseLogs(string resourceName, SolutionDetails expectedSolutionDetails, Annotation[] expectedAnnotations,
-            string cloneRoot, Func<EquivalencyAssertionOptions<SolutionDetails>, EquivalencyAssertionOptions<SolutionDetails>> solutionDetailsEquivalency = null)
+            string cloneRoot, string repoOwner, string repoName, string headSha, Func<EquivalencyAssertionOptions<SolutionDetails>, EquivalencyAssertionOptions<SolutionDetails>> solutionDetailsEquivalency = null)
         {
             var resourcePath = TestUtils.GetResourcePath(resourceName);
             File.Exists(resourcePath).Should().BeTrue();
 
             var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
-            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot);
+            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot, repoOwner, repoName, headSha);
 
             parsedBinaryLog.Annotations.ToArray().Should().BeEquivalentTo(expectedAnnotations);
 

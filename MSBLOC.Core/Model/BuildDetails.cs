@@ -17,9 +17,10 @@ namespace MSBLOC.Core.Model
             Annotations = annotations?.ToList() ?? new List<Annotation>();
         }
 
-        public void AddAnnotation(string filename, int lineNumber, int endLine, CheckWarningLevel checkWarningLevel, string message, string title)
+        public void AddAnnotation(string filename, int lineNumber, int endLine, CheckWarningLevel checkWarningLevel,
+            string message, string title, string blobHref)
         {
-            var annotation = new Annotation(filename, checkWarningLevel, title, message, lineNumber, endLine);
+            var annotation = new Annotation(filename, checkWarningLevel, title, message, lineNumber, endLine, blobHref);
             Annotations.Add(annotation);
         }
     }

@@ -19,7 +19,8 @@ namespace MSBLOC.Core.Services
         }
 
         /// <inheritdoc />
-        public BuildDetails ProcessLog(string binLogPath, string buildEnvironmentCloneRoot)
+        public BuildDetails ProcessLog(string binLogPath, string buildEnvironmentCloneRoot, string repoOwner,
+            string repoName, string headSha)
         {
             var binLogReader = new StructuredLogger::Microsoft.Build.Logging.BinaryLogReplayEventSource();
 
@@ -56,7 +57,8 @@ namespace MSBLOC.Core.Services
                     }
 
                     var projectItemPath = solutionDetails.GetProjectItemPath(buildWarning.ProjectFile, buildWarning.File);
-                    buildDetails.AddAnnotation(projectItemPath, buildWarning.LineNumber, endLine, CheckWarningLevel.Warning, buildWarning.Message, buildWarning.Code);
+                    var blobHref = BlobHref(repoOwner, repoName, headSha, projectItemPath);
+                    buildDetails.AddAnnotation(projectItemPath, buildWarning.LineNumber, endLine, CheckWarningLevel.Warning, buildWarning.Message, buildWarning.Code, blobHref);
                 }
 
                 if (buildEventArgs is BuildErrorEventArgs buildError)
@@ -68,11 +70,17 @@ namespace MSBLOC.Core.Services
                     }
 
                     var projectItemPath = solutionDetails.GetProjectItemPath(buildError.ProjectFile, buildError.File);
-                    buildDetails.AddAnnotation(projectItemPath, buildError.LineNumber, endLine, CheckWarningLevel.Failure, buildError.Message, buildError.Code);
+                    var blobHref = BlobHref(repoOwner, repoName, headSha, projectItemPath);
+                    buildDetails.AddAnnotation(projectItemPath, buildError.LineNumber, endLine, CheckWarningLevel.Failure, buildError.Message, buildError.Code, blobHref);
                 }
             }
 
             return buildDetails;
+        }
+
+        public static string BlobHref(string owner, string repository, string sha, string file)
+        {
+            return $"https://github.com/{owner}/{repository}/blob/{sha}/{file.Replace(@"\", "/")}";
         }
     }
 }

@@ -9,15 +9,15 @@ using Xunit.Abstractions;
 
 namespace MSBLOC.Core.IntegrationTests.Concepts
 {
-    public class SubmissionIntegrationTests : IntegrationTestsBase
+    public class MSBLOCServiceIntegrationTests : IntegrationTestsBase
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly ILogger<SubmissionIntegrationTests> _logger;
+        private readonly ILogger<MSBLOCServiceIntegrationTests> _logger;
 
-        public SubmissionIntegrationTests(ITestOutputHelper testOutputHelper)
+        public MSBLOCServiceIntegrationTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
-            _logger = TestLogger.Create<SubmissionIntegrationTests>(testOutputHelper);
+            _logger = TestLogger.Create<MSBLOCServiceIntegrationTests>(testOutputHelper);
         }
 
         [IntegrationTest]
@@ -45,25 +45,17 @@ namespace MSBLOC.Core.IntegrationTests.Concepts
 
             var startedAt = DateTimeOffset.Now;
             var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
-            var buildDetails = parser.ProcessLog(resourcePath, cloneRoot);
+            var buildDetails = parser.ProcessLog(resourcePath, cloneRoot, TestAppOwner, TestAppRepo, sha);
 
-            var gitHubClient = await CreateGitHubAppClientForLogin(TestAppOwner);
-            var checkRunsClient = gitHubClient.Check.Run;
+            var gitHubAppClientFactory = CreateGitHubAppClientFactory();
+            var gitHubAppModelService = new GitHubAppModelService(gitHubAppClientFactory, CreateTokenGenerator());
 
-//            var submitter = new CheckRunSubmitter(checkRunsClient);
-//            var checkRun = await submitter.SubmitCheckRun(buildDetails: buildDetails,
-//                owner: TestAppOwner,
-//                name: TestAppRepo,
-//                headSha: sha,
-//                checkRunName: "MSBuildLog Analyzer",
-//                checkRunTitle: "MSBuildLog Analysis",
-//                checkRunSummary: "",
-//                startedAt: startedAt,
-//                completedAt: DateTimeOffset.Now);
-//
-//            checkRun.Should().NotBeNull();
-//
-//            _logger.LogInformation($"CheckRun Created - {checkRun.HtmlUrl}");
+            var msblocService = new MSBLOCService(parser, gitHubAppModelService, TestLogger.Create<MSBLOCService>(_testOutputHelper));
+            var checkRun = await msblocService.SubmitAsync(TestAppOwner, TestAppRepo, sha, cloneRoot, resourcePath);
+
+            checkRun.Should().NotBeNull();
+
+            _logger.LogInformation($"CheckRun Created - {checkRun.Url}");
         }
     }
 }
