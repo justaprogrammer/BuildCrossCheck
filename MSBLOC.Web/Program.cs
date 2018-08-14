@@ -23,6 +23,7 @@ namespace MSBLOC.Web
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration(new Program().MSBLOCConfigureAppConfiguration)
+                .UseApplicationInsights()
                 .UseStartup<Startup>()
                 .Build();
 
