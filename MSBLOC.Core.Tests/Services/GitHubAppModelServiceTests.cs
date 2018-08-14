@@ -67,7 +67,7 @@ namespace MSBLOC.Core.Tests.Services
             {
                 gitHubAppClientFactory = Substitute.For<IGitHubAppClientFactory>();
                 gitHubAppClientFactory.CreateAppClient(Arg.Any<ITokenGenerator>()).Returns(gitHubClient);
-                gitHubAppClientFactory.CreateAppClientForLogin(Arg.Any<ITokenGenerator>(), Arg.Any<string>())
+                gitHubAppClientFactory.CreateAppClientForLoginAsync(Arg.Any<ITokenGenerator>(), Arg.Any<string>())
                     .Returns(gitHubClient);
             }
 
@@ -107,7 +107,7 @@ namespace MSBLOC.Core.Tests.Services
             var owner = Faker.Internet.UserName();
             var name = Faker.Lorem.Word();
 
-            var checkRun = await gitHubAppModelService.CreateCheckRun(
+            var checkRun = await gitHubAppModelService.CreateCheckRunAsync(
                 owner,
                 name,
                 Faker.Random.String(),
@@ -128,7 +128,7 @@ namespace MSBLOC.Core.Tests.Services
             {
                 var annotations = FakeAnnotation.Generate(51).ToArray();
 
-                await s.CreateCheckRun(
+                await s.CreateCheckRunAsync(
                     Faker.Internet.UserName(),
                     Faker.Lorem.Word(),
                     Faker.Random.String(),
@@ -145,7 +145,7 @@ namespace MSBLOC.Core.Tests.Services
             {
                 var annotations = FakeAnnotation.Generate(51).ToArray();
 
-                await s.UpdateCheckRun(
+                await s.UpdateCheckRunAsync(
                     Faker.Random.Long(),
                     Faker.Internet.UserName(),
                     Faker.Lorem.Word(),
@@ -170,7 +170,7 @@ namespace MSBLOC.Core.Tests.Services
             {
                 var annotations = FakeAnnotation.Generate(1).ToArray();
 
-                await s.CreateCheckRun(
+                await s.CreateCheckRunAsync(
                     Faker.Internet.UserName(),
                     Faker.Lorem.Word(),
                     Faker.Random.String(),
@@ -189,7 +189,7 @@ namespace MSBLOC.Core.Tests.Services
             {
                 var annotations = FakeAnnotation.Generate(1).ToArray();
 
-                await s.UpdateCheckRun(
+                await s.UpdateCheckRunAsync(
                     Faker.Random.Long(),
                     Faker.Internet.UserName(),
                     Faker.Lorem.Word(),
@@ -213,7 +213,7 @@ namespace MSBLOC.Core.Tests.Services
             var checkRunId = Faker.Random.Long();
             var annotations = FakeAnnotation.Generate(1).ToArray();
 
-            await gitHubAppModelService.UpdateCheckRun(
+            await gitHubAppModelService.UpdateCheckRunAsync(
                 checkRunId,
                 owner,
                 name,

@@ -20,14 +20,14 @@ namespace MSBLOC.Core.Services
             _tokenGenerator = tokenGenerator;
         }
 
-        public async Task GetPullRequestChangedPaths(string repoOwner, string repoName, int number)
+        public async Task GetPullRequestChangedPathsAsync(string repoOwner, string repoName, int number)
         {
-            var gitHubClient = await _gitHubUserClientFactory.CreateAppClientForLogin(_tokenGenerator, repoOwner);
+            var gitHubClient = await _gitHubUserClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, repoOwner);
 
             await GetPullRequestChangedPaths(gitHubClient, repoOwner, repoName, number);
         }
 
-        public async Task<CheckRun> CreateCheckRun(string repoOwner, string repoName, string headSha,
+        public async Task<CheckRun> CreateCheckRunAsync(string repoOwner, string repoName, string headSha,
             string checkRunName,
             string checkRunTitle, string checkRunSummary, Annotation[] annotations, DateTimeOffset? startedAt,
             DateTimeOffset? completedAt)
@@ -42,7 +42,7 @@ namespace MSBLOC.Core.Services
             if (annotations.Length > 50)
                 throw new ArgumentException("Cannot create more than 50 annotations at a time");
 
-            var gitHubClient = await _gitHubUserClientFactory.CreateAppClientForLogin(_tokenGenerator, repoOwner);
+            var gitHubClient = await _gitHubUserClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, repoOwner);
             var checkRunsClient = gitHubClient?.Check?.Run;
 
             if (checkRunsClient == null) throw new InvalidOperationException("ICheckRunsClient is null");
@@ -72,14 +72,14 @@ namespace MSBLOC.Core.Services
             };
         }
 
-        public async Task UpdateCheckRun(long checkRunId, string repoOwner, string repoName,
+        public async Task UpdateCheckRunAsync(long checkRunId, string repoOwner, string repoName,
             string headSha, string checkRunTitle, string checkRunSummary, Annotation[] annotations,
             DateTimeOffset? startedAt, DateTimeOffset? completedAt)
         {
             if (annotations.Length > 50)
                 throw new ArgumentException("Cannot create more than 50 annotations at a time");
 
-            var gitHubClient = await _gitHubUserClientFactory.CreateAppClientForLogin(_tokenGenerator, repoOwner);
+            var gitHubClient = await _gitHubUserClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, repoOwner);
             var checkRunsClient = gitHubClient?.Check?.Run;
 
             if (checkRunsClient == null) throw new InvalidOperationException("ICheckRunsClient is null");

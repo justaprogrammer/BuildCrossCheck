@@ -50,14 +50,14 @@ namespace MSBLOC.Core.IntegrationTests
         {
             var gitHubClientFactory = CreateGitHubAppClientFactory();
             var tokenGenerator = CreateTokenGenerator();
-            return await gitHubClientFactory.CreateAppClientForLogin(tokenGenerator, login);
+            return await gitHubClientFactory.CreateAppClientForLoginAsync(tokenGenerator, login);
         }
 
         protected async Task<IGitHubGraphQLClient> CreateGitHubAppGraphQLClientForLogin(string login)
         {
             var gitHubClientFactory = CreateGitHubAppClientFactory();
             var tokenGenerator = CreateTokenGenerator();
-            return await gitHubClientFactory.CreateAppGraphQLClientForLogin(tokenGenerator, login);
+            return await gitHubClientFactory.CreateAppGraphQLClientForLoginAsync(tokenGenerator, login);
         }
 
         protected IGitHubClient CreateGitHubTokenClient()

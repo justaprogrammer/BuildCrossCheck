@@ -53,11 +53,11 @@ namespace MSBLOC.Core.Services
         {
             var annotations = buildDetails.Annotations?.Batch(50).ToArray();
 
-            var checkRun = await _gitHubAppModelService.CreateCheckRun(owner, name, headSha, checkRunName, checkRunTitle, checkRunSummary, annotations?.FirstOrDefault()?.ToArray(), startedAt, completedAt).ConfigureAwait(false);
+            var checkRun = await _gitHubAppModelService.CreateCheckRunAsync(owner, name, headSha, checkRunName, checkRunTitle, checkRunSummary, annotations?.FirstOrDefault()?.ToArray(), startedAt, completedAt).ConfigureAwait(false);
 
             foreach (var annotationBatch in annotations.Skip(1))
             {
-                await _gitHubAppModelService.UpdateCheckRun(checkRun.Id, owner, name, headSha, checkRunTitle, checkRunSummary,
+                await _gitHubAppModelService.UpdateCheckRunAsync(checkRun.Id, owner, name, headSha, checkRunTitle, checkRunSummary,
                     annotationBatch.ToArray(), startedAt, completedAt).ConfigureAwait(false);
             }
 

@@ -6,13 +6,13 @@ namespace MSBLOC.Core.Interfaces
 {
     public interface IGitHubAppModelService
     {
-        Task GetPullRequestChangedPaths(string repoOwner, string repoName, int number);
+        Task GetPullRequestChangedPathsAsync(string repoOwner, string repoName, int number);
 
-        Task<CheckRun> CreateCheckRun(string repoOwner, string repoName, string headSha,
+        Task<CheckRun> CreateCheckRunAsync(string repoOwner, string repoName, string headSha,
             string checkRunName, string checkRunTitle,
             string checkRunSummary, Annotation[] annotations, DateTimeOffset? startedAt, DateTimeOffset? completedAt);
 
-        Task UpdateCheckRun(long checkRunId, string repoOwner, string repoName,
+        Task UpdateCheckRunAsync(long checkRunId, string repoOwner, string repoName,
             string headSha, string checkRunTitle, string checkRunSummary, Annotation[] annotations,
             DateTimeOffset? startedAt, DateTimeOffset? completedAt);
     }

@@ -8,7 +8,7 @@ namespace MSBLOC.Core.Services.Factories
 {
     public class GitHubAppClientFactory : IGitHubAppClientFactory
     {
-        public async Task<IGitHubClient> CreateAppClientForLogin(ITokenGenerator tokenGenerator, string login)
+        public async Task<IGitHubClient> CreateAppClientForLoginAsync(ITokenGenerator tokenGenerator, string login)
         {
             var (installation, token) = await FindInstallationAndGetToken(tokenGenerator, login);
             return GitHubClientFactoryHelper.GitHubClient(token, GetUserAgent(installation));
@@ -32,7 +32,7 @@ namespace MSBLOC.Core.Services.Factories
             return GitHubClientFactoryHelper.GraphQLClient(token, GitHubClientFactory.UserAgent);
         }
 
-        public async Task<IGitHubGraphQLClient> CreateAppGraphQLClientForLogin(ITokenGenerator tokenGenerator, string login)
+        public async Task<IGitHubGraphQLClient> CreateAppGraphQLClientForLoginAsync(ITokenGenerator tokenGenerator, string login)
         {
             var (installation, token) = await FindInstallationAndGetToken(tokenGenerator, login);
             return GitHubClientFactoryHelper.GraphQLClient(token, GetUserAgent(installation));

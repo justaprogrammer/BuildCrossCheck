@@ -47,7 +47,7 @@ namespace MSBLOC.Core.Services
             return _connection.Run(query, variables);
         }
 
-        public async Task<IEnumerable<CommitDetails>> GetCommitDetailsByPullRequestId(string owner, string name,
+        public async Task<IEnumerable<CommitDetails>> GetCommitDetailsByPullRequestIdAsync(string owner, string name,
             int pullRequest)
         {
             var query = await CommitDetailsByPullRequestId;

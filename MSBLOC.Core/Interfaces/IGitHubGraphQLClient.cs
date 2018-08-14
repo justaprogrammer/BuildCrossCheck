@@ -8,7 +8,7 @@ namespace MSBLOC.Core.Interfaces
 {
     public interface IGitHubGraphQLClient
     {
-        Task<IEnumerable<CommitDetails>> GetCommitDetailsByPullRequestId(string owner, string name,
+        Task<IEnumerable<CommitDetails>> GetCommitDetailsByPullRequestIdAsync(string owner, string name,
             int pullRequest);
     }
 }

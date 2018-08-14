@@ -10,7 +10,7 @@ namespace MSBLOC.Core.IntegrationTests.Services
         {
             var gitHubGraphQLClient = CreateGitHubGraphQLTokenClient();
             var commitDetailsByPullRequestId
-                = await gitHubGraphQLClient.GetCommitDetailsByPullRequestId("justaprogrammer", "TestConsoleApp1", 1);
+                = await gitHubGraphQLClient.GetCommitDetailsByPullRequestIdAsync("justaprogrammer", "TestConsoleApp1", 1);
         }
     }
 }

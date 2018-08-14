@@ -11,7 +11,7 @@ namespace MSBLOC.Core.IntegrationTests.Services
         public async Task ShouldConstruct()
         {
             var gitHubAppModelService = CreateGitHubAppModelService();
-            await gitHubAppModelService.GetPullRequestChangedPaths("justaprogrammer", "TestConsoleApp1", 1);
+            await gitHubAppModelService.GetPullRequestChangedPathsAsync("justaprogrammer", "TestConsoleApp1", 1);
         }
 
         private IGitHubAppModelService CreateGitHubAppModelService()

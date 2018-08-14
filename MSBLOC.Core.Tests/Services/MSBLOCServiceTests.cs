@@ -56,7 +56,7 @@ namespace MSBLOC.Core.Tests.Services
             var url = Faker.Internet.Url();
 
             var gitHubAppModelService = Substitute.For<IGitHubAppModelService>();
-            gitHubAppModelService.CreateCheckRun(null, null, null, null, null, null, null, null, null)
+            gitHubAppModelService.CreateCheckRunAsync(null, null, null, null, null, null, null, null, null)
                 .ReturnsForAnyArgs(new CheckRun()
                 {
                     Id = id,
@@ -78,7 +78,7 @@ namespace MSBLOC.Core.Tests.Services
             Received.InOrder(async () =>
             {
                 binaryLogProcessor.Received(1).ProcessLog(Arg.Is(resourcePath), Arg.Is(root), repoOwner, repoName, sha);
-                await gitHubAppModelService.Received(1).CreateCheckRun(
+                await gitHubAppModelService.Received(1).CreateCheckRunAsync(
                     Arg.Is(repoOwner),
                     Arg.Is(repoName),
                     Arg.Is(sha),
