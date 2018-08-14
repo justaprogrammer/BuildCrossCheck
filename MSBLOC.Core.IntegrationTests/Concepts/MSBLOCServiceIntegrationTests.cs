@@ -24,7 +24,7 @@ namespace MSBLOC.Core.IntegrationTests.Concepts
         public async Task ShouldSubmitWarning()
         {
             const string file = "testconsoleapp1-1warning.binlog";
-            const string sha = "7d8c017ce2934453a2166f28e4eb3b92640c97e4";
+            const string sha = "b6e4d0c605b79b1a87945cc081e3f728d3100b31";
 
             await AssertSubmit(file, sha);
         }
@@ -33,7 +33,7 @@ namespace MSBLOC.Core.IntegrationTests.Concepts
         public async Task ShouldSubmitError()
         {
             const string file = "testconsoleapp1-1error.binlog";
-            const string sha = "478882ff771853355906ea1e7177daa123116aeb";
+            const string sha = "53e93a597fd50825ba6060f5bae0d594be714088";
 
             await AssertSubmit(file, sha);
         }
@@ -54,8 +54,6 @@ namespace MSBLOC.Core.IntegrationTests.Concepts
             var checkRun = await msblocService.SubmitAsync(TestAppOwner, TestAppRepo, sha, cloneRoot, resourcePath);
 
             checkRun.Should().NotBeNull();
-
-            _logger.LogInformation($"CheckRun Created - {checkRun.Url}");
         }
     }
 }
