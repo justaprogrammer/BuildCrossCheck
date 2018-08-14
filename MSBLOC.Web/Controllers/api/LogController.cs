@@ -180,7 +180,8 @@ namespace MSBLOC.Web.Controllers.api
                 repositoryName,
                 submissionData.CommitSha,
                 submissionData.CloneRoot,
-                _tempFileService.GetFilePath(submissionData.BinaryLogFile));
+                _tempFileService.GetFilePath(submissionData.BinaryLogFile),
+                submissionData.CommitSha);
 
             return Json(checkRun);
         }

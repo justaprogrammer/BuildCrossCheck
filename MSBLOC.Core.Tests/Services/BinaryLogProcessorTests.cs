@@ -9,6 +9,7 @@ using FluentAssertions.Equivalency;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.Builds;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
 using Xunit;
@@ -123,7 +124,7 @@ namespace MSBLOC.Core.Tests.Services
             File.Exists(resourcePath).Should().BeTrue();
 
             var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
-            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot, Faker.Lorem.Word(), Faker.Lorem.Word(), Faker.Lorem.Word());
+            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot);
         }
 
         [Fact]
@@ -162,7 +163,7 @@ namespace MSBLOC.Core.Tests.Services
             File.Exists(resourcePath).Should().BeTrue();
 
             var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
-            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot, repoOwner, repoName, headSha);
+            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot);
 
             parsedBinaryLog.Annotations.ToArray().Should().BeEquivalentTo(expectedAnnotations);
 

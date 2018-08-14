@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.Builds;
 
 namespace MSBLOC.Core.Services
 {
@@ -19,12 +20,11 @@ namespace MSBLOC.Core.Services
         }
 
         /// <inheritdoc />
-        public BuildDetails ProcessLog(string binLogPath, string buildEnvironmentCloneRoot, string repoOwner,
-            string repoName, string headSha)
+        public BuildDetails ProcessLog(string binLogPath, string cloneRoot)
         {
             var binLogReader = new StructuredLogger::Microsoft.Build.Logging.BinaryLogReplayEventSource();
 
-            var solutionDetails = new SolutionDetails(buildEnvironmentCloneRoot);
+            var solutionDetails = new SolutionDetails(cloneRoot);
             var buildDetails = new BuildDetails(solutionDetails);
 
             foreach (var record in binLogReader.ReadRecords(binLogPath))
@@ -34,7 +34,7 @@ namespace MSBLOC.Core.Services
                 {
                     if(!solutionDetails.ContainsKey(startedEventArgs.ProjectFile))
                     { 
-                        var projectDetails = new ProjectDetails(buildEnvironmentCloneRoot, startedEventArgs.ProjectFile);
+                        var projectDetails = new ProjectDetails(cloneRoot, startedEventArgs.ProjectFile);
                         solutionDetails.Add(projectDetails);
 
                         var items = startedEventArgs.Items.Cast<DictionaryEntry>()
@@ -50,37 +50,32 @@ namespace MSBLOC.Core.Services
 
                 if (buildEventArgs is BuildWarningEventArgs buildWarning)
                 {
-                    var endLine = buildWarning.EndLineNumber;
-                    if (endLine == 0)
-                    {
-                        endLine = buildWarning.LineNumber;
-                    }
-
-                    var projectItemPath = solutionDetails.GetProjectItemPath(buildWarning.ProjectFile, buildWarning.File);
-                    var blobHref = BlobHref(repoOwner, repoName, headSha, projectItemPath);
-                    buildDetails.AddAnnotation(projectItemPath, buildWarning.LineNumber, endLine, CheckWarningLevel.Warning, buildWarning.Message, buildWarning.Code, blobHref);
+                    var buildMessage = new BuildMessage(
+                        BuildMessageLevel.Warning,
+                        buildWarning.ProjectFile, 
+                        buildWarning.File, 
+                        buildWarning.LineNumber,
+                        buildWarning.EndLineNumber,
+                        buildWarning.Message,
+                        buildWarning.Code);
+                    buildDetails.AddMessage(buildMessage);
                 }
 
                 if (buildEventArgs is BuildErrorEventArgs buildError)
                 {
-                    var endLine = buildError.EndLineNumber;
-                    if (endLine == 0)
-                    {
-                        endLine = buildError.LineNumber;
-                    }
-
-                    var projectItemPath = solutionDetails.GetProjectItemPath(buildError.ProjectFile, buildError.File);
-                    var blobHref = BlobHref(repoOwner, repoName, headSha, projectItemPath);
-                    buildDetails.AddAnnotation(projectItemPath, buildError.LineNumber, endLine, CheckWarningLevel.Failure, buildError.Message, buildError.Code, blobHref);
+                    var buildMessage = new BuildMessage(
+                        BuildMessageLevel.Error, 
+                        buildError.ProjectFile, 
+                        buildError.File, 
+                        buildError.LineNumber,
+                        buildError.EndLineNumber, 
+                        buildError.Message, 
+                        buildError.Code);
+                    buildDetails.AddMessage(buildMessage);
                 }
             }
 
             return buildDetails;
-        }
-
-        public static string BlobHref(string owner, string repository, string sha, string file)
-        {
-            return $"https://github.com/{owner}/{repository}/blob/{sha}/{file.Replace(@"\", "/")}";
         }
     }
 }

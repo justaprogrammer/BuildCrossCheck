@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.Builds;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
 using NSubstitute;
@@ -50,7 +51,7 @@ namespace MSBLOC.Core.Tests.Services
             var buildDetails = new BuildDetails(new SolutionDetails(cloneRoot));
 
             var binaryLogProcessor = Substitute.For<IBinaryLogProcessor>();
-            binaryLogProcessor.ProcessLog(null, null, null, null, null).ReturnsForAnyArgs(buildDetails);
+            binaryLogProcessor.ProcessLog(null, null).ReturnsForAnyArgs(buildDetails);
 
             var id = Faker.Random.Long();
             var url = Faker.Internet.Url();
@@ -77,7 +78,7 @@ namespace MSBLOC.Core.Tests.Services
 
             Received.InOrder(async () =>
             {
-                binaryLogProcessor.Received(1).ProcessLog(Arg.Is(resourcePath), Arg.Is(root), repoOwner, repoName, sha);
+                binaryLogProcessor.Received(1).ProcessLog(Arg.Is(resourcePath), Arg.Is(root));
                 await gitHubAppModelService.Received(1).CreateCheckRunAsync(
                     Arg.Is(repoOwner),
                     Arg.Is(repoName),

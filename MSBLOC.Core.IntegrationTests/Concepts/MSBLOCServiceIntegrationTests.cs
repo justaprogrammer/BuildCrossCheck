@@ -45,7 +45,7 @@ namespace MSBLOC.Core.IntegrationTests.Concepts
 
             var startedAt = DateTimeOffset.Now;
             var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
-            var buildDetails = parser.ProcessLog(resourcePath, cloneRoot, TestAppOwner, TestAppRepo, sha);
+            var buildDetails = parser.ProcessLog(resourcePath, cloneRoot);
 
             var gitHubAppClientFactory = CreateGitHubAppClientFactory();
             var gitHubAppModelService = new GitHubAppModelService(gitHubAppClientFactory, CreateTokenGenerator());

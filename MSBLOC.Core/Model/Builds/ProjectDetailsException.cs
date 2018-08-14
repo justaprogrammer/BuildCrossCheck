@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MSBLOC.Core.Model
+namespace MSBLOC.Core.Model.Builds
 {
     public class ProjectDetailsException : Exception
     {
