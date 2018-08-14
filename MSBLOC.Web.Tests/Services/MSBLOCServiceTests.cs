@@ -36,11 +36,11 @@ namespace MSBLOC.Web.Tests.Services
         public async Task SubmitTest()
         {
             var submissionData = new Faker<SubmissionData>()
-                .RuleFor(sd => sd.RepoOwner, f => f.Person.FullName)
-                .RuleFor(sd => sd.RepoName, f => f.Hacker.Phrase())
                 .RuleFor(sd => sd.CloneRoot, f => f.System.DirectoryPath())
                 .RuleFor(sd => sd.CommitSha, f => f.Hashids.Encode())
                 .RuleFor(sd => sd.BinaryLogFile, f => f.System.FileName())
+                .RuleFor(sd => sd.RepoOwner, f => f.Person.FullName)
+                .RuleFor(sd => sd.RepoName, f => f.Hacker.Phrase())
                 .Generate();
 
             var checkRun = new Faker<CheckRun>()

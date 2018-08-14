@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Bogus;
@@ -161,8 +162,6 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             var formData = new SubmissionData
             {
-                RepoName = "SomeApplicationName",
-                RepoOwner = "SomeApplicationOwner",
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot",
                 BinaryLogFile = string.Empty //Bad Data
@@ -207,8 +206,6 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             var formData = new SubmissionData
             {
-                RepoName = "SomeApplicationName",
-                RepoOwner = "SomeApplicationOwner",
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot",
                 BinaryLogFile = "someOtherFileName.txt" //Bad Data
@@ -261,16 +258,23 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             var formData = new SubmissionData
             {
-                RepoName = "SomeApplicationName",
-                RepoOwner = "SomeApplicationOwner",
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot"
+            };
+
+            var faker = new Faker();
+
+            var claims = new[]
+            {
+                new Claim("urn:msbloc:repositoryName", faker.Hacker.Phrase()),
+                new Claim("urn:msbloc:repositoryOwner", faker.Person.FullName),
+                new Claim("urn:msbloc:repositoryOwnerId", faker.Random.Long().ToString())
             };
 
             var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
                 msblocService)
             {
-                ControllerContext = await RequestWithFiles(fileDictionary, formData),
+                ControllerContext = await RequestWithFiles(fileDictionary, formData, claims),
                 MetadataProvider = new EmptyModelMetadataProvider(),
                 ModelBinderFactory = Substitute.For<IModelBinderFactory>(),
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
@@ -279,12 +283,12 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var result = await fileController.Upload() as JsonResult;
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
-            await msblocService.Received(1).SubmitAsync(Arg.Is<SubmissionData>(data =>
-                data.RepoOwner.Equals(formData.RepoOwner) &&
-                data.RepoName.Equals(formData.RepoName) && 
-                data.CloneRoot.Equals(formData.CloneRoot) &&
-                data.CommitSha.Equals(formData.CommitSha) &&
-                data.BinaryLogFile.Equals(receivedFiles.Keys.FirstOrDefault())));
+            await msblocService.Received(1).SubmitAsync(
+                Arg.Is<SubmissionData>(data => data.RepoOwner.Equals(claims.First(c => c.Type == "urn:msbloc:repositoryOwner").Value) &&
+                    data.RepoName.Equals(claims.First(c => c.Type == "urn:msbloc:repositoryName").Value) &&
+                    data.CloneRoot.Equals(formData.CloneRoot) &&
+                    data.CommitSha.Equals(formData.CommitSha) &&
+                    data.BinaryLogFile.Equals(receivedFiles.Keys.FirstOrDefault())));
 
             receivedFiles.Should().BeEquivalentTo(fileDictionary);
 
@@ -296,7 +300,8 @@ namespace MSBLOC.Web.Tests.Controllers.api
         }
 
         private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary,
-            SubmissionData formData = null)
+            SubmissionData formData = null,
+            IEnumerable<Claim> claims = null)
         {
             var boundary = "---9908908098";
 
@@ -324,6 +329,9 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 }
 
                 var httpContext = new DefaultHttpContext();
+
+                httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims ?? Enumerable.Empty<Claim>()));
+
                 httpContext.Request.Headers.Add("Content-Type", $"multipart/form-data; boundary={boundary}");
 
                 httpContext.Request.Body = new MemoryStream(await formDataContent.ReadAsByteArrayAsync());
@@ -336,13 +344,14 @@ namespace MSBLOC.Web.Tests.Controllers.api
         {
             public LogControllerStub(ILogger<LogController> logger, ITempFileService tempFileService, IMSBLOCService msblocService) : base(logger, tempFileService, msblocService)
             {
+
             }
 
-            protected override Task<bool> BindDataAsync(SubmissionData model, Dictionary<string, StringValues> dataToBind)
+            protected override Task<bool> BindDataAsync(SubmissionFormData model, Dictionary<string, StringValues> dataToBind)
             {
                 foreach (var item in dataToBind)
                 {
-                    var propertyInfo = model.GetType().GetProperty(item.Key);
+                    var propertyInfo = typeof(SubmissionFormData).GetProperty(item.Key);
                     var value = Convert.ChangeType(item.Value.ToString(), propertyInfo.PropertyType);
                     propertyInfo.SetValue(model, value);
                 }
