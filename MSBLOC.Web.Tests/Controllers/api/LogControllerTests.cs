@@ -263,7 +263,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             msblocService.SubmitAsync(null, null, null, null, null).ReturnsForAnyArgs(checkRun);
 
-            var formData = new SubmissionData
+            var submissionData = new SubmissionData
             {
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot"
@@ -271,17 +271,20 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             var faker = new Faker();
 
+            var repoOwner = faker.Person.FullName;
+            var repoName = faker.Hacker.Phrase();
+
             var claims = new[]
             {
-                new Claim("urn:msbloc:repositoryName", faker.Hacker.Phrase()),
-                new Claim("urn:msbloc:repositoryOwner", faker.Person.FullName),
+                new Claim("urn:msbloc:repositoryName", repoName),
+                new Claim("urn:msbloc:repositoryOwner", repoOwner),
                 new Claim("urn:msbloc:repositoryOwnerId", faker.Random.Long().ToString())
             };
 
             var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
                 msblocService)
             {
-                ControllerContext = await RequestWithFiles(fileDictionary, formData, claims),
+                ControllerContext = await RequestWithFiles(fileDictionary, submissionData, claims),
                 MetadataProvider = new EmptyModelMetadataProvider(),
                 ModelBinderFactory = Substitute.For<IModelBinderFactory>(),
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
@@ -291,10 +294,10 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
             await msblocService.Received(1).SubmitAsync(
-                formData.RepoOwner,
-                formData.RepoName,
-                formData.CommitSha,
-                formData.CloneRoot,
+                repoOwner,
+                repoName,
+                submissionData.CommitSha,
+                submissionData.CloneRoot,
                 string.Empty);
 
             receivedFiles.Should().BeEquivalentTo(fileDictionary);
@@ -354,11 +357,11 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             }
 
-            protected override Task<bool> BindDataAsync(SubmissionFormData model, Dictionary<string, StringValues> dataToBind)
+            protected override Task<bool> BindDataAsync(SubmissionData model, Dictionary<string, StringValues> dataToBind)
             {
                 foreach (var item in dataToBind)
                 {
-                    var propertyInfo = typeof(SubmissionFormData).GetProperty(item.Key);
+                    var propertyInfo = typeof(SubmissionData).GetProperty(item.Key);
                     var value = Convert.ChangeType(item.Value.ToString(), propertyInfo.PropertyType);
                     propertyInfo.SetValue(model, value);
                 }
