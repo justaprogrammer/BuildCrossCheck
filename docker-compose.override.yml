@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  msbloc.web:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "64952:80"
+  mongo:
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: webscale
+    ports:
+      - "27017:27017"
