@@ -1,0 +1,11 @@
+version: '3.4'
+
+services:
+  msbloc.web:
+    image: ${DOCKER_REGISTRY}msblocweb
+    build:
+      context: .
+      dockerfile: MSBLOC.Web/Dockerfile
+  mongo:
+    image: mongo
+
