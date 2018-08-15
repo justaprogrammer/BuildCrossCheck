@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Castle.DynamicProxy;
 using GitHubJwt;
+using Microsoft.ApplicationInsights.AspNetCore.Logging;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -38,6 +39,8 @@ namespace MSBLOC.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddOptions<ApplicationInsightsLoggerOptions>().Bind(Configuration.GetSection("ApplicationInsightsLogger"));
+
             services.AddAuthentication(options =>
                 {
                     options.DefaultScheme = "PolicyScheme";
@@ -148,8 +151,10 @@ namespace MSBLOC.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddApplicationInsights(app.ApplicationServices, LogLevel.Trace);
+
             if (env.IsDevelopment())
             {
                 app.UseBrowserLink();
