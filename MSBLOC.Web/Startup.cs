@@ -40,6 +40,10 @@ namespace MSBLOC.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<ApplicationInsightsLoggerOptions>(Configuration.GetSection("ApplicationInsightsLogger"));
+            services.Configure<GitHubAppOptions>(Configuration.GetSection("GitHub:App"));
+            services.Configure<AuthOptions>(Configuration.GetSection("Auth"));
+
+            services.AddApplicationInsightsTelemetry(Configuration);
 
             services.AddAuthentication(options =>
                 {
@@ -94,9 +98,6 @@ namespace MSBLOC.Web
             services.AddHttpContextAccessor();
 
             services.AddInfrastructure(Configuration.GetSection("Infrastructure"));
-
-            services.Configure<GitHubAppOptions>(Configuration.GetSection("GitHub:App"));
-            services.Configure<AuthOptions>(Configuration.GetSection("Auth"));
 
             services.AddSingleton<IPrivateKeySource, GitHubAppOptionsPrivateKeySource>();
             services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async repoOwner =>
