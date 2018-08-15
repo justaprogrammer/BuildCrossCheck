@@ -12,3 +12,7 @@ Integration tests in the project `MSBLOC.Core.IntegrationTests` require the foll
   - **MSBLOC_INTEGRATION_APP_NAME**: Set to the name of the fork of `TestConsoleApp1`
   - **MSBLOC_GITHUB_APPID**: Set to the AppId of the GitHub App
   - **MSBLOC_GITHUB_KEY**: Set to the contents of a private key created for the GitHub App
+
+## Generating a Client Id and CLient Secret
+
+- OAuth Credentials can be generated from https://github.com/settings/applications/new
