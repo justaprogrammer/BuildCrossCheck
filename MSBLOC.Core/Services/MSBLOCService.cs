@@ -76,9 +76,11 @@ namespace MSBLOC.Core.Services
         {
             var annotationBatches = annotations?.Batch(50).ToArray();
 
+            var isFailure = annotations?.Any(annotation => annotation.CheckWarningLevel == CheckWarningLevel.Failure) ?? false;
+            var isSuccess = !isFailure;
+
             var checkRun = await _gitHubAppModelService.CreateCheckRunAsync(owner, name, headSha, checkRunName,
-                    checkRunTitle, checkRunSummary, annotationBatches?.FirstOrDefault()?.ToArray(), startedAt,
-                    completedAt)
+                    checkRunTitle, checkRunSummary, isSuccess, annotationBatches?.FirstOrDefault()?.ToArray(), startedAt, completedAt)
                 .ConfigureAwait(false);
 
             foreach (var annotationBatch in annotationBatches.Skip(1))

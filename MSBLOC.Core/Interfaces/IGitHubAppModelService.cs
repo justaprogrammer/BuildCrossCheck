@@ -10,7 +10,8 @@ namespace MSBLOC.Core.Interfaces
 
         Task<CheckRun> CreateCheckRunAsync(string repoOwner, string repoName, string headSha,
             string checkRunName, string checkRunTitle,
-            string checkRunSummary, Annotation[] annotations, DateTimeOffset? startedAt, DateTimeOffset? completedAt);
+            string checkRunSummary, bool checkRunIsSuccess, Annotation[] annotations, DateTimeOffset? startedAt,
+            DateTimeOffset? completedAt);
 
         Task UpdateCheckRunAsync(long checkRunId, string repoOwner, string repoName,
             string headSha, string checkRunTitle, string checkRunSummary, Annotation[] annotations,

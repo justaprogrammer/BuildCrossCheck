@@ -7,7 +7,7 @@ using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
 using Xunit.Abstractions;
 
-namespace MSBLOC.Core.IntegrationTests.Concepts
+namespace MSBLOC.Core.IntegrationTests.Services
 {
     public class MSBLOCServiceIntegrationTests : IntegrationTestsBase
     {

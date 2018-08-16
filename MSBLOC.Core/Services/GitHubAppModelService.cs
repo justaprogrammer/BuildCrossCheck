@@ -29,7 +29,8 @@ namespace MSBLOC.Core.Services
 
         public async Task<CheckRun> CreateCheckRunAsync(string repoOwner, string repoName, string headSha,
             string checkRunName,
-            string checkRunTitle, string checkRunSummary, Annotation[] annotations, DateTimeOffset? startedAt,
+            string checkRunTitle, string checkRunSummary, bool checkRunIsSuccess, Annotation[] annotations,
+            DateTimeOffset? startedAt,
             DateTimeOffset? completedAt)
         {
             if (repoOwner == null) throw new ArgumentNullException(nameof(repoOwner));
@@ -60,7 +61,7 @@ namespace MSBLOC.Core.Services
                 Status = CheckStatus.Completed,
                 StartedAt = startedAt,
                 CompletedAt = completedAt,
-                Conclusion = CheckConclusion.Success
+                Conclusion = checkRunIsSuccess ? CheckConclusion.Success : CheckConclusion.Failure
             };
 
             var checkRun = await checkRunsClient.Create(repoOwner, repoName, newCheckRun);
@@ -93,11 +94,7 @@ namespace MSBLOC.Core.Services
                             annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
                             annotation.Message))
                         .ToArray()
-                },
-                Status = CheckStatus.Completed,
-                StartedAt = startedAt,
-                CompletedAt = completedAt,
-                Conclusion = CheckConclusion.Success
+                }
             });
         }
 
