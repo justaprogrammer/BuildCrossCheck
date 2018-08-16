@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Castle.DynamicProxy;
 using GitHubJwt;
+using Microsoft.ApplicationInsights.AspNetCore.Logging;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -38,6 +39,12 @@ namespace MSBLOC.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<ApplicationInsightsLoggerOptions>(Configuration.GetSection("ApplicationInsightsLogger"));
+            services.Configure<GitHubAppOptions>(Configuration.GetSection("GitHub:App"));
+            services.Configure<AuthOptions>(Configuration.GetSection("Auth"));
+
+            services.AddApplicationInsightsTelemetry(Configuration);
+
             services.AddAuthentication(options =>
                 {
                     options.DefaultScheme = "PolicyScheme";
@@ -92,9 +99,6 @@ namespace MSBLOC.Web
 
             services.AddInfrastructure(Configuration.GetSection("Infrastructure"));
 
-            services.Configure<GitHubAppOptions>(Configuration.GetSection("GitHub:App"));
-            services.Configure<AuthOptions>(Configuration.GetSection("Auth"));
-
             services.AddSingleton<IPrivateKeySource, GitHubAppOptionsPrivateKeySource>();
             services.AddSingleton<IProxyGenerator, ProxyGenerator>();
             
@@ -143,8 +147,19 @@ namespace MSBLOC.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            var logLevel = Configuration.GetSection("Logging:LogLevel").GetChildren()
+                .Where(ll => ll.Key.Equals("Default", StringComparison.InvariantCultureIgnoreCase))
+                .Select(ll =>
+                {
+                    Enum.TryParse(ll.Value, ignoreCase: true, result: out LogLevel logLevelValue);
+                    return logLevelValue;
+                })
+                .FirstOrDefault();
+
+            loggerFactory.AddApplicationInsights(app.ApplicationServices, logLevel);
+
             if (env.IsDevelopment())
             {
                 app.UseBrowserLink();
