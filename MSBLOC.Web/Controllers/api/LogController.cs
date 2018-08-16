@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
+using MSBLOC.Core.Interfaces;
 using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
@@ -145,9 +146,9 @@ namespace MSBLOC.Web.Controllers.api
             }
 
             // Bind form data to a model
-            var formData = new SubmissionData();
+            var submissionData = new SubmissionData();
 
-            var bindingSuccessful = await BindDataAsync(formData, formAccumulator.GetResults());
+            var bindingSuccessful = await BindDataAsync(submissionData, formAccumulator.GetResults());
 
             if (!bindingSuccessful)
             {
@@ -163,7 +164,7 @@ namespace MSBLOC.Web.Controllers.api
 
             foreach (var requiredFormFileProperty in requiredFormFileProperties)
             {
-                var fileName = requiredFormFileProperty.GetValue(formData);
+                var fileName = requiredFormFileProperty.GetValue(submissionData);
                 if (!_tempFileService.Files.Contains(fileName))
                 {
                     ModelState.AddModelError(requiredFormFileProperty.Name, $"File '{requiredFormFileProperty.Name}' with name: '{fileName}' not found in request.");
@@ -171,7 +172,15 @@ namespace MSBLOC.Web.Controllers.api
                 }
             }
 
-            var checkRun = await _msblocService.SubmitAsync(formData);
+            var repositoryOwner = User.Claims.FirstOrDefault(c => c.Type == "urn:msbloc:repositoryOwner")?.Value;
+            var repositoryName = User.Claims.FirstOrDefault(c => c.Type == "urn:msbloc:repositoryName")?.Value;
+
+            var checkRun = await _msblocService.SubmitAsync(
+                repositoryOwner,
+                repositoryName,
+                submissionData.CommitSha,
+                submissionData.CloneRoot,
+                _tempFileService.GetFilePath(submissionData.BinaryLogFile));
 
             return Json(checkRun);
         }

@@ -65,7 +65,7 @@ namespace MSBLOC.Web.Attributes
                             parameterType = "number";
                         }
 
-                        if (property.GetCustomAttributes(typeof(FormFileAttribute), false).Any())
+                        if (property.GetCustomAttributes(typeof(FormFileAttribute), true).Any())
                         {
                             parameterFormat = "binary";
                             parameterType = "file";
@@ -75,7 +75,7 @@ namespace MSBLOC.Web.Attributes
                         {
                             Name = property.Name,
                             In = "formData",
-                            Required = property.GetCustomAttributes(typeof(RequiredAttribute), false).Any(),
+                            Required = property.GetCustomAttributes(typeof(RequiredAttribute), true).Any(),
                             Type = parameterType,
                             Format = parameterFormat
                         });
