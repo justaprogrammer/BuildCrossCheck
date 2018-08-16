@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using MSBLOC.Core.Services;
 using MSBLOC.Web.Services;
 using MSBLOC.Web.Tests.Util;
 using NSubstitute.ExceptionExtensions;

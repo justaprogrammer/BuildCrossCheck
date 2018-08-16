@@ -96,12 +96,6 @@ namespace MSBLOC.Web
             services.Configure<AuthOptions>(Configuration.GetSection("Auth"));
 
             services.AddSingleton<IPrivateKeySource, GitHubAppOptionsPrivateKeySource>();
-            services.AddSingleton<Func<string, Task<ICheckRunSubmitter>>>(s => async repoOwner =>
-            {
-                var tokenGenerator = s.GetService<ITokenGenerator>();
-                var gitHubClient = await s.GetService<IGitHubAppClientFactory>().CreateClient(tokenGenerator, repoOwner);
-                return new CheckRunSubmitter(gitHubClient.Check.Run, s.GetService<ILogger<CheckRunSubmitter>>());
-            });
             services.AddSingleton<IProxyGenerator, ProxyGenerator>();
             
             services.AddScoped<ITempFileService, LocalTempFileService>();
@@ -115,6 +109,7 @@ namespace MSBLOC.Web
             services.AddScoped<IGitHubClientFactory, GitHubClientFactory>();
             services.AddScoped<IGitHubAppClientFactory, GitHubAppClientFactory>();
             services.AddScoped<IGitHubUserClientFactory, GitHubUserClientFactory>();
+            services.AddScoped<IGitHubAppModelService, GitHubAppModelService>();
             services.AddScoped<GitHubUserModelService>();
             services.AddScoped<IGitHubUserModelService>(s =>
             {

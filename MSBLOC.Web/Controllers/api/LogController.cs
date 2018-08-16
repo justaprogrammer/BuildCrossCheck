@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
+using MSBLOC.Core.Interfaces;
 using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
@@ -47,7 +48,7 @@ namespace MSBLOC.Web.Controllers.api
 
         [HttpPost]
         [DisableFormValueModelBinding]
-        [MultiPartFormBinding(typeof(SubmissionFormData))]
+        [MultiPartFormBinding(typeof(SubmissionData))]
         [Route("upload")]
         [Produces("application/json")]
         public async Task<IActionResult> Upload()
@@ -157,7 +158,7 @@ namespace MSBLOC.Web.Controllers.api
                 }
             }
 
-            var requiredFormFileProperties = typeof(SubmissionFormData).GetProperties()
+            var requiredFormFileProperties = typeof(SubmissionData).GetProperties()
                 .Where(p => p.GetCustomAttributes(typeof(RequiredAttribute), true).Any())
                 .Where(p => p.GetCustomAttributes(typeof(FormFileAttribute), true).Any());
 
@@ -174,15 +175,17 @@ namespace MSBLOC.Web.Controllers.api
             var repositoryOwner = User.Claims.FirstOrDefault(c => c.Type == "urn:msbloc:repositoryOwner")?.Value;
             var repositoryName = User.Claims.FirstOrDefault(c => c.Type == "urn:msbloc:repositoryName")?.Value;
 
-            submissionData.RepoOwner = repositoryOwner;
-            submissionData.RepoName = repositoryName;
-
-            var checkRun = await _msblocService.SubmitAsync(submissionData);
+            var checkRun = await _msblocService.SubmitAsync(
+                repositoryOwner,
+                repositoryName,
+                submissionData.CommitSha,
+                submissionData.CloneRoot,
+                _tempFileService.GetFilePath(submissionData.BinaryLogFile));
 
             return Json(checkRun);
         }
 
-        protected virtual async Task<bool> BindDataAsync(SubmissionFormData model, Dictionary<string, StringValues> dataToBind)
+        protected virtual async Task<bool> BindDataAsync(SubmissionData model, Dictionary<string, StringValues> dataToBind)
         {
             var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(dataToBind), CultureInfo.CurrentCulture);
             var bindingSuccessful = await TryUpdateModelAsync(model, "", formValueProvider);

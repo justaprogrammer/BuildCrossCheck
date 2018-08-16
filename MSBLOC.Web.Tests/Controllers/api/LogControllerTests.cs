@@ -16,13 +16,14 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Model;
 using MSBLOC.Web.Controllers.api;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using MSBLOC.Web.Tests.Util;
 using Newtonsoft.Json;
 using NSubstitute;
-using Octokit;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -32,11 +33,17 @@ namespace MSBLOC.Web.Tests.Controllers.api
     {
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly ILogger<LogControllerTests> _logger;
+        private static readonly Faker Faker;
 
         public LogControllerTests(ITestOutputHelper testOutputHelper)
         {
             _logger = TestLogger.Create<LogControllerTests>(testOutputHelper);
             _testOutputHelper = testOutputHelper;
+        }
+
+        static LogControllerTests()
+        {
+            Faker = new Faker();
         }
 
         [Fact]
@@ -248,15 +255,15 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 });
             fileService.Files.Returns(new[] {name});
 
-            var checkRun = new CheckRun(
-                id: 1234, headSha: "123456", externalId: "", url: "", htmlUrl: "", status: CheckStatus.Completed,
-                conclusion: CheckConclusion.Failure, startedAt: DateTimeOffset.Now.AddMinutes(-10),
-                completedAt: DateTimeOffset.Now, output: new CheckRunOutputResponse("title", "summary", "text", 5),
-                name: "Name", checkSuite: new CheckSuite(), app: new GitHubApp(), pullRequests: null);
+            var checkRun = new CheckRun()
+            {
+                Id = Faker.Random.Long(),
+                Url = Faker.Internet.Url()
+            };
 
-            msblocService.SubmitAsync(null).ReturnsForAnyArgs(checkRun);
+            msblocService.SubmitAsync(null, null, null, null, null).ReturnsForAnyArgs(checkRun);
 
-            var formData = new SubmissionData
+            var submissionData = new SubmissionData
             {
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot"
@@ -264,17 +271,20 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             var faker = new Faker();
 
+            var repoOwner = faker.Person.FullName;
+            var repoName = faker.Hacker.Phrase();
+
             var claims = new[]
             {
-                new Claim("urn:msbloc:repositoryName", faker.Hacker.Phrase()),
-                new Claim("urn:msbloc:repositoryOwner", faker.Person.FullName),
+                new Claim("urn:msbloc:repositoryName", repoName),
+                new Claim("urn:msbloc:repositoryOwner", repoOwner),
                 new Claim("urn:msbloc:repositoryOwnerId", faker.Random.Long().ToString())
             };
 
             var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
                 msblocService)
             {
-                ControllerContext = await RequestWithFiles(fileDictionary, formData, claims),
+                ControllerContext = await RequestWithFiles(fileDictionary, submissionData, claims),
                 MetadataProvider = new EmptyModelMetadataProvider(),
                 ModelBinderFactory = Substitute.For<IModelBinderFactory>(),
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
@@ -284,11 +294,11 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
             await msblocService.Received(1).SubmitAsync(
-                Arg.Is<SubmissionData>(data => data.RepoOwner.Equals(claims.First(c => c.Type == "urn:msbloc:repositoryOwner").Value) &&
-                    data.RepoName.Equals(claims.First(c => c.Type == "urn:msbloc:repositoryName").Value) &&
-                    data.CloneRoot.Equals(formData.CloneRoot) &&
-                    data.CommitSha.Equals(formData.CommitSha) &&
-                    data.BinaryLogFile.Equals(receivedFiles.Keys.FirstOrDefault())));
+                repoOwner,
+                repoName,
+                submissionData.CommitSha,
+                submissionData.CloneRoot,
+                string.Empty);
 
             receivedFiles.Should().BeEquivalentTo(fileDictionary);
 
@@ -296,7 +306,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             resultFormData.Should().NotBeNull();
             resultFormData.Id.Should().Be(checkRun.Id);
-            resultFormData.HeadSha.Should().Be(checkRun.HeadSha);
+            resultFormData.Url.Should().Be(checkRun.Url);
         }
 
         private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary,
@@ -347,11 +357,11 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             }
 
-            protected override Task<bool> BindDataAsync(SubmissionFormData model, Dictionary<string, StringValues> dataToBind)
+            protected override Task<bool> BindDataAsync(SubmissionData model, Dictionary<string, StringValues> dataToBind)
             {
                 foreach (var item in dataToBind)
                 {
-                    var propertyInfo = typeof(SubmissionFormData).GetProperty(item.Key);
+                    var propertyInfo = typeof(SubmissionData).GetProperty(item.Key);
                     var value = Convert.ChangeType(item.Value.ToString(), propertyInfo.PropertyType);
                     propertyInfo.SetValue(model, value);
                 }
