@@ -350,7 +350,7 @@ namespace MSBLOC.Core.Tests.Services
             var solutionDetails = new SolutionDetails(cloneRoot) {projectDetails};
             var buildDetails = new BuildDetails(solutionDetails);
 
-            var projectCodeFiles = GenerateFileNames().Distinct().Take(Faker.Random.Int(1, 200)).ToArray();
+            var projectCodeFiles = GenerateFileNames().Distinct().Take(Faker.Random.Int(50, 200)).ToArray();
 
             projectDetails.AddItems(projectCodeFiles);
 
