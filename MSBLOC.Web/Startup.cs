@@ -154,7 +154,16 @@ namespace MSBLOC.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddApplicationInsights(app.ApplicationServices, LogLevel.Trace);
+            var logLevel = Configuration.GetSection("Logging:LogLevel").GetChildren()
+                .Where(ll => ll.Key.Equals("Default", StringComparison.InvariantCultureIgnoreCase))
+                .Select(ll =>
+                {
+                    Enum.TryParse(ll.Value, ignoreCase: true, result: out LogLevel logLevelValue);
+                    return logLevelValue;
+                })
+                .FirstOrDefault();
+
+            loggerFactory.AddApplicationInsights(app.ApplicationServices, logLevel);
 
             if (env.IsDevelopment())
             {
