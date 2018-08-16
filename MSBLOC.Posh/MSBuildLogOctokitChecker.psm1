@@ -6,9 +6,7 @@ function  Send-MsbuildLog {
         [ValidateNotNullOrEmpty()]
         [string] $Path,
         [ValidateNotNullOrEmpty()]
-        [string] $RepoOwner,
-        [ValidateNotNullOrEmpty()]
-        [string] $RepoName,
+        [string] $Token,
         [ValidateNotNullOrEmpty()]
         [string] $CloneRoot,
         [ValidateNotNullOrEmpty()]
@@ -28,12 +26,6 @@ function  Send-MsbuildLog {
     $LF = "`r`n";
     $Body = @(
         "--$Boundary",
-        "Content-Disposition: form-data; name=`"RepoOwner`"$LF",
-        $RepoOwner
-        "--$Boundary",
-        "Content-Disposition: form-data; name=`"RepoName`"$LF",
-        $RepoName
-        "--$Boundary",
         "Content-Disposition: form-data; name=`"CommitSha`"$LF",
         $HeadCommit,
         "--$Boundary",
@@ -47,6 +39,7 @@ function  Send-MsbuildLog {
     ) -join $LF
 
     $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+    $headers.Add("Authorization", "Bearer $Token")
     $headers.Add("Accept", "application/json")
 
     $Uri = GetUploadUrl
@@ -83,15 +76,15 @@ function  Send-MsbuildLogAppveyor {
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [ValidateNotNullOrEmpty()]
-        [string] $Path
+        [string] $Path,
+        [ValidateNotNullOrEmpty()]
+        [string] $Token
     )
 
-    $RepoOwnerName = $env:APPVEYOR_REPO_NAME
-    $RepoOwner, $RepoName = $RepoOwnerName.Split('/');
     $CloneRoot = $env:APPVEYOR_BUILD_FOLDER
     $HeadCommit = $env:APPVEYOR_REPO_COMMIT
 
-    Send-MsbuildLog $Path $RepoOwner $RepoName $CloneRoot $HeadCommit
+    Send-MsbuildLog $Path $Token $CloneRoot $HeadCommit
 }
 
 # Export only the functions using PowerShell standard verb-noun naming.
