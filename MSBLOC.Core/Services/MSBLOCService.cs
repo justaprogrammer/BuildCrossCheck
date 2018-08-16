@@ -26,34 +26,47 @@ namespace MSBLOC.Core.Services
         }
 
         public async Task<CheckRun> SubmitAsync(string repoOwner, string repoName, string sha, string cloneRoot,
-            string resourcePath, int number)
+            string resourcePath)
         {
             var startedAt = DateTimeOffset.Now;
 
             var buildDetails = _binaryLogProcessor.ProcessLog(resourcePath, cloneRoot);
 
-            var annotations = await CreateAnnotations(buildDetails, repoOwner, repoName, number);
+            var annotations = CreateAnnotations(buildDetails, repoOwner, repoName, sha);
 
-            var checkRun = await SubmitCheckRun(annotations: annotations,
-                owner: repoOwner,
-                name: repoName,
-                headSha: sha,
-                checkRunName: "MSBuildLog Analyzer",
-                checkRunTitle: "MSBuildLog Analysis",
-                checkRunSummary: "",
-                startedAt: startedAt,
-                completedAt: DateTimeOffset.Now).ConfigureAwait(false);
+            var checkRun = await SubmitCheckRun(annotations,
+                repoOwner,
+                repoName,
+                sha,
+                "MSBuildLog Analyzer",
+                "MSBuildLog Analysis",
+                "",
+                startedAt,
+                DateTimeOffset.Now).ConfigureAwait(false);
 
             _logger.LogInformation($"CheckRun Created - {checkRun.Url}");
 
             return checkRun;
         }
 
-        private async Task<Annotation[]> CreateAnnotations(BuildDetails buildDetails, string repoOwner, string repoName,
-            int number)
+        private Annotation[] CreateAnnotations(BuildDetails buildDetails, string repoOwner, string repoName, string sha)
         {
-            await _gitHubAppModelService.GetPullRequestChangedPathsAsync(repoOwner, repoName, number);
-            return new Annotation[0];
+            return buildDetails.BuildMessages.Select(buildMessage =>
+            {
+                var filename =
+                    buildDetails.SolutionDetails.GetProjectItemPath(buildMessage.ProjectFile, buildMessage.File);
+                var blobHref = BlobHref(repoOwner, repoName, sha, filename);
+                return new Annotation(filename,
+                    buildMessage.MessageLevel == BuildMessageLevel.Error
+                        ? CheckWarningLevel.Failure
+                        : CheckWarningLevel.Warning, buildMessage.Code, buildMessage.Message, buildMessage.LineNumber,
+                    buildMessage.EndLineNumber, blobHref);
+            }).ToArray();
+        }
+
+        public static string BlobHref(string owner, string repository, string sha, string file)
+        {
+            return $"https://github.com/{owner}/{repository}/blob/{sha}/{file.Replace(@"\", "/")}";
         }
 
         protected async Task<CheckRun> SubmitCheckRun(Annotation[] annotations,
@@ -63,13 +76,15 @@ namespace MSBLOC.Core.Services
         {
             var annotationBatches = annotations?.Batch(50).ToArray();
 
-            var checkRun = await _gitHubAppModelService.CreateCheckRunAsync(owner, name, headSha, checkRunName, checkRunTitle, checkRunSummary, annotationBatches?.FirstOrDefault()?.ToArray(), startedAt, completedAt).ConfigureAwait(false);
+            var checkRun = await _gitHubAppModelService.CreateCheckRunAsync(owner, name, headSha, checkRunName,
+                    checkRunTitle, checkRunSummary, annotationBatches?.FirstOrDefault()?.ToArray(), startedAt,
+                    completedAt)
+                .ConfigureAwait(false);
 
             foreach (var annotationBatch in annotationBatches.Skip(1))
-            {
-                await _gitHubAppModelService.UpdateCheckRunAsync(checkRun.Id, owner, name, headSha, checkRunTitle, checkRunSummary,
+                await _gitHubAppModelService.UpdateCheckRunAsync(checkRun.Id, owner, name, headSha, checkRunTitle,
+                    checkRunSummary,
                     annotationBatch.ToArray(), startedAt, completedAt).ConfigureAwait(false);
-            }
 
             return checkRun;
         }

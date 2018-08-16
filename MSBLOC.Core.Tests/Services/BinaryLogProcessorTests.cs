@@ -45,7 +45,8 @@ namespace MSBLOC.Core.Tests.Services
             var project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
             solutionDetails.Add(project);
 
-            project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj");
+            var projectFile = @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj";
+            project = new ProjectDetails(cloneRoot, projectFile);
             project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
             solutionDetails.Add(project);
 
@@ -57,7 +58,7 @@ namespace MSBLOC.Core.Tests.Services
 
                 solutionDetails, new[]
                 {
-                    new Annotation(filename, CheckWarningLevel.Warning, "CS0219", "The variable 'hello' is assigned but its value is never used", 13, 13, BinaryLogProcessor.BlobHref(repoOwner, repoName, headSha, filename)),
+                    new BuildMessage(BuildMessageLevel.Warning, projectFile, "Program.cs", 13, 13, "The variable 'hello' is assigned but its value is never used", "CS0219"),
                 }, cloneRoot, repoOwner, repoName, headSha);
         }
 
@@ -71,7 +72,8 @@ namespace MSBLOC.Core.Tests.Services
             var project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
             solutionDetails.Add(project);
 
-            project = new ProjectDetails(cloneRoot, @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj");
+            var projectFile = @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj";
+            project = new ProjectDetails(cloneRoot, projectFile);
             project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
             solutionDetails.Add(project);
 
@@ -83,7 +85,7 @@ namespace MSBLOC.Core.Tests.Services
             AssertParseLogs("testconsoleapp1-1error.binlog",
                 solutionDetails, new[]
                 {
-                    new Annotation(filename, CheckWarningLevel.Failure, "CS1002", "; expected", 13, 13, BinaryLogProcessor.BlobHref(repoOwner, repoName, headSha, filename)),
+                    new BuildMessage(BuildMessageLevel.Error, projectFile, "Program.cs", 13, 13, "; expected", "CS1002"),
                 }, cloneRoot, repoOwner, repoName, headSha);
         }
 
@@ -112,7 +114,7 @@ namespace MSBLOC.Core.Tests.Services
             project = new ProjectDetails(cloneRoot, @"C:\projects\msbuildlogoctokitchecker\MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj");
             solutionDetails.Add(project);
 
-            AssertParseLogs("msbloc.binlog", solutionDetails, new Annotation[0], cloneRoot, Faker.Lorem.Word(), Faker.Lorem.Word(), Faker.Lorem.Word(), options => options.IncludingNestedObjects().IncludingProperties().Excluding(info => info.SelectedMemberInfo.Name == "Paths"));
+            AssertParseLogs("msbloc.binlog", solutionDetails, new BuildMessage[0], cloneRoot, Faker.Lorem.Word(), Faker.Lorem.Word(), Faker.Lorem.Word(), options => options.IncludingNestedObjects().IncludingProperties().Excluding(info => info.SelectedMemberInfo.Name == "Paths"));
         }
 
         [Fact]
@@ -130,12 +132,13 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public void ShouldThrowWhenBuildPathOutisdeCloneRoot()
         {
-            var solutionDetails = new SolutionDetails("C:\\projects\\testconsoleapp1\\");
+            var solutionDetails = new SolutionDetails(@"C:\projects\testconsoleapp1\");
 
-            var project = new ProjectDetails("C:\\projects\\testconsoleapp1\\", @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
+            var project = new ProjectDetails(@"C:\projects\testconsoleapp1\", @"C:\projects\testconsoleapp1\TestConsoleApp1.sln");
             solutionDetails.Add(project);
 
-            project = new ProjectDetails("C:\\projects\\testconsoleapp1\\", @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj");
+            var projectFile = @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj";
+            project = new ProjectDetails(@"C:\projects\testconsoleapp1\", projectFile);
             project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
             solutionDetails.Add(project);
 
@@ -147,16 +150,13 @@ namespace MSBLOC.Core.Tests.Services
                 var filename = @"TestConsoleApp1/Program.cs";
 
                 AssertParseLogs("testconsoleapp1-1warning.binlog",
-                    solutionDetails, new[]
-                    {
-                        new Annotation(filename, CheckWarningLevel.Warning, "CS1002", "; expected", 13, 13, BinaryLogProcessor.BlobHref(repoOwner, repoName, headSha, filename)),
-                    }, "C:\\projects\\testconsoleapp2\\", repoOwner, repoName, headSha);
+                    solutionDetails, new BuildMessage[0], @"C:\projects\testconsoleapp2\", repoOwner, repoName, headSha);
             });
 
             projectDetailsException.Message.Should().Be(@"Project file path ""C:\projects\testconsoleapp1\TestConsoleApp1.sln"" is not a subpath of ""C:\projects\testconsoleapp2\""");
         }
 
-        private void AssertParseLogs(string resourceName, SolutionDetails expectedSolutionDetails, Annotation[] expectedAnnotations,
+        private void AssertParseLogs(string resourceName, SolutionDetails expectedSolutionDetails, BuildMessage[] expectedBuildMessages,
             string cloneRoot, string repoOwner, string repoName, string headSha, Func<EquivalencyAssertionOptions<SolutionDetails>, EquivalencyAssertionOptions<SolutionDetails>> solutionDetailsEquivalency = null)
         {
             var resourcePath = TestUtils.GetResourcePath(resourceName);
@@ -165,7 +165,7 @@ namespace MSBLOC.Core.Tests.Services
             var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
             var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot);
 
-            parsedBinaryLog.Annotations.ToArray().Should().BeEquivalentTo(expectedAnnotations);
+            parsedBinaryLog.BuildMessages.ToArray().Should().BeEquivalentTo(expectedBuildMessages);
 
             solutionDetailsEquivalency = solutionDetailsEquivalency ?? (options => options.IncludingNestedObjects().IncludingProperties());
             parsedBinaryLog.SolutionDetails.Should().BeEquivalentTo(expectedSolutionDetails, solutionDetailsEquivalency);

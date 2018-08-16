@@ -5,8 +5,7 @@ namespace MSBLOC.Core.Model.Builds
 {
     public class BuildMessage
     {
-        public BuildMessage(
-            BuildMessageLevel messageLevel,
+        public BuildMessage(BuildMessageLevel messageLevel,
             [NotNull] string projectFile, [NotNull] string file, int lineNumber,
             int endLineNumber, [NotNull] string message, [NotNull] string code)
         {

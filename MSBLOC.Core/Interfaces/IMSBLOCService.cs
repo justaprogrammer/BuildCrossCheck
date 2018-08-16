@@ -13,10 +13,7 @@ namespace MSBLOC.Core.Interfaces
         /// <param name="sha"></param>
         /// <param name="cloneRoot"></param>
         /// <param name="resourcePath"></param>
-        /// <param name="number"></param>
-        /// <param name="submissionData">The submission data.</param>
         /// <returns>A CheckRun object</returns>
-        Task<CheckRun> SubmitAsync(string repoOwner, string repoName, string sha, string cloneRoot, string resourcePath,
-            int number);
+        Task<CheckRun> SubmitAsync(string repoOwner, string repoName, string sha, string cloneRoot, string resourcePath);
     }
 }
