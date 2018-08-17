@@ -53,7 +53,6 @@ namespace MSBLOC.Core.Tests.Services
             var headSha = Faker.Lorem.Word();
             var filename = @"TestConsoleApp1/Program.cs";
             AssertParseLogs("testconsoleapp1-1warning.binlog",
-
                 solutionDetails, new[]
                 {
                     new Annotation(filename, CheckWarningLevel.Warning, "CS0219", "The variable 'hello' is assigned but its value is never used", 13, 13, BinaryLogProcessor.BlobHref(repoOwner, repoName, headSha, filename)),
@@ -124,6 +123,18 @@ namespace MSBLOC.Core.Tests.Services
 
             var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
             var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot, Faker.Lorem.Word(), Faker.Lorem.Word(), Faker.Lorem.Word());
+        }
+
+        [Fact]
+        public void ShouldParseDBATools()
+        {
+            var cloneRoot = @"C:\projects\dbatools\";
+
+            var resourcePath = TestUtils.GetResourcePath("dbatools.binlog");
+            File.Exists(resourcePath).Should().BeTrue();
+
+            var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
+            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot);
         }
 
         [Fact]
