@@ -3,31 +3,11 @@ image: Visual Studio 2017
 before_build:
     - ps: |
         nuget restore MSBuildLogOctokitChecker.sln -Verbosity Quiet
+        cd ./MSBLOC.web
+        npm install
 build_script:
 - ps: >-
-    if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
-    {
-      Import-Module .\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
-    }
-
     msbuild MSBuildLogOctokitChecker.sln --% /p:Configuration=Release /bl:output.binlog /verbosity:minimal
-    
-    if (! $?) {
-      echo "Build Error"
-      Push-AppveyorArtifact output.binlog -Type File
-
-      if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
-      {
-        Send-MsbuildLogAppveyor output.binlog
-      }
-      
-      exit -1
-    }
-    
-    if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
-    {
-      Send-MsbuildLogAppveyor output.binlog
-    }
 after_build:
     - cmd: dotnet publish MSBLOC.Web  --configuration Release --output %appveyor_build_folder%\dist
 artifacts:
