@@ -5,6 +5,7 @@ before_build:
         nuget restore MSBuildLogOctokitChecker.sln -Verbosity Quiet
         cd ./MSBLOC.web
         npm install
+        cd ..
 build_script:
 - ps: >-
     msbuild MSBuildLogOctokitChecker.sln --% /p:Configuration=Release /bl:output.binlog /verbosity:minimal
