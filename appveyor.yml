@@ -10,7 +10,7 @@ build_script:
       Import-Module .\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
     }
 
-    msbuild MSBuildLogOctokitChecker.sln --% /bl:output.binlog /verbosity:minimal
+    msbuild MSBuildLogOctokitChecker.sln --% /p:Configuration=Release /bl:output.binlog /verbosity:minimal
     
     if (! $?) {
       echo "Build Error"
