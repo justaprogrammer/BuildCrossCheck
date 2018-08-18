@@ -19,8 +19,8 @@ More information about the MSBuild Binary Log format can be found [here](http://
 ## Integrating on AppVeyor
 
 1. Copy `MSBuildLogOctokitChecker.psd1` and `MSBuildLogOctokitChecker.psm1` from MSBLOC.Posh to your project
-   - [MSBuildLogOctokitChecker.psd1](../MSBLOC.Post/MSBuildLogOctokitChecker.psd1)
-   - [MSBuildLogOctokitChecker.psm1](../MSBLOC.Post/MSBuildLogOctokitChecker.psm1)
+   - [MSBuildLogOctokitChecker.psd1](../MSBLOC.Posh/MSBuildLogOctokitChecker.psd1)
+   - [MSBuildLogOctokitChecker.psm1](../MSBLOC.Posh/MSBuildLogOctokitChecker.psm1)
 1. Modify you build script to perform the following steps
 
    ```
@@ -28,32 +28,21 @@ More information about the MSBuild Binary Log format can be found [here](http://
    image: Visual Studio 2017
    build_script:
       - ps: >-
-       Import-Module .\tools\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
-       msbuild TestConsoleApp1.sln --% /bl:output.binlog verbosity=diagnostic
-    
-       if (! $?) {
-         echo "Build Error"
-         if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
-         {
-           Send-MsbuildLogAppveyor output.binlog
-         }
-         exit -1
-       }
-    
-       if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
-       {
-         Send-MsbuildLogAppveyor output.binlog
-       }
+          msbuild TestConsoleApp1.sln --% /bl:output.binlog verbosity=diagnostic
+   on_finish:
+      - ps: >-
+          if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
+          {
+              Import-Module .\tools\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
+              Send-MsbuildLogAppveyor output.binlog
+          }
    ```
    The key points are as follows
 
-   1. Using Powershell
-   1. Importing the MSBLOC.Posh Powershell Module
    1. Invoking MSBuild with the option to output the binary log
-   1. Captuing errors from MSBuild
-      - If it is a branch build invoke `Send-MsbuildLogAppveyor` to send MSBLOC the binary log file
-      - Returning an error for MSBuild
-   1. If it is a branch build invoke `Send-MsbuildLogAppveyor` to send MSBLOC the binary log file
+   1. In the `on_finish` task with a PowerShell script
+      1. If it is a branch build
+         1. Import the MSBLOC.Posh Powershell Module and send MSBLOC the binary log file
 
    An example can be found [here](https://github.com/justaprogrammer/TestConsoleApp1/blob/appveyor/appveyor.yml)
 

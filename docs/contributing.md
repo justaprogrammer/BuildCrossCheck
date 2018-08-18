@@ -1,5 +1,10 @@
 # Contributing
 
+## Running Web Application
+
+1. Create a GitHub app
+1. 
+
 ## Running Integration Tests
 
 Integration tests in the project `MSBLOC.Core.IntegrationTests` require the following:
