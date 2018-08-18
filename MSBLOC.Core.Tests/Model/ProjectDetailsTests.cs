@@ -2,6 +2,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.Builds;
 using MSBLOC.Core.Tests.Util;
 using Xunit;
 using Xunit.Abstractions;

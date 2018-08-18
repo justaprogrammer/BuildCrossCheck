@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using JetBrains.Annotations;
 using MSBLOC.Core.Extensions;
 
-namespace MSBLOC.Core.Model
+namespace MSBLOC.Core.Model.Builds
 {
     public class ProjectDetails
     {
@@ -16,10 +17,10 @@ namespace MSBLOC.Core.Model
 
         private Dictionary<string, string> _paths;
 
-        public ProjectDetails(string cloneRoot, string projectFile)
+        public ProjectDetails([NotNull] string cloneRoot, [NotNull] string projectFile)
         {
-            CloneRoot = cloneRoot;
-            ProjectFile = projectFile;
+            CloneRoot = cloneRoot ?? throw new ArgumentNullException(nameof(cloneRoot));
+            ProjectFile = projectFile ?? throw new ArgumentNullException(nameof(projectFile));
 
             if (!projectFile.IsSubPathOf(cloneRoot))
             {
@@ -32,16 +33,26 @@ namespace MSBLOC.Core.Model
             _paths = new Dictionary<string, string>();
         }
 
-        public void AddItems(params string[] itemProjectPaths)
+        public void AddItems([NotNull] params string[] itemProjectPaths)
         {
+            if (itemProjectPaths == null)
+            {
+                throw new ArgumentNullException(nameof(itemProjectPaths));
+            }
+
             foreach (var itemProjectPath in itemProjectPaths)
             {
                 AddItem(itemProjectPath);
             }
         }
 
-        private void AddItem(string itemProjectPath)
+        private void AddItem([NotNull] string itemProjectPath)
         {
+            if (itemProjectPath == null)
+            {
+                throw new ArgumentNullException(nameof(itemProjectPath));
+            }
+
             if (_paths.ContainsKey(itemProjectPath))
             {
                 throw new ProjectDetailsException($"Item \"{itemProjectPath}\" already exists");
@@ -50,16 +61,26 @@ namespace MSBLOC.Core.Model
             _paths[itemProjectPath] = GetClonePath(itemProjectPath);
         }
 
-        private string GetClonePath(string itemProjectPath)
+        private string GetClonePath([NotNull] string itemProjectPath)
         {
+            if (itemProjectPath == null)
+            {
+                throw new ArgumentNullException(nameof(itemProjectPath));
+            }
+
             return Path.Combine(ProjectDirectory, itemProjectPath)
                 .Split(new[] {CloneRoot}, StringSplitOptions.RemoveEmptyEntries)
                 .First()
                 .Replace(@"\", "/");
         }
 
-        public string GetPath(string itemProjectPath)
+        public string GetPath([NotNull] string itemProjectPath)
         {
+            if (itemProjectPath == null)
+            {
+                throw new ArgumentNullException(nameof(itemProjectPath));
+            }
+
             if (_paths.TryGetValue(itemProjectPath, out var result))
             {
                 return result;

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using MoreLinq;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.Builds;
 
 namespace MSBLOC.Core.Services
 {
@@ -29,37 +30,63 @@ namespace MSBLOC.Core.Services
         {
             var startedAt = DateTimeOffset.Now;
 
-            var buildDetails = _binaryLogProcessor.ProcessLog(resourcePath, cloneRoot, repoOwner, repoName, sha);
+            var buildDetails = _binaryLogProcessor.ProcessLog(resourcePath, cloneRoot);
 
-            var checkRun = await SubmitCheckRun(buildDetails: buildDetails,
-                owner: repoOwner,
-                name: repoName,
-                headSha: sha,
-                checkRunName: "MSBuildLog Analyzer",
-                checkRunTitle: "MSBuildLog Analysis",
-                checkRunSummary: "",
-                startedAt: startedAt,
-                completedAt: DateTimeOffset.Now).ConfigureAwait(false);
+            var annotations = CreateAnnotations(buildDetails, repoOwner, repoName, sha);
+
+            var checkRun = await SubmitCheckRun(annotations,
+                repoOwner,
+                repoName,
+                sha,
+                "MSBuildLog Analyzer",
+                "MSBuildLog Analysis",
+                "",
+                startedAt,
+                DateTimeOffset.Now).ConfigureAwait(false);
 
             _logger.LogInformation($"CheckRun Created - {checkRun.Url}");
 
             return checkRun;
         }
 
-        protected async Task<CheckRun> SubmitCheckRun(BuildDetails buildDetails,
+        private Annotation[] CreateAnnotations(BuildDetails buildDetails, string repoOwner, string repoName, string sha)
+        {
+            return buildDetails.BuildMessages.Select(buildMessage =>
+            {
+                var filename =
+                    buildDetails.SolutionDetails.GetProjectItemPath(buildMessage.ProjectFile, buildMessage.File);
+                var blobHref = BlobHref(repoOwner, repoName, sha, filename);
+                return new Annotation(filename,
+                    buildMessage.MessageLevel == BuildMessageLevel.Error
+                        ? CheckWarningLevel.Failure
+                        : CheckWarningLevel.Warning, buildMessage.Code, buildMessage.Message, buildMessage.LineNumber,
+                    buildMessage.EndLineNumber, blobHref);
+            }).ToArray();
+        }
+
+        public static string BlobHref(string owner, string repository, string sha, string file)
+        {
+            return $"https://github.com/{owner}/{repository}/blob/{sha}/{file.Replace(@"\", "/")}";
+        }
+
+        protected async Task<CheckRun> SubmitCheckRun(Annotation[] annotations,
             string owner, string name, string headSha,
             string checkRunName, string checkRunTitle, string checkRunSummary,
             DateTimeOffset startedAt, DateTimeOffset completedAt)
         {
-            var annotations = buildDetails.Annotations?.Batch(50).ToArray();
+            var annotationBatches = annotations?.Batch(50).ToArray();
 
-            var checkRun = await _gitHubAppModelService.CreateCheckRunAsync(owner, name, headSha, checkRunName, checkRunTitle, checkRunSummary, annotations?.FirstOrDefault()?.ToArray(), startedAt, completedAt).ConfigureAwait(false);
+            var isFailure = annotations?.Any(annotation => annotation.CheckWarningLevel == CheckWarningLevel.Failure) ?? false;
+            var isSuccess = !isFailure;
 
-            foreach (var annotationBatch in annotations.Skip(1))
-            {
-                await _gitHubAppModelService.UpdateCheckRunAsync(checkRun.Id, owner, name, headSha, checkRunTitle, checkRunSummary,
+            var checkRun = await _gitHubAppModelService.CreateCheckRunAsync(owner, name, headSha, checkRunName,
+                    checkRunTitle, checkRunSummary, isSuccess, annotationBatches?.FirstOrDefault()?.ToArray(), startedAt, completedAt)
+                .ConfigureAwait(false);
+
+            foreach (var annotationBatch in annotationBatches.Skip(1))
+                await _gitHubAppModelService.UpdateCheckRunAsync(checkRun.Id, owner, name, headSha, checkRunTitle,
+                    checkRunSummary,
                     annotationBatch.ToArray(), startedAt, completedAt).ConfigureAwait(false);
-            }
 
             return checkRun;
         }

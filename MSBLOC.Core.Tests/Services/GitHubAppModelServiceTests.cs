@@ -111,7 +111,13 @@ namespace MSBLOC.Core.Tests.Services
                 owner,
                 name,
                 Faker.Random.String(),
-                Faker.Lorem.Word(), Faker.Lorem.Sentence(), Faker.Lorem.Paragraph(), FakeAnnotation.Generate(1).ToArray(), Faker.Date.RecentOffset(2), Faker.Date.RecentOffset(1));
+                Faker.Lorem.Word(),
+                Faker.Lorem.Sentence(),
+                Faker.Lorem.Paragraph(), 
+                Faker.Random.Bool(),
+                FakeAnnotation.Generate(1).ToArray(),
+                Faker.Date.RecentOffset(2), 
+                Faker.Date.RecentOffset(1));
 
             checkRunsClient.Received(1).Create(owner, name, Arg.Any<NewCheckRun>());
 
@@ -132,7 +138,14 @@ namespace MSBLOC.Core.Tests.Services
                     Faker.Internet.UserName(),
                     Faker.Lorem.Word(),
                     Faker.Random.String(),
-                    Faker.Lorem.Word(), Faker.Lorem.Sentence(), Faker.Lorem.Paragraph(), annotations, Faker.Date.RecentOffset(2), Faker.Date.RecentOffset(1));
+                    Faker.Lorem.Word(), 
+                    Faker.Lorem.Sentence(), 
+                    Faker.Lorem.Paragraph(), 
+                    false,
+                    annotations, 
+                    Faker.Date.RecentOffset(2), 
+                    Faker.Date.RecentOffset(1));
+
             }).Should().Throw<ArgumentException>().WithMessage("Cannot create more than 50 annotations at a time");
         }
 
@@ -155,6 +168,7 @@ namespace MSBLOC.Core.Tests.Services
                     annotations,
                     Faker.Date.RecentOffset(2),
                     Faker.Date.RecentOffset(1));
+
             }).Should().Throw<ArgumentException>().WithMessage("Cannot create more than 50 annotations at a time");
         }
 
@@ -174,7 +188,14 @@ namespace MSBLOC.Core.Tests.Services
                     Faker.Internet.UserName(),
                     Faker.Lorem.Word(),
                     Faker.Random.String(),
-                    Faker.Lorem.Word(), Faker.Lorem.Sentence(), Faker.Lorem.Paragraph(), annotations, Faker.Date.RecentOffset(2), Faker.Date.RecentOffset(1));
+                    Faker.Lorem.Word(), 
+                    Faker.Lorem.Sentence(),
+                    Faker.Lorem.Paragraph(),
+                    false,
+                    annotations,
+                    Faker.Date.RecentOffset(2), 
+                    Faker.Date.RecentOffset(1));
+
             }).Should().Throw<InvalidOperationException>().WithMessage("ICheckRunsClient is null");
         }
 
@@ -199,6 +220,7 @@ namespace MSBLOC.Core.Tests.Services
                     annotations,
                     Faker.Date.RecentOffset(2),
                     Faker.Date.RecentOffset(1));
+
             }).Should().Throw<InvalidOperationException>().WithMessage("ICheckRunsClient is null");
         }
 
@@ -224,7 +246,7 @@ namespace MSBLOC.Core.Tests.Services
                 Faker.Date.RecentOffset(2),
                 Faker.Date.RecentOffset(1));
 
-            checkRunsClient.Received(1).Update(owner, name, checkRunId, Arg.Any<CheckRunUpdate>());
+            await checkRunsClient.Received(1).Update(owner, name, checkRunId, Arg.Any<CheckRunUpdate>());
         }
     }
 }
