@@ -29,7 +29,7 @@ build_script:
       Send-MsbuildLogAppveyor output.binlog
     }
 after_build:
-    - cmd: dotnet publish MSBLOC.Web --output %appveyor_build_folder%\dist
+    - cmd: dotnet publish MSBLOC.Web --output %appveyor_build_folder%\dist --Configuration Release
 artifacts:
     - path: output.binlog
       name: log
