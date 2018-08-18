@@ -168,6 +168,7 @@ namespace MSBLOC.Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+                app.UseHttpsRedirection();
             }
 
             app.UseSwagger(c =>
