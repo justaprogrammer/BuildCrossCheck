@@ -165,7 +165,6 @@ namespace MSBLOC.Core.Tests.Services
                 $"https://github.com/{repoOwner}/{repoName}/blob/{headSha}/{filename}"));
         }
 
-
         [Fact]
         public async Task SubmitBuildDetailsWithError()
         {
@@ -216,126 +215,6 @@ namespace MSBLOC.Core.Tests.Services
                 lineNumber,
                 endLineNumber,
                 $"https://github.com/{repoOwner}/{repoName}/blob/{headSha}/{filename}"));
-        }
-
-        [Fact]
-        public async Task SubmitOver50To100BuildDetails()
-        {
-            var cloneRoot = @"c:" + Faker.System.DirectoryPath().Replace("/", @"\") + @"\";
-            var projectPath = Path.Combine(cloneRoot, Faker.Lorem.Word());
-            var projectFile = Path.Combine(projectPath, Faker.System.FileName("csproj"));
-
-            var projectDetails = new ProjectDetails(cloneRoot, projectFile);
-
-            var solutionDetails = new SolutionDetails(cloneRoot) {projectDetails};
-            var buildDetails = new BuildDetails(solutionDetails);
-
-            var projectCodeFiles = GenerateFileNames().Distinct().Take(Faker.Random.Int(100, 200)).ToArray();
-
-            projectDetails.AddItems(projectCodeFiles);
-
-            foreach (var projectCodeFile in Faker.PickRandom(projectCodeFiles, Faker.Random.Int(50, 100)))
-                buildDetails.AddMessage(new BuildMessage(BuildMessageLevel.Warning, projectFile, projectCodeFile,
-                    Faker.Random.Int(2), Faker.Random.Int(2), Faker.Lorem.Sentence(), Faker.Lorem.Word()));
-
-            buildDetails.BuildMessages.Count.Should().BeGreaterThan(50);
-            buildDetails.BuildMessages.Count.Should().BeLessOrEqualTo(100);
-
-            var repoOwner = Faker.Lorem.Word();
-            var repoName = Faker.Lorem.Word();
-            var headSha = Faker.Random.String();
-
-            var gitHubAppModelService = await SubmitBuild(buildDetails, repoOwner, repoName, headSha);
-
-            await gitHubAppModelService.Received(1).CreateCheckRunAsync(
-                Arg.Is(repoOwner),
-                Arg.Is(repoName),
-                Arg.Is(headSha),
-                Arg.Is("MSBuildLog Analyzer"),
-                Arg.Is("MSBuildLog Analysis"),
-                Arg.Is(""),
-                Arg.Is(true),
-                Arg.Is<Annotation[]>(annotations => annotations.Length == 50),
-                Arg.Any<DateTimeOffset>(),
-                Arg.Any<DateTimeOffset>());
-
-            await gitHubAppModelService.Received(1)
-                .UpdateCheckRunAsync(
-                    Arg.Any<long>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Is<Annotation[]>(annotations => annotations.Length == buildDetails.BuildMessages.Count - 50),
-                    Arg.Any<DateTimeOffset?>(),
-                    Arg.Any<DateTimeOffset?>());
-        }
-
-        [Fact]
-        public async Task SubmitOver100To150BuildDetails()
-        {
-            var cloneRoot = @"c:" + Faker.System.DirectoryPath().Replace("/", @"\") + @"\";
-            var projectPath = Path.Combine(cloneRoot, Faker.Lorem.Word());
-            var projectFile = Path.Combine(projectPath, Faker.System.FileName("csproj"));
-
-            var projectDetails = new ProjectDetails(cloneRoot, projectFile);
-
-            var solutionDetails = new SolutionDetails(cloneRoot) {projectDetails};
-            var buildDetails = new BuildDetails(solutionDetails);
-
-            var projectCodeFiles = GenerateFileNames().Distinct().Take(Faker.Random.Int(200, 300)).ToArray();
-
-            projectDetails.AddItems(projectCodeFiles);
-
-            foreach (var projectCodeFile in Faker.PickRandom(projectCodeFiles, Faker.Random.Int(100, 150)))
-                buildDetails.AddMessage(new BuildMessage(BuildMessageLevel.Warning, projectFile, projectCodeFile,
-                    Faker.Random.Int(2), Faker.Random.Int(2), Faker.Lorem.Sentence(), Faker.Lorem.Word()));
-
-            buildDetails.BuildMessages.Count.Should().BeGreaterThan(100);
-            buildDetails.BuildMessages.Count.Should().BeLessOrEqualTo(150);
-
-            var repoOwner = Faker.Lorem.Word();
-            var repoName = Faker.Lorem.Word();
-            var headSha = Faker.Random.String();
-
-            var gitHubAppModelService = await SubmitBuild(buildDetails, repoOwner, repoName, headSha);
-
-            await gitHubAppModelService.Received(1).CreateCheckRunAsync(
-                Arg.Is(repoOwner),
-                Arg.Is(repoName),
-                Arg.Is(headSha),
-                Arg.Is("MSBuildLog Analyzer"),
-                Arg.Is("MSBuildLog Analysis"),
-                Arg.Is(""),
-                Arg.Is(true),
-                Arg.Is<Annotation[]>(annotations => annotations.Length == 50),
-                Arg.Any<DateTimeOffset>(),
-                Arg.Any<DateTimeOffset>());
-
-            await gitHubAppModelService.Received(1)
-                .UpdateCheckRunAsync(
-                    Arg.Any<long>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Is<Annotation[]>(annotations => annotations.Length == 50),
-                    Arg.Any<DateTimeOffset?>(),
-                    Arg.Any<DateTimeOffset?>());
-
-            await gitHubAppModelService.Received(1)
-                .UpdateCheckRunAsync(
-                    Arg.Any<long>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Is<Annotation[]>(annotations => annotations.Length == buildDetails.BuildMessages.Count - 100),
-                    Arg.Any<DateTimeOffset?>(),
-                    Arg.Any<DateTimeOffset?>());
         }
 
         [Fact]
@@ -391,6 +270,134 @@ namespace MSBLOC.Core.Tests.Services
                     Arg.Any<Annotation[]>(),
                     Arg.Any<DateTimeOffset?>(),
                     Arg.Any<DateTimeOffset?>());
+        }
+
+        [Fact]
+        public async Task Submit50To100BuildDetails()
+        {
+            var cloneRoot = @"c:" + Faker.System.DirectoryPath().Replace("/", @"\") + @"\";
+            var projectPath = Path.Combine(cloneRoot, Faker.Lorem.Word());
+            var projectFile = Path.Combine(projectPath, Faker.System.FileName("csproj"));
+
+            var projectDetails = new ProjectDetails(cloneRoot, projectFile);
+
+            var solutionDetails = new SolutionDetails(cloneRoot) {projectDetails};
+            var buildDetails = new BuildDetails(solutionDetails);
+
+            var projectCodeFiles = GenerateFileNames().Distinct().Take(Faker.Random.Int(100, 200)).ToArray();
+
+            projectDetails.AddItems(projectCodeFiles);
+
+            foreach (var projectCodeFile in Faker.PickRandom(projectCodeFiles, Faker.Random.Int(51, 100)))
+                buildDetails.AddMessage(new BuildMessage(BuildMessageLevel.Warning, projectFile, projectCodeFile,
+                    Faker.Random.Int(2), Faker.Random.Int(2), Faker.Lorem.Sentence(), Faker.Lorem.Word()));
+
+            buildDetails.BuildMessages.Count.Should().BeGreaterThan(50);
+            buildDetails.BuildMessages.Count.Should().BeLessOrEqualTo(100);
+
+            var repoOwner = Faker.Lorem.Word();
+            var repoName = Faker.Lorem.Word();
+            var headSha = Faker.Random.String();
+
+            var gitHubAppModelService = await SubmitBuild(buildDetails, repoOwner, repoName, headSha);
+
+            Received.InOrder(async () =>
+            {
+                await gitHubAppModelService.Received(1).CreateCheckRunAsync(
+                    Arg.Is(repoOwner),
+                    Arg.Is(repoName),
+                    Arg.Is(headSha),
+                    Arg.Is("MSBuildLog Analyzer"),
+                    Arg.Is("MSBuildLog Analysis"),
+                    Arg.Is(""),
+                    Arg.Is(true),
+                    Arg.Is<Annotation[]>(annotations => annotations.Length == 50),
+                    Arg.Any<DateTimeOffset>(),
+                    Arg.Any<DateTimeOffset>());
+
+                await gitHubAppModelService.Received(1)
+                    .UpdateCheckRunAsync(
+                        Arg.Any<long>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Is<Annotation[]>(annotations => annotations.Length == buildDetails.BuildMessages.Count - 50),
+                        Arg.Any<DateTimeOffset?>(),
+                        Arg.Any<DateTimeOffset?>());
+            });
+        }
+
+        [Fact]
+        public async Task Submit100To150BuildDetails()
+        {
+            var cloneRoot = @"c:" + Faker.System.DirectoryPath().Replace("/", @"\") + @"\";
+            var projectPath = Path.Combine(cloneRoot, Faker.Lorem.Word());
+            var projectFile = Path.Combine(projectPath, Faker.System.FileName("csproj"));
+
+            var projectDetails = new ProjectDetails(cloneRoot, projectFile);
+
+            var solutionDetails = new SolutionDetails(cloneRoot) {projectDetails};
+            var buildDetails = new BuildDetails(solutionDetails);
+
+            var projectCodeFiles = GenerateFileNames().Distinct().Take(Faker.Random.Int(200, 300)).ToArray();
+
+            projectDetails.AddItems(projectCodeFiles);
+
+            foreach (var projectCodeFile in Faker.PickRandom(projectCodeFiles, Faker.Random.Int(101, 150)))
+                buildDetails.AddMessage(new BuildMessage(BuildMessageLevel.Warning, projectFile, projectCodeFile,
+                    Faker.Random.Int(2), Faker.Random.Int(2), Faker.Lorem.Sentence(), Faker.Lorem.Word()));
+
+            buildDetails.BuildMessages.Count.Should().BeGreaterThan(100);
+            buildDetails.BuildMessages.Count.Should().BeLessOrEqualTo(150);
+
+            _logger.LogInformation("Build Message Count: {0}", buildDetails.BuildMessages.Count);
+
+            var repoOwner = Faker.Lorem.Word();
+            var repoName = Faker.Lorem.Word();
+            var headSha = Faker.Random.String();
+
+            var gitHubAppModelService = await SubmitBuild(buildDetails, repoOwner, repoName, headSha);
+
+            Received.InOrder(async () =>
+            {
+                await gitHubAppModelService.Received(1).CreateCheckRunAsync(
+                    Arg.Is(repoOwner),
+                    Arg.Is(repoName),
+                    Arg.Is(headSha),
+                    Arg.Is("MSBuildLog Analyzer"),
+                    Arg.Is("MSBuildLog Analysis"),
+                    Arg.Is(""),
+                    Arg.Is(true),
+                    Arg.Is<Annotation[]>(annotations => annotations.Length == 50),
+                    Arg.Any<DateTimeOffset>(),
+                    Arg.Any<DateTimeOffset>());
+
+                await gitHubAppModelService.Received(1)
+                    .UpdateCheckRunAsync(
+                        Arg.Any<long>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Is<Annotation[]>(annotations => annotations.Length == 50),
+                        Arg.Any<DateTimeOffset?>(),
+                        Arg.Any<DateTimeOffset?>());
+
+                await gitHubAppModelService.Received(1)
+                    .UpdateCheckRunAsync(
+                        Arg.Any<long>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Is<Annotation[]>(annotations => annotations.Length == buildDetails.BuildMessages.Count - 100),
+                        Arg.Any<DateTimeOffset?>(),
+                        Arg.Any<DateTimeOffset?>());
+            });
         }
     }
 }
