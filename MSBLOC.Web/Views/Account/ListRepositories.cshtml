@@ -1,7 +1,9 @@
-﻿@using MSBLOC.Core.Interfaces
-@using MSBLOC.Core.Model
+﻿@using MSBLOC.Core.Model
 @using AccessToken = MSBLOC.Infrastructure.Models.AccessToken
 @{
+    ViewData["Title"] = "Repositories - MSBLOC";
+    ViewData["IsListRepositories"] = true;
+
     var tokenLookup = ViewBag.TokenLookup as ILookup<long, AccessToken>;
     var repositories = ViewBag.Repositories as IEnumerable<UserRepository>;
 }
