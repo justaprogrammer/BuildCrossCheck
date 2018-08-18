@@ -170,8 +170,6 @@ namespace MSBLOC.Web
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.UseHttpsRedirection();
-
             app.UseSwagger(c =>
             {
                 c.RouteTemplate = "docs/{documentName}/swagger.json";
