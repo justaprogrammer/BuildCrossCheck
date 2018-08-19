@@ -24,7 +24,7 @@ namespace MSBLOC.Core.Model.Builds
                 throw new System.ArgumentNullException(nameof(item));
             }
 
-            var projectDetails = this[projectFile];
+            var projectDetails = this[projectFile]
             return projectDetails.GetPath(item);
         }
 
