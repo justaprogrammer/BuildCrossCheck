@@ -1,9 +1,11 @@
 ﻿extern alias StructuredLogger;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using MoreLinq;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
 using MSBLOC.Core.Model.Builds;
@@ -26,6 +28,7 @@ namespace MSBLOC.Core.Services
 
             var solutionDetails = new SolutionDetails(cloneRoot);
             var buildDetails = new BuildDetails(solutionDetails);
+            var buildMessages = new List<BuildMessage>();
 
             foreach (var record in binLogReader.ReadRecords(binLogPath))
             {
@@ -63,7 +66,7 @@ namespace MSBLOC.Core.Services
                         buildWarning.EndLineNumber,
                         buildWarning.Message,
                         buildWarning.Code);
-                    buildDetails.AddMessage(buildMessage);
+                    buildMessages.Add(buildMessage);
                 }
 
                 if (buildEventArgs is BuildErrorEventArgs buildError)
@@ -76,9 +79,15 @@ namespace MSBLOC.Core.Services
                         buildError.EndLineNumber, 
                         buildError.Message, 
                         buildError.Code);
-                    buildDetails.AddMessage(buildMessage);
+                    buildMessages.Add(buildMessage);
                 }
             }
+
+            var distinctBy = buildMessages
+                .DistinctBy(message => (message.ProjectFile, message.MessageLevel, message.File, message.Code, message.Message, message.LineNumber, message.EndLineNumber))
+                .ToArray();
+
+            buildDetails.AddMessages(distinctBy);
 
             return buildDetails;
         }
