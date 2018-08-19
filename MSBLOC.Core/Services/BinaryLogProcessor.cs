@@ -37,14 +37,17 @@ namespace MSBLOC.Core.Services
                         var projectDetails = new ProjectDetails(cloneRoot, startedEventArgs.ProjectFile);
                         solutionDetails.Add(projectDetails);
 
-                        var items = startedEventArgs.Items.Cast<DictionaryEntry>()
+                        var items = startedEventArgs.Items?.Cast<DictionaryEntry>()
                             .Where(entry => (string) entry.Key == "Compile")
                             .Select(entry => entry.Value)
                             .Cast<ITaskItem>()
                             .Select(item => item.ItemSpec)
                             .ToArray();
 
-                        projectDetails.AddItems(items);
+                        if (items != null)
+                        {
+                            projectDetails.AddItems(items);
+                        }
                     }
                 }
 
