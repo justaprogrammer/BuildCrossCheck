@@ -38,9 +38,8 @@ namespace MSBLOC.Core.Services
             if (headSha == null) throw new ArgumentNullException(nameof(headSha));
             if (checkRunTitle == null) throw new ArgumentNullException(nameof(checkRunTitle));
             if (checkRunSummary == null) throw new ArgumentNullException(nameof(checkRunSummary));
-            if (annotations == null) throw new ArgumentNullException(nameof(annotations));
 
-            if (annotations.Length > 50)
+            if ((annotations?.Length ?? 0) > 50)
                 throw new ArgumentException("Cannot create more than 50 annotations at a time");
 
             var gitHubClient = await _gitHubUserClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, repoOwner);
@@ -52,7 +51,7 @@ namespace MSBLOC.Core.Services
             {
                 Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
                 {
-                    Annotations = annotations
+                    Annotations = annotations?
                         .Select(annotation => new NewCheckRunAnnotation(annotation.Filename, annotation.BlobHref,
                             annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
                             annotation.Message))
