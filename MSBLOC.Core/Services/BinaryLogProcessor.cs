@@ -32,19 +32,24 @@ namespace MSBLOC.Core.Services
                 var buildEventArgs = record.Args;
                 if (buildEventArgs is ProjectStartedEventArgs startedEventArgs)
                 {
-                    if(!solutionDetails.ContainsKey(startedEventArgs.ProjectFile))
-                    { 
+                    var notPresent = !solutionDetails.ContainsKey(startedEventArgs.ProjectFile);
+
+                    var items = startedEventArgs.Items?.Cast<DictionaryEntry>()
+                        .Where(entry => (string)entry.Key == "Compile")
+                        .Select(entry => entry.Value)
+                        .Cast<ITaskItem>()
+                        .Select(item => item.ItemSpec)
+                        .ToArray();
+
+                    if (notPresent && (items?.Any() ?? false))
+                    {
                         var projectDetails = new ProjectDetails(cloneRoot, startedEventArgs.ProjectFile);
                         solutionDetails.Add(projectDetails);
 
-                        var items = startedEventArgs.Items.Cast<DictionaryEntry>()
-                            .Where(entry => (string) entry.Key == "Compile")
-                            .Select(entry => entry.Value)
-                            .Cast<ITaskItem>()
-                            .Select(item => item.ItemSpec)
-                            .ToArray();
-
-                        projectDetails.AddItems(items);
+                        if (items != null)
+                        {
+                            projectDetails.AddItems(items);
+                        }
                     }
                 }
 
