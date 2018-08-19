@@ -54,7 +54,9 @@ namespace MSBLOC.Core.Services
             return buildDetails.BuildMessages.Select(buildMessage =>
             {
                 var filename =
-                    buildDetails.SolutionDetails.GetProjectItemPath(buildMessage.ProjectFile, buildMessage.File);
+                    buildDetails.SolutionDetails.GetProjectItemPath(buildMessage.ProjectFile, buildMessage.File)
+                        .TrimStart('/');
+
                 var blobHref = BlobHref(repoOwner, repoName, sha, filename);
                 return new Annotation(filename,
                     buildMessage.MessageLevel == BuildMessageLevel.Error

@@ -72,8 +72,7 @@ namespace MSBLOC.Core.Model.Builds
             return Path.Combine(ProjectDirectory, itemProjectPath)
                 .Split(new[] {CloneRoot}, StringSplitOptions.RemoveEmptyEntries)
                 .First()
-                .Replace(@"\", "/")
-                .TrimStart('\\');
+                .Replace(@"\", "/");
         }
 
         public string GetPath([NotNull] string itemProjectPath)
