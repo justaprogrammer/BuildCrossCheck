@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
 using MSBLOC.Core.Extensions;
+using MSBLOC.Core.Util;
 
 namespace MSBLOC.Core.Model.Builds
 {
@@ -27,7 +28,7 @@ namespace MSBLOC.Core.Model.Builds
                 throw new ProjectDetailsException($"Project file path \"{projectFile}\" is not a subpath of \"{cloneRoot}\"");
             }
 
-            ProjectDirectory = Path.GetDirectoryName(projectFile)
+            ProjectDirectory = Path.GetDirectoryName(ProjectFile)
                                ?? throw new ProjectDetailsException("Path.GetDirectoryName(projectFile) is null");
 
             _paths = new Dictionary<string, string>();

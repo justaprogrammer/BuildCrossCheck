@@ -21,6 +21,15 @@ namespace MSBLOC.Core.Tests.Model
         }
 
         [Fact]
+        public void ShouldConstructWhenProjectPathIsChildOfClone()
+        {
+            var projectDetails = new ProjectDetails(@"c:\Project\", @"c:\Project\Project1.csproj");
+            projectDetails.CloneRoot.Should().BeEquivalentTo(@"c:\Project\");
+            projectDetails.ProjectFile.Should().Be(@"c:\Project\Project1.csproj");
+            projectDetails.ProjectDirectory.Should().Be(@"c:\Project");
+        }
+
+        [Fact]
         public void ShouldThrowWhenAddingFileTwice()
         {
             var projectDetails = new ProjectDetails(@"c:\Project\", @"c:\Project\Project1.csproj");
@@ -28,12 +37,6 @@ namespace MSBLOC.Core.Tests.Model
 
             var argumentException = Assert.Throws<ProjectDetailsException>(() => projectDetails.AddItems(@"c:\Project\File1.cs"));
             argumentException.Message.Should().Be(@"Item ""c:\Project\File1.cs"" already exists");
-        }
-
-        [Fact]
-        public void ShouldConstructWhenProjectPathIsChildOfClone()
-        {
-            new ProjectDetails(@"c:\Project\", @"c:\Project\Project1.csproj");
         }
 
         [Fact]
