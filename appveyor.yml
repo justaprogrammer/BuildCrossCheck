@@ -10,13 +10,8 @@ before_build:
         npm install
         cd ..
 build_script:
-- ps: |
+- ps: >-
     msbuild MSBuildLogOctokitChecker.sln --% /p:Configuration=Release /bl:output.binlog /verbosity:minimal
-    if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
-    {
-      Import-Module .\tools\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
-      Send-MsbuildLogAppveyor -Path output.binlog -Token $env:MSBLOC_JWT
-    }
 after_build:
     - cmd: dotnet publish MSBLOC.Web  --configuration Release --output %appveyor_build_folder%\dist
 artifacts:
@@ -26,3 +21,10 @@ artifacts:
     - path: dist
       name: dist.web
       type: WebDeployPackage
+on_finish:
+- ps: >-
+    if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
+    {
+      Import-Module .\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
+      Send-MsbuildLogAppveyor -Path output.binlog -Token $env:MSBLOC_JWT
+    }
