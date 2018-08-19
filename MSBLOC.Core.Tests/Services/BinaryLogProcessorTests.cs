@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Bogus;
 using FluentAssertions;
 using FluentAssertions.Equivalency;
-using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
-using MSBLOC.Core.Model;
 using MSBLOC.Core.Model.Builds;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
@@ -22,7 +18,7 @@ namespace MSBLOC.Core.Tests.Services
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly ILogger<BinaryLogProcessorTests> _logger;
 
-        private static Faker Faker;
+        private static readonly Faker Faker;
 
         public BinaryLogProcessorTests(ITestOutputHelper testOutputHelper)
         {
@@ -50,16 +46,11 @@ namespace MSBLOC.Core.Tests.Services
             project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
             solutionDetails.Add(project);
 
-            var repoOwner = Faker.Lorem.Word();
-            var repoName = Faker.Lorem.Word();
-            var headSha = Faker.Lorem.Word();
-            var filename = @"TestConsoleApp1/Program.cs";
             AssertParseLogs("testconsoleapp1-1warning.binlog",
-
                 solutionDetails, new[]
                 {
                     new BuildMessage(BuildMessageLevel.Warning, projectFile, "Program.cs", 13, 13, "The variable 'hello' is assigned but its value is never used", "CS0219"),
-                }, cloneRoot, repoOwner, repoName, headSha);
+                }, cloneRoot);
         }
 
         [Fact]
@@ -77,16 +68,11 @@ namespace MSBLOC.Core.Tests.Services
             project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
             solutionDetails.Add(project);
 
-            var repoOwner = Faker.Lorem.Word();
-            var repoName = Faker.Lorem.Word();
-            var headSha = Faker.Lorem.Word();
-            var filename = @"TestConsoleApp1/Program.cs";
-
             AssertParseLogs("testconsoleapp1-1error.binlog",
                 solutionDetails, new[]
                 {
                     new BuildMessage(BuildMessageLevel.Error, projectFile, "Program.cs", 13, 13, "; expected", "CS1002"),
-                }, cloneRoot, repoOwner, repoName, headSha);
+                }, cloneRoot);
         }
 
         [Fact]
@@ -114,7 +100,7 @@ namespace MSBLOC.Core.Tests.Services
             project = new ProjectDetails(cloneRoot, @"C:\projects\msbuildlogoctokitchecker\MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj");
             solutionDetails.Add(project);
 
-            AssertParseLogs("msbloc.binlog", solutionDetails, new BuildMessage[0], cloneRoot, Faker.Lorem.Word(), Faker.Lorem.Word(), Faker.Lorem.Word(), options => options.IncludingNestedObjects().IncludingProperties().Excluding(info => info.SelectedMemberInfo.Name == "Paths"));
+            AssertParseLogs("msbloc.binlog", solutionDetails, new BuildMessage[0], cloneRoot, options => options.IncludingNestedObjects().IncludingProperties().Excluding(info => info.SelectedMemberInfo.Name == "Paths"));
         }
 
         [Fact]
@@ -144,20 +130,15 @@ namespace MSBLOC.Core.Tests.Services
 
             var projectDetailsException = Assert.Throws<ProjectDetailsException>(() =>
             {
-                var repoOwner = Faker.Lorem.Word();
-                var repoName = Faker.Lorem.Word();
-                var headSha = Faker.Lorem.Word();
-                var filename = @"TestConsoleApp1/Program.cs";
-
                 AssertParseLogs("testconsoleapp1-1warning.binlog",
-                    solutionDetails, new BuildMessage[0], @"C:\projects\testconsoleapp2\", repoOwner, repoName, headSha);
+                    solutionDetails, new BuildMessage[0], @"C:\projects\testconsoleapp2\");
             });
 
             projectDetailsException.Message.Should().Be(@"Project file path ""C:\projects\testconsoleapp1\TestConsoleApp1.sln"" is not a subpath of ""C:\projects\testconsoleapp2\""");
         }
 
         private void AssertParseLogs(string resourceName, SolutionDetails expectedSolutionDetails, BuildMessage[] expectedBuildMessages,
-            string cloneRoot, string repoOwner, string repoName, string headSha, Func<EquivalencyAssertionOptions<SolutionDetails>, EquivalencyAssertionOptions<SolutionDetails>> solutionDetailsEquivalency = null)
+            string cloneRoot, Func<EquivalencyAssertionOptions<SolutionDetails>, EquivalencyAssertionOptions<SolutionDetails>> solutionDetailsEquivalency = null)
         {
             var resourcePath = TestUtils.GetResourcePath(resourceName);
             File.Exists(resourcePath).Should().BeTrue();
