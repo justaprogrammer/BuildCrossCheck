@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
 using FluentAssertions;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
@@ -134,7 +135,60 @@ namespace MSBLOC.Core.Tests.Services
             buildDetails.AddMessage(new BuildMessage(BuildMessageLevel.Warning, projectFile, projectCodeFile,
                 lineNumber, endLineNumber, message, messageCode));
 
-            var filename = Path.Combine(projectPath, projectCodeFile).Substring(cloneRoot.Length).Replace(@"\", "/");
+            var filename = Path.Combine(projectPath, projectCodeFile).Substring(cloneRoot.Length).Replace(@"\", "/").TrimStart('/');
+            var repoOwner = Faker.Lorem.Word();
+            var repoName = Faker.Lorem.Word();
+            var headSha = Faker.Random.String();
+
+            var gitHubAppModelService = await SubmitBuild(buildDetails, repoOwner, repoName, headSha);
+
+            await gitHubAppModelService.Received(1).CreateCheckRunAsync(
+                Arg.Is(repoOwner),
+                Arg.Is(repoName),
+                Arg.Is(headSha),
+                Arg.Is("MSBuildLog Analyzer"),
+                Arg.Is("MSBuildLog Analysis"),
+                Arg.Is(""),
+                Arg.Is(true),
+                Arg.Any<Annotation[]>(),
+                Arg.Any<DateTimeOffset>(),
+                Arg.Any<DateTimeOffset>());
+
+            var arguments = gitHubAppModelService.ReceivedCalls().First().GetArguments().ToArray();
+            var annotations = (Annotation[]) arguments[7];
+            annotations.Should().BeEquivalentTo(new Annotation(
+                filename,
+                CheckWarningLevel.Warning,
+                messageCode,
+                message,
+                lineNumber,
+                endLineNumber,
+                $"https://github.com/{repoOwner}/{repoName}/blob/{headSha}/{filename}"));
+        }
+
+        [CanBeNull]
+        [Fact]
+        public async Task SubmitBuildDetailsWhenCloneRootMissesEndingSlash()
+        {
+            var cloneRoot = @"c:" + Faker.System.DirectoryPath().Replace("/", @"\");
+            var projectPath = Path.Combine(cloneRoot, Faker.Lorem.Word());
+            var projectFile = Path.Combine(projectPath, Faker.System.FileName("csproj"));
+
+            var projectDetails = new ProjectDetails(cloneRoot, projectFile);
+            var projectCodeFile = Path.Combine(Faker.Lorem.Word(), Faker.System.FileName("cs"));
+            projectDetails.AddItems(projectCodeFile);
+
+            var solutionDetails = new SolutionDetails(cloneRoot) {projectDetails};
+
+            var buildDetails = new BuildDetails(solutionDetails);
+            var lineNumber = Faker.Random.Int(2);
+            var endLineNumber = lineNumber + 1;
+            var message = Faker.Lorem.Sentence();
+            var messageCode = Faker.Lorem.Word();
+            buildDetails.AddMessage(new BuildMessage(BuildMessageLevel.Warning, projectFile, projectCodeFile,
+                lineNumber, endLineNumber, message, messageCode));
+
+            var filename = Path.Combine(projectPath, projectCodeFile).Substring(cloneRoot.Length).Replace(@"\", "/").TrimStart('/');
             var repoOwner = Faker.Lorem.Word();
             var repoName = Faker.Lorem.Word();
             var headSha = Faker.Random.String();
@@ -186,7 +240,7 @@ namespace MSBLOC.Core.Tests.Services
             buildDetails.AddMessage(new BuildMessage(BuildMessageLevel.Error, projectFile, projectCodeFile,
                 lineNumber, endLineNumber, message, messageCode));
 
-            var filename = Path.Combine(projectPath, projectCodeFile).Substring(cloneRoot.Length).Replace(@"\", "/");
+            var filename = Path.Combine(projectPath, projectCodeFile).Substring(cloneRoot.Length).Replace(@"\", "/").TrimStart('/');
             var repoOwner = Faker.Lorem.Word();
             var repoName = Faker.Lorem.Word();
             var headSha = Faker.Random.String();
