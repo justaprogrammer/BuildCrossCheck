@@ -28,7 +28,7 @@ More information about the MSBuild Binary Log format can be found [here](http://
    image: Visual Studio 2017
    build_script:
       - ps: >-
-          msbuild TestConsoleApp1.sln --% /bl:output.binlog verbosity=diagnostic
+          msbuild TestConsoleApp1.sln --% /bl:output.binlog
    on_finish:
       - ps: >-
           if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
