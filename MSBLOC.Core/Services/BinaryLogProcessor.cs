@@ -32,13 +32,13 @@ namespace MSBLOC.Core.Services
                 var buildEventArgs = record.Args;
                 if (buildEventArgs is ProjectStartedEventArgs startedEventArgs)
                 {
-                    if(!solutionDetails.ContainsKey(startedEventArgs.ProjectFile))
-                    { 
+                    if (!solutionDetails.ContainsKey(startedEventArgs.ProjectFile))
+                    {
                         var projectDetails = new ProjectDetails(cloneRoot, startedEventArgs.ProjectFile);
                         solutionDetails.Add(projectDetails);
 
                         var items = startedEventArgs.Items?.Cast<DictionaryEntry>()
-                            .Where(entry => (string) entry.Key == "Compile")
+                            .Where(entry => (string)entry.Key == "Compile")
                             .Select(entry => entry.Value)
                             .Cast<ITaskItem>()
                             .Select(item => item.ItemSpec)
@@ -55,8 +55,8 @@ namespace MSBLOC.Core.Services
                 {
                     var buildMessage = new BuildMessage(
                         BuildMessageLevel.Warning,
-                        buildWarning.ProjectFile, 
-                        buildWarning.File, 
+                        buildWarning.ProjectFile,
+                        buildWarning.File,
                         buildWarning.LineNumber,
                         buildWarning.EndLineNumber,
                         buildWarning.Message,
@@ -67,12 +67,12 @@ namespace MSBLOC.Core.Services
                 if (buildEventArgs is BuildErrorEventArgs buildError)
                 {
                     var buildMessage = new BuildMessage(
-                        BuildMessageLevel.Error, 
-                        buildError.ProjectFile, 
-                        buildError.File, 
+                        BuildMessageLevel.Error,
+                        buildError.ProjectFile,
+                        buildError.File,
                         buildError.LineNumber,
-                        buildError.EndLineNumber, 
-                        buildError.Message, 
+                        buildError.EndLineNumber,
+                        buildError.Message,
                         buildError.Code);
                     buildDetails.AddMessage(buildMessage);
                 }
