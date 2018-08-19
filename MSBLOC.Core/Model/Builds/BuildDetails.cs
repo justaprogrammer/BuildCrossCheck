@@ -6,7 +6,7 @@ namespace MSBLOC.Core.Model.Builds
 {
     public class BuildDetails
     {
-        private List<BuildMessage> _buildMessages;
+        private readonly List<BuildMessage> _buildMessages;
 
         public BuildDetails([NotNull] SolutionDetails solutionDetails)
         {
@@ -24,7 +24,7 @@ namespace MSBLOC.Core.Model.Builds
             _buildMessages.Add(message);
         }
 
-        public void AddMessages([NotNull] params BuildMessage[] messages)
+        public void AddMessages([NotNull] IEnumerable<BuildMessage> messages)
         {
             if (messages == null) throw new ArgumentNullException(nameof(messages));
 

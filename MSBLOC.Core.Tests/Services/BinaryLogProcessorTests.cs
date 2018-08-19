@@ -113,7 +113,14 @@ namespace MSBLOC.Core.Tests.Services
                 options => options.IncludingNestedObjects().IncludingProperties()
                     .Excluding(info => info.SelectedMemberInfo.Name == "Paths"));
 
-            parsedBinaryLog.SolutionDetails.GetProjectItemPath(cloneRoot + @"MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj", @"Services\GitHubAppModelServiceTests.cs");
+            parsedBinaryLog.SolutionDetails.GetProjectItemPath(cloneRoot + @"MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj", @"Services\GitHubAppModelServiceTests.cs")
+                .Should().NotBeNull();
+
+            var list = parsedBinaryLog.BuildMessages
+                .GroupBy(message => (message.ProjectFile, message.Code, message.File, message.LineNumber))
+                .ToList();
+
+            parsedBinaryLog.BuildMessages.Count.Should().Be(list.Count);
         }
 
         [Fact]
