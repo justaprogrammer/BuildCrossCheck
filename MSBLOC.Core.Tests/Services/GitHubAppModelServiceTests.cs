@@ -126,6 +126,54 @@ namespace MSBLOC.Core.Tests.Services
         }
 
         [Fact]
+        public async Task ShouldCreateCheckRunWithNullAnnotations()
+        {
+            var checkRunsClient = Substitute.For<ICheckRunsClient>();
+
+            var id = Faker.Random.Long();
+            var htmlUrl = Faker.Internet.Url();
+
+            checkRunsClient.Create(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<NewCheckRun>())
+                .Returns(new CheckRun(
+                    id,
+                    Faker.Random.String(),
+                    Faker.Random.String(),
+                    Faker.Internet.Url(),
+                    htmlUrl,
+                    Faker.PickRandom<CheckStatus>(),
+                    Faker.Random.Bool() ? (CheckConclusion?) null : Faker.PickRandom<CheckConclusion>(),
+                    Faker.Date.RecentOffset(2),
+                    Faker.Date.RecentOffset(1),
+                    null,
+                    Faker.Lorem.Word(),
+                    null,
+                    null,
+                    null));
+
+            var gitHubAppModelService = CreateTarget(checkRunsClient: checkRunsClient);
+
+            var owner = Faker.Internet.UserName();
+            var name = Faker.Lorem.Word();
+
+            var checkRun = await gitHubAppModelService.CreateCheckRunAsync(
+                owner,
+                name,
+                Faker.Random.String(),
+                Faker.Lorem.Word(),
+                Faker.Lorem.Sentence(),
+                Faker.Lorem.Paragraph(), 
+                Faker.Random.Bool(),
+                null,
+                Faker.Date.RecentOffset(2), 
+                Faker.Date.RecentOffset(1));
+
+            checkRunsClient.Received(1).Create(owner, name, Arg.Any<NewCheckRun>());
+
+            checkRun.Id.Should().Be(id);
+            checkRun.Url.Should().Be(htmlUrl);
+        }
+
+        [Fact]
         public void ShouldNotCreateCheckRunWithMoreThan50Annotations()
         {
             var gitHubAppModelService = CreateTarget();
