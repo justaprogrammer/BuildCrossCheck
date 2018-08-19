@@ -1,5 +1,8 @@
 version: 1.0.{build}
 image: Visual Studio 2017
+environment:
+  MSBLOC_JWT:
+    secure: eWX23ydbzsvhziCB8woiK9EwwDv+ppl4E8j9ZuxwyrYOP6oQ9VFhBdsRvXiZo8AYsfNsYXMEPzndp5YhrbnNuE48FQ3QJQjmmISgpZN/V1INz5ukENLm3yeRYzg6YCDtRgv25+geZyrgG0oZ6rAR0GpTmBKG0SxFimkK6hA4GiB54+7BDiRQvIw776hyVUFW+sIjD8Za6xls3JDQmEEm/p4M5hPWOeLRJQqj8iTlVOLLRdk76FrawXdqIFK6dUtc/dcrx5ApAXm4bF5gPaBsbTfY5Q5IifGr6owrBW5z/vP9XsiN5wJz/HM7iCpwIW5w4Q9leruBMn7wdPZsFYf57j7z1INerDgqbptaSZWMD6Pm9D+ujrXNleuVEJN4+Gz8ZLSZfcY4hBI+t50Qp/YyEzqes/caJiD2qv01IymJe8P1DCoSoOgPzPykhJRfV8HVtnhMWJoh+HCmI+4MUNGHzUkCqvc8fXVxyl738OKE8SlZFb3XC6segwSo3zjHvPsLW5R2GJJX4cxVp3H78MJ9Nd4E+xejgms8tqLX4ELg1BBUf9dt/G+UIRstfsYz25ptVvLTvVpbkVLiwAbt99GYlTMixbS7HQyFrtqvgk0wAzGNBEHYyw6J2N+y53REZk+zyEdEmgIBWCY0xjYU8o5EZDjt47TiT4zYuveQlAqa3r2sHw+zXpTZTbz5DJLTYvsM
 before_build:
     - ps: |
         nuget restore MSBuildLogOctokitChecker.sln -Verbosity Quiet
@@ -7,8 +10,13 @@ before_build:
         npm install
         cd ..
 build_script:
-- ps: >-
+- ps: |
     msbuild MSBuildLogOctokitChecker.sln --% /p:Configuration=Release /bl:output.binlog /verbosity:minimal
+    if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
+    {
+      Import-Module .\tools\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
+      Send-MsbuildLogAppveyor -Path output.binlog -Token $env:MSBLOC_JWT
+    }
 after_build:
     - cmd: dotnet publish MSBLOC.Web  --configuration Release --output %appveyor_build_folder%\dist
 artifacts:
