@@ -49,6 +49,7 @@ namespace MSBLOC.Core.Services
                             OwnerNodeId = repository.Owner.NodeId,
                             OwnerType = GetOwnerType(repository),
                             Owner = repository.Owner.Login,
+                            OwnerUrl = repository.Owner.HtmlUrl,
                             Name = repository.Name,
                             Url = repository.HtmlUrl
                         })

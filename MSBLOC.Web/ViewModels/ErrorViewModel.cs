@@ -1,6 +1,6 @@
 using System;
 
-namespace MSBLOC.Web.Models
+namespace MSBLOC.Web.ViewModels
 {
     public class ErrorViewModel
     {
