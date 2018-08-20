@@ -51,19 +51,29 @@ namespace MSBLOC.Core.Services
 
         private Annotation[] CreateAnnotations(BuildDetails buildDetails, string repoOwner, string repoName, string sha)
         {
-            return buildDetails.BuildMessages.Select(buildMessage =>
-            {
-                var filename =
-                    buildDetails.SolutionDetails.GetProjectItemPath(buildMessage.ProjectFile, buildMessage.File)
-                        .TrimStart('/');
+            return buildDetails.BuildMessages.Select(buildMessage => CreateAnnotation(buildDetails, repoOwner, repoName, sha, buildMessage)).ToArray();
+        }
 
-                var blobHref = BlobHref(repoOwner, repoName, sha, filename);
-                return new Annotation(filename,
-                    buildMessage.MessageLevel == BuildMessageLevel.Error
-                        ? CheckWarningLevel.Failure
-                        : CheckWarningLevel.Warning, buildMessage.Code, buildMessage.Message, buildMessage.LineNumber,
-                    buildMessage.EndLineNumber, blobHref);
-            }).ToArray();
+        private static Annotation CreateAnnotation(BuildDetails buildDetails, string repoOwner, string repoName, string sha,
+            BuildMessage buildMessage)
+        {
+            var filename =
+                buildDetails.SolutionDetails.GetProjectItemPath(buildMessage.ProjectFile, buildMessage.File)
+                    .TrimStart('/');
+
+            var blobHref = BlobHref(repoOwner, repoName, sha, filename);
+
+            var checkWarningLevel = buildMessage.MessageLevel == BuildMessageLevel.Error
+                ? CheckWarningLevel.Failure
+                : CheckWarningLevel.Warning;
+
+            return new Annotation(filename,
+                checkWarningLevel,
+                buildMessage.Code,
+                $"{buildMessage.Code}: {buildMessage.Message}",
+                buildMessage.LineNumber,
+                buildMessage.EndLineNumber,
+                blobHref);
         }
 
         public static string BlobHref(string owner, string repository, string sha, string file)

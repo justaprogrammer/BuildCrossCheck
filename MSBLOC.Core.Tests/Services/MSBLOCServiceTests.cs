@@ -160,7 +160,7 @@ namespace MSBLOC.Core.Tests.Services
                 filename,
                 CheckWarningLevel.Warning,
                 messageCode,
-                message,
+                messageCode + ": " + message,
                 lineNumber,
                 endLineNumber,
                 $"https://github.com/{repoOwner}/{repoName}/blob/{headSha}/{filename}"));
@@ -213,7 +213,7 @@ namespace MSBLOC.Core.Tests.Services
                 filename,
                 CheckWarningLevel.Warning,
                 messageCode,
-                message,
+                messageCode + ": " + message,
                 lineNumber,
                 endLineNumber,
                 $"https://github.com/{repoOwner}/{repoName}/blob/{headSha}/{filename}"));
@@ -265,7 +265,7 @@ namespace MSBLOC.Core.Tests.Services
                 filename,
                 CheckWarningLevel.Failure,
                 messageCode,
-                message,
+                messageCode + ": " + message,
                 lineNumber,
                 endLineNumber,
                 $"https://github.com/{repoOwner}/{repoName}/blob/{headSha}/{filename}"));
