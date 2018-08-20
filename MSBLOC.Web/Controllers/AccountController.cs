@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Model;
 using MSBLOC.Infrastructure.Interfaces;
 using MSBLOC.Web.Interfaces;
+using MSBLOC.Web.ViewModels;
 
 namespace MSBLOC.Web.Controllers
 {
@@ -37,29 +39,49 @@ namespace MSBLOC.Web.Controllers
             return SignOut(authProperties);
         }
 
-        public async Task<IActionResult> ListRepositories(
-            [FromServices] IPersistantDataContext dbContext,
-            [FromServices] IGitHubUserModelService gitHubUserModelService)
+        public async Task<IActionResult> ListRepositories([FromServices] IGitHubUserModelService gitHubUserModelService)
+        {
+            var listRepositoriesViewModel = await BuildListRepositoriesViewModel(gitHubUserModelService);
+
+            return View(listRepositoriesViewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateToken([FromServices] IGitHubUserModelService gitHubUserModelService, [FromQuery] long gitHubRepositoryId)
+        {
+            var jsonWebToken = await _accessTokenService.CreateTokenAsync(gitHubRepositoryId);
+            var listRepositoriesViewModel = await BuildListRepositoriesViewModel(gitHubUserModelService, gitHubRepositoryId, jsonWebToken);
+
+            return View("ListRepositories", listRepositoriesViewModel);
+        }
+
+        private async Task<ListRepositoriesViewModel> BuildListRepositoriesViewModel(IGitHubUserModelService gitHubUserModelService)
         {
             var userInstallations = await gitHubUserModelService.GetUserInstallationsAsync();
-            var repositories = userInstallations.SelectMany(installation => installation.Repositories).ToArray();
+
+            var repositoriesByOwner = userInstallations
+                .SelectMany(installation => installation.Repositories)
+                .GroupBy(repository => repository.Owner)
+                .OrderBy(grouping => grouping.Key)
+                .ToArray();
 
             var issuedAccessTokens = await _accessTokenService.GetTokensForUserRepositoriesAsync();
 
             var tokenLookup = issuedAccessTokens.ToLookup(t => t.GitHubRepositoryId, r => r);
 
-            ViewBag.TokenLookup = tokenLookup;
-            ViewBag.Repositories = repositories;
-
-            return View();
+            return new ListRepositoriesViewModel
+            {
+                TokenLookup = tokenLookup,
+                RepositoriesByOwner = repositoriesByOwner
+            };
         }
 
-        [HttpGet]
-        public async Task<IActionResult> CreateToken([FromQuery] long gitHubRepositoryId)
+        private async Task<ListRepositoriesViewModel> BuildListRepositoriesViewModel(IGitHubUserModelService gitHubUserModelService, long gitHubRepositoryId, string jsonWebToken)
         {
-            var jsonWebToken = await _accessTokenService.CreateTokenAsync(gitHubRepositoryId);
-
-            return Content(jsonWebToken);
+            var buildListRepositoriesViewModel = await BuildListRepositoriesViewModel(gitHubUserModelService);
+            buildListRepositoriesViewModel.CreatedToken = jsonWebToken;
+            buildListRepositoriesViewModel.CreatedTokenRepoId = gitHubRepositoryId;
+            return buildListRepositoriesViewModel;
         }
 
         [HttpGet]

@@ -10,6 +10,8 @@ namespace MSBLOC.Core.Model
 
         public string Owner { get; set; }
 
+        public string OwnerUrl { get; set; }
+        
         public long Id { get; set; }
 
         public string NodeId { get; set; }

@@ -46,6 +46,12 @@ namespace MSBLOC.Web.Services
                 throw new ArgumentException("Repository does not exist or no permission to access given repository.");
             }
 
+            var accessTokens = await _tokenRepository.GetByRepositoryIdsAsync(new[] {githubRepositoryId});
+            if (accessTokens.Any())
+            {
+                throw new ArgumentException("Repository already has a token.");
+            }
+
             var tokenHandler = new JsonWebTokenHandler();
             var signingCredentials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256Signature);
 

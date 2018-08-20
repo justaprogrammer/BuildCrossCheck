@@ -1,12 +1,18 @@
-﻿@using MSBLOC.Core.Model
-@using AccessToken = MSBLOC.Infrastructure.Models.AccessToken
+﻿@model ListRepositoriesViewModel
 @{
     ViewData["Title"] = "Repositories - MSBLOC";
     ViewData["IsListRepositories"] = true;
-
-    var tokenLookup = ViewBag.TokenLookup as ILookup<long, AccessToken>;
-    var repositories = ViewBag.Repositories as IEnumerable<UserRepository>;
 }
+
+@section Scripts
+{
+    <script type="text/javascript" language="javascript">
+        $(function() {
+            new ClipboardJS('.clip-btn');
+        });
+    </script>
+}
+
 <div class="row">
     <div class="col-md-12">
 
@@ -15,43 +21,64 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>
+                    <th scope="col">
+                        Organization
+                    </th>
+                    <th scope="col">
                         Repository
                     </th>
-                    <th>
+                    <th scope="col">
                         Secret
                     </th>
                 </tr>
             </thead>
 
             <tbody>
-                @foreach (var repo in repositories)
+                @foreach (var ownerRepositories in Model.RepositoriesByOwner)
                 {
-                    <tr>
-                        <td><a href="@repo.Url" target="_blank">@repo.Name</a></td>
-                        <td>
-                            <div>
-                                <a target="_blank" href="@Url.Action("CreateToken", "Account", new
-                                                         {
-                                                             gitHubRepositoryId = repo.Id
-                                                         })">Create Token</a>
-                            </div>
-                            <div>
-                                @if (tokenLookup.Contains(repo.Id) && tokenLookup[repo.Id].Any())
+                    var items = ownerRepositories.ToArray();
+                    for (var index = 0; index < items.Length; index++)
+                    {
+                        var repo = items[index];
+                        var accessToken = Model.TokenLookup[repo.Id].FirstOrDefault();
+
+                        <tr>
+                            @if (index == 0)
+                            {
+                                <td rowspan="@items.Length">
+                                    <a href="@repo.OwnerUrl" target="_blank">@repo.Owner</a>
+                                </td>
+                            }
+                            <td><a href="@repo.Url" target="_blank">@repo.Name</a></td>
+                            <td>
+                                @if (Model.CreatedTokenRepoId.HasValue && repo.Id == Model.CreatedTokenRepoId.Value)
                                 {
-                                    <ul>
-                                        @foreach (var token in tokenLookup[repo.Id])
-                                        {
-                                            <li>@Html.ActionLink(token.Id.ToString(), "RevokeToken", "Account", new
-                                                {
-                                                    tokenId = token.Id
-                                                })</li>
-                                        }
-                                    </ul>
+                                    <div class="input-group">
+                                        <input id="clip-token" value="@Model.CreatedToken"
+                                               type="text" class="form-control">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">
+                                                <i class="clip-btn fas fa-clipboard" 
+                                                   style="cursor:pointer"
+                                                   data-clipboard-target="#clip-token"></i>
+                                            </span>
+                                        </div>
+                                    </div>
                                 }
-                            </div>
-                        </td>
-                    </tr>
+
+                                <div>
+                                    @if (accessToken == null)
+                                    {
+                                        @Html.ActionLink("Create Token", "CreateToken", "Account", new { gitHubRepositoryId = repo.Id })
+                                    }
+                                    else
+                                    {
+                                        @Html.ActionLink("Revoke Token", "RevokeToken", "Account", new { tokenId = accessToken.Id })
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>

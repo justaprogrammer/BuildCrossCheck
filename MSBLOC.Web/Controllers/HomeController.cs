@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MSBLOC.Web.Models;
+using MSBLOC.Web.ViewModels;
 using Activity = System.Diagnostics.Activity;
 
 namespace MSBLOC.Web.Controllers
@@ -9,7 +10,8 @@ namespace MSBLOC.Web.Controllers
     {
         public IActionResult Index()
         {
-            return View();
+            var viewModelBase = new ViewModelBase();
+            return View(viewModelBase);
         }
 
         public IActionResult Error()
