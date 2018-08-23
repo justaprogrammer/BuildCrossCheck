@@ -22,13 +22,6 @@ namespace MSBLOC.Core.Services
             _tokenGenerator = tokenGenerator;
         }
 
-        public async Task GetPullRequestChangedPathsAsync(string repoOwner, string repoName, int number)
-        {
-            var gitHubClient = await _gitHubUserClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, repoOwner);
-
-            await GetPullRequestChangedPathsAsync(gitHubClient, repoOwner, repoName, number);
-        }
-
         public async Task<CheckRun> CreateCheckRunAsync(string repoOwner, string repoName, string headSha,
             string checkRunName,
             string checkRunTitle, string checkRunSummary, bool checkRunIsSuccess, Annotation[] annotations,

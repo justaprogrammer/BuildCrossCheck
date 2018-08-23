@@ -8,8 +8,6 @@ namespace MSBLOC.Core.Interfaces
 {
     public interface IGitHubAppModelService
     {
-        Task GetPullRequestChangedPathsAsync(string repoOwner, string repoName, int number);
-
         Task<CheckRun> CreateCheckRunAsync(string repoOwner, string repoName, string headSha,
             string checkRunName, string checkRunTitle,
             string checkRunSummary, bool checkRunIsSuccess, Annotation[] annotations, DateTimeOffset? startedAt,

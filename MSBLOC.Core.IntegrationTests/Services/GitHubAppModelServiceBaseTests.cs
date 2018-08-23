@@ -10,14 +10,6 @@ namespace MSBLOC.Core.IntegrationTests.Services
     public class GitHubAppModelServiceBaseTests : IntegrationTestsBase
     {
         [IntegrationTest]
-        public async Task ShouldGetPullRequestChangedPaths()
-        {
-            var testAppModelService = CreateTarget();
-            var paths = await testAppModelService.GetPullRequestChangedPathsAsync("octokit", "octokit.graphql.net", 142);
-            paths.Length.Should().Be(57);
-        }
-
-        [IntegrationTest]
         public async Task ShouldGetResitoryFile()
         {
             var testAppModelService = CreateTarget();
@@ -47,11 +39,6 @@ namespace MSBLOC.Core.IntegrationTests.Services
             {
                 _graphQLClient = graphQLClient;
                 _gitHubClient = gitHubClient;
-            }
-
-            public Task<string[]> GetPullRequestChangedPathsAsync(string owner, string repository, int pullRequest)
-            {
-                return GetPullRequestChangedPathsAsync(_gitHubClient, owner, repository, pullRequest);
             }
 
             public Task<string> GetRepositoryFileAsync(string owner, string repository, string filepath, string reference)
