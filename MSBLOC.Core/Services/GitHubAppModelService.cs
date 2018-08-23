@@ -97,7 +97,7 @@ namespace MSBLOC.Core.Services
 
         public async Task<string> GetRepositoryFileAsync(string owner, string repository, string path, string reference)
         {
-            var gitHubClient = await _gitHubUserClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
+            var gitHubClient = await _gitHubAppClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
             return await GetRepositoryFileAsync(gitHubClient, owner, repository, path, reference);
         }
 
