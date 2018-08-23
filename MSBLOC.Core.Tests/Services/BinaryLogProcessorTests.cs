@@ -128,7 +128,7 @@ namespace MSBLOC.Core.Tests.Services
         [Fact]
         public void ShouldParseDBATools()
         {
-            var cloneRoot = @"C:\projects\dbatools\";
+            var cloneRoot = @"c:\github\dbatools\bin\projects\dbatools\";
 
             var resourcePath = TestUtils.GetResourcePath("dbatools.binlog");
             File.Exists(resourcePath).Should().BeTrue();
