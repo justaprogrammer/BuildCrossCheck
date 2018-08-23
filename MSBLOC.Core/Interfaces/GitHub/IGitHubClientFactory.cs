@@ -1,6 +1,6 @@
 using Octokit;
 
-namespace MSBLOC.Core.Interfaces
+namespace MSBLOC.Core.Interfaces.GitHub
 {
     /// <summary>
     /// This factory provides GitHub clients configured for with a token for Authentication.

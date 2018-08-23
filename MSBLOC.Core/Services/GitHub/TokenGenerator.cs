@@ -1,10 +1,9 @@
-﻿using System.IO;
-using GitHubJwt;
+﻿using GitHubJwt;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Interfaces.GitHub;
 
-namespace MSBLOC.Core.Services
+namespace MSBLOC.Core.Services.GitHub
 {
     /// <inheritdoc />
     public class TokenGenerator : ITokenGenerator

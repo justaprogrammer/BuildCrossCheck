@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Interfaces.GitHub;
 using Octokit;
 
-namespace MSBLOC.Core.Services.Factories
+namespace MSBLOC.Core.Services.GitHub
 {
     /// <inheritdoc />
     public class GitHubAppClientFactory : IGitHubAppClientFactory
