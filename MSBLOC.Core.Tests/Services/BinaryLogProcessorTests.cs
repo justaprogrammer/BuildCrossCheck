@@ -144,7 +144,7 @@ namespace MSBLOC.Core.Tests.Services
             File.Exists(resourcePath).Should().BeTrue();
 
             var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
-            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot, Faker.Lorem.Word(), Faker.Lorem.Word(), Faker.Lorem.Word());
+            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot);
 
             parsedBinaryLog.SolutionDetails.CloneRoot.Should().Be(cloneRoot);
 
@@ -164,8 +164,7 @@ namespace MSBLOC.Core.Tests.Services
             dbaToolsTestProjectDetails.ProjectDirectory.Should().Be(dbaToolsTestProjectPath);
 
             parsedBinaryLog.SolutionDetails.Count(project => project.Value.ProjectFile.EndsWith(".csproj")).Should().Be(2);
-            parsedBinaryLog.SolutionDetails.Count(project => project.Value.ProjectFile.EndsWith(".sln")).Should().Be(1);
-            parsedBinaryLog.Annotations.Should().BeEmpty();
+            parsedBinaryLog.BuildMessages.Should().BeEmpty();
         }
 
         [Fact]
