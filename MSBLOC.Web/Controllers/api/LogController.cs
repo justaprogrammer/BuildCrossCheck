@@ -37,13 +37,13 @@ namespace MSBLOC.Web.Controllers.api
 
         private readonly ILogger<LogController> _logger;
         private readonly ITempFileService _tempFileService;
-        private readonly IMSBLOCService _msblocService;
+        private readonly ILogAnalyzer _logAnalyzer;
 
-        public LogController(ILogger<LogController> logger, ITempFileService tempFileService, IMSBLOCService msblocService)
+        public LogController(ILogger<LogController> logger, ITempFileService tempFileService, ILogAnalyzer logAnalyzer)
         {
             _logger = logger;
             _tempFileService = tempFileService;
-            _msblocService = msblocService;
+            _logAnalyzer = logAnalyzer;
         }
 
         [HttpPost]
@@ -175,7 +175,7 @@ namespace MSBLOC.Web.Controllers.api
             var repositoryOwner = User.Claims.FirstOrDefault(c => c.Type == "urn:msbloc:repositoryOwner")?.Value;
             var repositoryName = User.Claims.FirstOrDefault(c => c.Type == "urn:msbloc:repositoryName")?.Value;
 
-            var checkRun = await _msblocService.SubmitAsync(
+            var checkRun = await _logAnalyzer.SubmitAsync(
                 repositoryOwner,
                 repositoryName,
                 submissionData.CommitSha,

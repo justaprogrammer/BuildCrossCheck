@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.GitHub;
 using MSBLOC.Infrastructure.Interfaces;
 using MSBLOC.Infrastructure.Models;
 using MSBLOC.Web.Models;

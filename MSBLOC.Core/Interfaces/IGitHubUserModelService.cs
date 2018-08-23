@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.GitHub;
 
 namespace MSBLOC.Core.Interfaces
 {

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.GitHub;
+using MSBLOC.Core.Model.LogAnalyzer;
 
 namespace MSBLOC.Core.Interfaces
 {
