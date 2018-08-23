@@ -33,7 +33,7 @@ namespace MSBLOC.Core.Services
             string resourcePath)
         {
             _logger.LogInformation("SubmitAsync repoOwner:{0} repoName:{1} sha:{2} cloneRoot:{3} resourcePath:{4}",
-                repoOwner, repoName, sha, cloneRoot, resourcePath);
+                owner, repository, sha, cloneRoot, resourcePath);
 
             var startedAt = DateTimeOffset.Now;
 
