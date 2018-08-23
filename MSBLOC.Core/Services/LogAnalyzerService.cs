@@ -32,7 +32,7 @@ namespace MSBLOC.Core.Services
         public async Task<CheckRun> SubmitAsync(string owner, string repository, string sha, string cloneRoot,
             string resourcePath)
         {
-            _logger.LogInformation("SubmitAsync repoOwner:{0} repoName:{1} sha:{2} cloneRoot:{3} resourcePath:{4}",
+            _logger.LogInformation("SubmitAsync owner:{0} repository:{1} sha:{2} cloneRoot:{3} resourcePath:{4}",
                 owner, repository, sha, cloneRoot, resourcePath);
 
             var startedAt = DateTimeOffset.Now;
