@@ -57,9 +57,9 @@ namespace MSBLOC.Web.Controllers
 
         private async Task<ListRepositoriesViewModel> BuildListRepositoriesViewModel(IGitHubUserModelService gitHubUserModelService)
         {
-            var userInstallations = await gitHubUserModelService.GetUserInstallationsAsync();
+            var installations = await gitHubUserModelService.GetInstallationsAsync();
 
-            var repositoriesByOwner = userInstallations
+            var repositoriesByOwner = installations
                 .SelectMany(installation => installation.Repositories)
                 .GroupBy(repository => repository.Owner)
                 .OrderBy(grouping => grouping.Key)

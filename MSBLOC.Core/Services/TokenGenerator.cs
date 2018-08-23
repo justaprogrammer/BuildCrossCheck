@@ -6,6 +6,7 @@ using MSBLOC.Core.Interfaces;
 
 namespace MSBLOC.Core.Services
 {
+    /// <inheritdoc />
     public class TokenGenerator : ITokenGenerator
     {
         private IPrivateKeySource _privateKeySource;
@@ -20,6 +21,7 @@ namespace MSBLOC.Core.Services
             _appIntegrationId = appIntegrationId;
         }
 
+        /// <inheritdoc />
         public string GetToken(int expirationSeconds = 600)
         {
             var readToEnd = _privateKeySource.GetPrivateKeyReader().ReadToEnd();
