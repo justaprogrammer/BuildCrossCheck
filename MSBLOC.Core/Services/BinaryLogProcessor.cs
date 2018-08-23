@@ -5,6 +5,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Model;
 
 namespace MSBLOC.Core.Services
 {

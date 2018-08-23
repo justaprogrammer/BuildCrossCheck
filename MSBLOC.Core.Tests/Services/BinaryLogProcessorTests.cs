@@ -134,7 +134,7 @@ namespace MSBLOC.Core.Tests.Services
             File.Exists(resourcePath).Should().BeTrue();
 
             var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
-            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot);
+            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot, Faker.Lorem.Word(), Faker.Lorem.Word(), Faker.Lorem.Word());
             Assert.Equal(cloneRoot, parsedBinaryLog.SolutionDetails.CloneRoot);
             Assert.Equal("c:\\github\\dbatools\\bin\\projects\\dbatools\\dbatools\\dbatools.csproj", parsedBinaryLog.SolutionDetails["c:\\github\\dbatools\\bin\\projects\\dbatools\\dbatools\\dbatools.csproj"].ProjectFile);
             Assert.Equal("c:\\github\\dbatools\\bin\\projects\\dbatools\\dbatools", parsedBinaryLog.SolutionDetails["c:\\github\\dbatools\\bin\\projects\\dbatools\\dbatools\\dbatools.csproj"].ProjectDirectory);
@@ -142,8 +142,8 @@ namespace MSBLOC.Core.Tests.Services
             Assert.Equal("c:\\github\\dbatools\\bin\\projects\\dbatools\\dbatools.Tests", parsedBinaryLog.SolutionDetails["c:\\github\\dbatools\\bin\\projects\\dbatools\\dbatools.Tests\\dbatools.Tests.csproj"].ProjectDirectory);
             Assert.Equal(2, parsedBinaryLog.SolutionDetails.Count(project => project.Value.ProjectFile.EndsWith(".csproj")));
             Assert.Equal(1, parsedBinaryLog.SolutionDetails.Count(project => project.Value.ProjectFile.EndsWith(".sln")));
-            Assert.Equal(0, parsedBinaryLog.BuildMessages.Count);
-            Assert.Equal(0, parsedBinaryLog.BuildMessages.Count);
+            Assert.Equal(0, parsedBinaryLog.Annotations.Count);
+            Assert.Equal(0, parsedBinaryLog.Annotations.Count);
         }
 
         [Fact]
