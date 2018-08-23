@@ -60,8 +60,11 @@ namespace MSBLOC.Core.Services
 
         private Annotation[] CreateAnnotations(BuildDetails buildDetails, string repoOwner, string repoName, string sha, LogAnalyzerConfiguration logAnalyzerConfiguration)
         {
-            var lookup = logAnalyzerConfiguration?.Rules.ToLookup(rule => rule.Code);
-            return buildDetails.BuildMessages.Select(buildMessage => CreateAnnotation(buildDetails, repoOwner, repoName, sha, buildMessage, lookup)).ToArray();
+            var lookup = logAnalyzerConfiguration?.Rules?.ToLookup(rule => rule.Code);
+            return buildDetails.BuildMessages
+                .Select(buildMessage => CreateAnnotation(buildDetails, repoOwner, repoName, sha, buildMessage, lookup))
+                .Where(annotation => annotation != null)
+                .ToArray();
         }
 
         private static Annotation CreateAnnotation(BuildDetails buildDetails, string repoOwner, string repoName,
