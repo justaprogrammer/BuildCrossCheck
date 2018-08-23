@@ -1,4 +1,4 @@
-﻿namespace MSBLOC.Core.Model
+﻿namespace MSBLOC.Core.Model.LogAnalyzer
 {
     public enum CheckWarningLevel
     {

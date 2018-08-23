@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MSBLOC.Core.Model
+namespace MSBLOC.Core.Model.GitHub
 {
     public class UserInstallation
     {

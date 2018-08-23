@@ -6,19 +6,21 @@ using MoreLinq;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
 using MSBLOC.Core.Model.Builds;
+using MSBLOC.Core.Model.GitHub;
+using MSBLOC.Core.Model.LogAnalyzer;
 
 namespace MSBLOC.Core.Services
 {
-    public class MSBLOCService : IMSBLOCService
+    public class LogAnalyzerService : ILogAnalyzer
     {
         private readonly IBinaryLogProcessor _binaryLogProcessor;
         private readonly IGitHubAppModelService _gitHubAppModelService;
         private readonly ILogger _logger;
 
-        public MSBLOCService(
+        public LogAnalyzerService(
             IBinaryLogProcessor binaryLogProcessor,
             IGitHubAppModelService gitHubAppModelService,
-            ILogger<MSBLOCService> logger)
+            ILogger<LogAnalyzerService> logger)
         {
             _logger = logger;
             _binaryLogProcessor = binaryLogProcessor;
