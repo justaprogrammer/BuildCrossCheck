@@ -123,7 +123,7 @@ namespace MSBLOC.Web.Tests.Services
             var contextAccessor = FakeHttpContextAccessor(user);
 
             var gitHubUserModelService = Substitute.For<IGitHubUserModelService>();
-            gitHubUserModelService.GetUserRepositoryAsync(Arg.Is(userRepository.Id)).Returns(userRepository);
+            gitHubUserModelService.GetRepositoryAsync(Arg.Is(userRepository.Id)).Returns(userRepository);
 
             var service = CreateTarget(
                 tokenRepository: tokenRepository,
@@ -170,7 +170,7 @@ namespace MSBLOC.Web.Tests.Services
                 .Returns(accessTokens);
 
             var gitHubUserModelService = Substitute.For<IGitHubUserModelService>();
-            gitHubUserModelService.GetUserRepositoriesAsync().Returns(repositories);
+            gitHubUserModelService.GetRepositoriesAsync().Returns(repositories);
 
             var service = CreateTarget(
                 tokenRepository: tokenRepository,
@@ -193,7 +193,7 @@ namespace MSBLOC.Web.Tests.Services
 
             var userRepository = FakeUserRepository.Generate();
             var gitHubUserModelService = Substitute.For<IGitHubUserModelService>();
-            gitHubUserModelService.GetUserRepositoryAsync(userRepository.Id).Returns(userRepository);
+            gitHubUserModelService.GetRepositoryAsync(userRepository.Id).Returns(userRepository);
 
             var service = CreateTarget(
                 gitHubUserModelService: gitHubUserModelService,
@@ -234,7 +234,7 @@ namespace MSBLOC.Web.Tests.Services
 
             var userRepository = FakeUserRepository.Generate();
             var gitHubUserModelService = Substitute.For<IGitHubUserModelService>();
-            gitHubUserModelService.GetUserRepositoryAsync(userRepository.Id).Returns(userRepository);
+            gitHubUserModelService.GetRepositoryAsync(userRepository.Id).Returns(userRepository);
 
             var service = CreateTarget(
                 tokenRepository: tokenRepository,

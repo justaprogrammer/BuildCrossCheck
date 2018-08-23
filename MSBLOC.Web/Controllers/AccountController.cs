@@ -41,7 +41,7 @@ namespace MSBLOC.Web.Controllers
             [FromServices] IPersistantDataContext dbContext,
             [FromServices] IGitHubUserModelService gitHubUserModelService)
         {
-            var userInstallations = await gitHubUserModelService.GetUserInstallationsAsync();
+            var userInstallations = await gitHubUserModelService.GetInstallationsAsync();
             var repositories = userInstallations.SelectMany(installation => installation.Repositories).ToArray();
 
             var issuedAccessTokens = await _accessTokenService.GetTokensForUserRepositoriesAsync();
