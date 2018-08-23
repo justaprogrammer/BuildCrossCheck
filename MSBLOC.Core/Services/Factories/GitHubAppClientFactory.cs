@@ -6,32 +6,35 @@ using Octokit;
 
 namespace MSBLOC.Core.Services.Factories
 {
+    /// <inheritdoc />
     public class GitHubAppClientFactory : IGitHubAppClientFactory
     {
+        /// <inheritdoc />
         public async Task<IGitHubClient> CreateAppClientForLoginAsync(ITokenGenerator tokenGenerator, string login)
         {
             var (installation, token) = await FindInstallationAndGetToken(tokenGenerator, login);
             return GitHubClientFactoryHelper.GitHubClient(token, GetUserAgent(installation));
         }
 
+        /// <inheritdoc />
         public IGitHubClient CreateAppClient(ITokenGenerator tokenGenerator)
         {
             var token = tokenGenerator.GetToken();
 
-            var appClient = new GitHubClient(new ProductHeaderValue("MSBuildLogOctokitChecker"))
+            return new GitHubClient(new ProductHeaderValue("MSBuildLogOctokitChecker"))
             {
                 Credentials = new Credentials(token, AuthenticationType.Bearer)
             };
-
-            return appClient;
         }
 
+        /// <inheritdoc />
         public IGitHubGraphQLClient CreateAppGraphQLClient(ITokenGenerator tokenGenerator)
         {
             var token = tokenGenerator.GetToken();
             return GitHubClientFactoryHelper.GraphQLClient(token, GitHubClientFactory.UserAgent);
         }
 
+        /// <inheritdoc />
         public async Task<IGitHubGraphQLClient> CreateAppGraphQLClientForLoginAsync(ITokenGenerator tokenGenerator, string login)
         {
             var (installation, token) = await FindInstallationAndGetToken(tokenGenerator, login);

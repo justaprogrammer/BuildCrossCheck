@@ -124,7 +124,7 @@ namespace MSBLOC.Web
             });
             services.AddScoped<IAccessTokenService, AccessTokenService>();
 
-            services.AddTransient<ILogAnalyzer, LogAnalyzerService>();
+            services.AddTransient<ILogAnalyzerService, LogAnalyzerService>();
 
             services.AddSwaggerGen(c =>
             {

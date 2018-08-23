@@ -136,6 +136,38 @@ namespace MSBLOC.Core.Tests.Services
         }
 
         [Fact]
+        public void ShouldParseDBATools()
+        {
+            var cloneRoot = @"c:\github\dbatools\bin\projects\dbatools\";
+
+            var resourcePath = TestUtils.GetResourcePath("dbatools.binlog");
+            File.Exists(resourcePath).Should().BeTrue();
+
+            var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
+            var parsedBinaryLog = parser.ProcessLog(resourcePath, cloneRoot);
+
+            parsedBinaryLog.SolutionDetails.CloneRoot.Should().Be(cloneRoot);
+
+            var dbaToolsProject = @"c:\github\dbatools\bin\projects\dbatools\dbatools\dbatools.csproj";
+            var dbaToolsProjectPath = @"c:\github\dbatools\bin\projects\dbatools\dbatools";
+
+            var dbaToolsTestProject = @"c:\github\dbatools\bin\projects\dbatools\dbatools.Tests\dbatools.Tests.csproj";
+            var dbaToolsTestProjectPath = @"c:\github\dbatools\bin\projects\dbatools\dbatools.Tests";
+
+            var dbaToolsProjectDetails = parsedBinaryLog.SolutionDetails[dbaToolsProject];
+            dbaToolsProjectDetails.ProjectFile.Should().Be(dbaToolsProject);
+            dbaToolsProjectDetails.ProjectDirectory.Should().Be(dbaToolsProjectPath);
+
+            var dbaToolsTestProjectDetails = parsedBinaryLog.SolutionDetails[dbaToolsTestProject];
+
+            dbaToolsTestProjectDetails.ProjectFile.Should().Be(dbaToolsTestProject);
+            dbaToolsTestProjectDetails.ProjectDirectory.Should().Be(dbaToolsTestProjectPath);
+
+            parsedBinaryLog.SolutionDetails.Count(project => project.Value.ProjectFile.EndsWith(".csproj")).Should().Be(2);
+            parsedBinaryLog.BuildMessages.Should().BeEmpty();
+        }
+
+        [Fact]
         public void ShouldThrowWhenBuildPathOutisdeCloneRoot()
         {
             var solutionDetails = new SolutionDetails(@"C:\projects\testconsoleapp1\");
