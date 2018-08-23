@@ -8,6 +8,8 @@ using MSBLOC.Core.Model.GitHub;
 using Nito.AsyncEx;
 using Octokit;
 using AccountType = MSBLOC.Core.Model.GitHub.AccountType;
+using Installation = MSBLOC.Core.Model.GitHub.Installation;
+using Repository = MSBLOC.Core.Model.GitHub.Repository;
 
 namespace MSBLOC.Core.Services
 {
@@ -22,13 +24,13 @@ namespace MSBLOC.Core.Services
             _lazyGitHubUserGraphQLClient = new AsyncLazy<IGitHubGraphQLClient>(() => gitHubUserClientFactory.CreateGraphQLClient());
         }
 
-        public async Task<IReadOnlyList<UserInstallation>> GetUserInstallationsAsync()
+        public async Task<IReadOnlyList<Installation>> GetUserInstallationsAsync()
         {
             var gitHubUserClient = await _lazyGitHubUserClient;
             var gitHubAppsUserClient = gitHubUserClient.GitHubApps;
             var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installations;
 
-            var userInstallations = new List<UserInstallation>();
+            var userInstallations = new List<Installation>();
 
             var installationsResponse = await gitHubAppsUserClient.GetAllInstallationsForUser().ConfigureAwait(false);
 
@@ -37,12 +39,12 @@ namespace MSBLOC.Core.Services
                 var repositoriesResponse = await gitHubAppsInstallationsUserClient
                     .GetAllRepositoriesForUser(installation.Id).ConfigureAwait(false);
 
-                var userInstallation = new UserInstallation
+                var userInstallation = new Installation
                 {
                     Id = installation.Id,
                     Login = installation.Account.Login,
                     Repositories = repositoriesResponse.Repositories
-                        .Select(repository => new UserRepository
+                        .Select(repository => new Repository
                         {
                             Id = repository.Id,
                             NodeId = repository.NodeId,
@@ -62,7 +64,7 @@ namespace MSBLOC.Core.Services
             return userInstallations;
         }
 
-        public async Task<UserInstallation> GetUserInstallationAsync(long installationId)
+        public async Task<Installation> GetUserInstallationAsync(long installationId)
         {
             var gitHubUserClient = await _lazyGitHubUserClient.ConfigureAwait(false);
             var gitHubAppsUserClient = gitHubUserClient.GitHubApps;
@@ -79,13 +81,13 @@ namespace MSBLOC.Core.Services
             return userInstallation;
         }
 
-        public async Task<IReadOnlyList<UserRepository>> GetUserRepositoriesAsync()
+        public async Task<IReadOnlyList<Repository>> GetUserRepositoriesAsync()
         {
             var userInstallations = await GetUserInstallationsAsync().ConfigureAwait(false);
             return userInstallations.SelectMany(installation => installation.Repositories).ToArray();
         }
 
-        public async Task<UserRepository> GetUserRepositoryAsync(long repositoryId)
+        public async Task<Repository> GetUserRepositoryAsync(long repositoryId)
         {
             var gitHubUserClient = await _lazyGitHubUserClient.ConfigureAwait(false);
             var repositoriesClient = gitHubUserClient.Repository;
@@ -94,10 +96,10 @@ namespace MSBLOC.Core.Services
             return BuildUserRepository(repository);
         }
 
-        private static UserInstallation BuildUserInstallation(Installation installation,
-            IReadOnlyList<Repository> repositories)
+        private static Installation BuildUserInstallation(Octokit.Installation installation,
+            IReadOnlyList<Octokit.Repository> repositories)
         {
-            return new UserInstallation
+            return new Installation
             {
                 Id = installation.Id,
                 Login = installation.Account.Login,
@@ -107,9 +109,9 @@ namespace MSBLOC.Core.Services
             };
         }
 
-        private static UserRepository BuildUserRepository(Repository repository)
+        private static Repository BuildUserRepository(Octokit.Repository repository)
         {
-            return new UserRepository
+            return new Repository
             {
                 Id = repository.Id,
                 Owner = repository.Owner.Login,
@@ -118,7 +120,7 @@ namespace MSBLOC.Core.Services
             };
         }
 
-        private static AccountType GetOwnerType(Repository repository)
+        private static AccountType GetOwnerType(Octokit.Repository repository)
         {
             if (!repository.Owner.Type.HasValue)
                 throw new InvalidOperationException("Repository owner does not have a type.");

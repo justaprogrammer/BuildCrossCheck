@@ -17,6 +17,7 @@ using MSBLOC.Web.Models;
 using Newtonsoft.Json.Linq;
 using Octokit;
 using AccessToken = MSBLOC.Infrastructure.Models.AccessToken;
+using Repository = MSBLOC.Core.Model.GitHub.Repository;
 
 namespace MSBLOC.Web.Services
 {
@@ -40,7 +41,7 @@ namespace MSBLOC.Web.Services
 
         public async Task<string> CreateTokenAsync(long githubRepositoryId)
         {
-            UserRepository repository = await _gitHubUserModelService.GetUserRepositoryAsync(githubRepositoryId);
+            Repository repository = await _gitHubUserModelService.GetUserRepositoryAsync(githubRepositoryId);
 
             if (repository == null)
             {

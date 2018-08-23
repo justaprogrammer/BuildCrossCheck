@@ -38,13 +38,13 @@ namespace MSBLOC.Web.Tests.Services
 
         static AccessTokenServiceTests()
         {
-            FakeUserRepository = new Faker<UserRepository>()
+            FakeUserRepository = new Faker<Repository>()
                 .RuleFor(u => u.Id, (f, u) => f.Random.Int(0))
                 .RuleFor(u => u.Name, (f, u) => f.Person.UserName)
                 .RuleFor(u => u.Owner, (f, u) => f.Person.UserName)
                 .RuleFor(u => u.Url, (f, u) => f.Internet.Url());
 
-            FakeUserInstallation = new Faker<UserInstallation>()
+            FakeUserInstallation = new Faker<Installation>()
                 .RuleFor(u => u.Id, (f, u) => f.Random.Int(0))
                 .RuleFor(u => u.Repositories, (f, u) => FakeUserRepository.Generate(Faker.Random.Int(1, 5)))
                 .RuleFor(u => u.Login, (f, u) => f.Person.UserName);
@@ -60,8 +60,8 @@ namespace MSBLOC.Web.Tests.Services
         private readonly ILogger<AccessTokenServiceTests> _logger;
 
         private static readonly Faker Faker = new Faker();
-        private static readonly Faker<UserRepository> FakeUserRepository;
-        private static readonly Faker<UserInstallation> FakeUserInstallation;
+        private static readonly Faker<Repository> FakeUserRepository;
+        private static readonly Faker<Installation> FakeUserInstallation;
         private static readonly Faker<AccessToken> FakeAccessToken;
 
         private static (long userId, ClaimsPrincipal user) FakeUserClaim()

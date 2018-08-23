@@ -1,6 +1,6 @@
 ﻿namespace MSBLOC.Core.Model.GitHub
 {
-    public class UserRepository
+    public class Repository
     {
         public long OwnerId { get; set; }
 
