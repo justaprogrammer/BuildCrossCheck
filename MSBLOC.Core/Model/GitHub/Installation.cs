@@ -2,11 +2,11 @@
 
 namespace MSBLOC.Core.Model.GitHub
 {
-    public class UserInstallation
+    public class Installation
     {
         public long Id { get; set; }
 
-        public IReadOnlyList<UserRepository> Repositories { get; set; }
+        public IReadOnlyList<Repository> Repositories { get; set; }
 
         public string Login { get; set; }
     }
