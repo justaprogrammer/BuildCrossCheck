@@ -11,38 +11,40 @@ using CheckWarningLevel = MSBLOC.Core.Model.LogAnalyzer.CheckWarningLevel;
 
 namespace MSBLOC.Core.Services
 {
+    /// <inheritdoc cref="IGitHubAppModelService"/> />
     public class GitHubAppModelService : GitHubAppModelServiceBase, IGitHubAppModelService
     {
-        private readonly IGitHubAppClientFactory _gitHubUserClientFactory;
+        private readonly IGitHubAppClientFactory _gitHubAppClientFactory;
         private readonly ITokenGenerator _tokenGenerator;
 
-        public GitHubAppModelService(IGitHubAppClientFactory gitHubUserClientFactory, ITokenGenerator tokenGenerator)
+        public GitHubAppModelService(IGitHubAppClientFactory gitHubAppClientFactory, ITokenGenerator tokenGenerator)
         {
-            _gitHubUserClientFactory = gitHubUserClientFactory;
+            _gitHubAppClientFactory = gitHubAppClientFactory;
             _tokenGenerator = tokenGenerator;
         }
 
-        public async Task<CheckRun> CreateCheckRunAsync(string repoOwner, string repoName, string headSha,
+        /// <inheritdoc />
+        public async Task<CheckRun> CreateCheckRunAsync(string owner, string repository, string sha,
             string checkRunName,
             string checkRunTitle, string checkRunSummary, bool checkRunIsSuccess, Annotation[] annotations,
             DateTimeOffset? startedAt,
             DateTimeOffset? completedAt)
         {
-            if (repoOwner == null) throw new ArgumentNullException(nameof(repoOwner));
-            if (repoName == null) throw new ArgumentNullException(nameof(repoName));
-            if (headSha == null) throw new ArgumentNullException(nameof(headSha));
+            if (owner == null) throw new ArgumentNullException(nameof(owner));
+            if (repository == null) throw new ArgumentNullException(nameof(repository));
+            if (sha == null) throw new ArgumentNullException(nameof(sha));
             if (checkRunTitle == null) throw new ArgumentNullException(nameof(checkRunTitle));
             if (checkRunSummary == null) throw new ArgumentNullException(nameof(checkRunSummary));
 
             if ((annotations?.Length ?? 0) > 50)
                 throw new ArgumentException("Cannot create more than 50 annotations at a time");
 
-            var gitHubClient = await _gitHubUserClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, repoOwner);
+            var gitHubClient = await _gitHubAppClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
             var checkRunsClient = gitHubClient?.Check?.Run;
 
             if (checkRunsClient == null) throw new InvalidOperationException("ICheckRunsClient is null");
 
-            var newCheckRun = new NewCheckRun(checkRunName, headSha)
+            var newCheckRun = new NewCheckRun(checkRunName, sha)
             {
                 Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
                 {
@@ -58,7 +60,7 @@ namespace MSBLOC.Core.Services
                 Conclusion = checkRunIsSuccess ? CheckConclusion.Success : CheckConclusion.Failure
             };
 
-            var checkRun = await checkRunsClient.Create(repoOwner, repoName, newCheckRun);
+            var checkRun = await checkRunsClient.Create(owner, repository, newCheckRun);
 
             return new CheckRun
             {
@@ -67,19 +69,20 @@ namespace MSBLOC.Core.Services
             };
         }
 
-        public async Task UpdateCheckRunAsync(long checkRunId, string repoOwner, string repoName,
-            string headSha, string checkRunTitle, string checkRunSummary, Annotation[] annotations,
+        /// <inheritdoc />
+        public async Task UpdateCheckRunAsync(long checkRunId, string owner, string repository,
+            string sha, string checkRunTitle, string checkRunSummary, Annotation[] annotations,
             DateTimeOffset? startedAt, DateTimeOffset? completedAt)
         {
             if (annotations.Length > 50)
                 throw new ArgumentException("Cannot create more than 50 annotations at a time");
 
-            var gitHubClient = await _gitHubUserClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, repoOwner);
+            var gitHubClient = await _gitHubAppClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
             var checkRunsClient = gitHubClient?.Check?.Run;
 
             if (checkRunsClient == null) throw new InvalidOperationException("ICheckRunsClient is null");
 
-            await checkRunsClient.Update(repoOwner, repoName, checkRunId, new CheckRunUpdate()
+            await checkRunsClient.Update(owner, repository, checkRunId, new CheckRunUpdate()
             {
                 Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
                 {

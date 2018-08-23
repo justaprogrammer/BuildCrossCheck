@@ -11,7 +11,8 @@ using MSBLOC.Core.Model.LogAnalyzer;
 
 namespace MSBLOC.Core.Services
 {
-    public class LogAnalyzerService : ILogAnalyzer
+    /// <inheritdoc />
+    public class LogAnalyzerService : ILogAnalyzerService
     {
         private readonly IBinaryLogProcessor _binaryLogProcessor;
         private readonly IGitHubAppModelService _gitHubAppModelService;
@@ -27,7 +28,8 @@ namespace MSBLOC.Core.Services
             _gitHubAppModelService = gitHubAppModelService;
         }
 
-        public async Task<CheckRun> SubmitAsync(string repoOwner, string repoName, string sha, string cloneRoot,
+        /// <inheritdoc />
+        public async Task<CheckRun> SubmitAsync(string owner, string repository, string sha, string cloneRoot,
             string resourcePath)
         {
             _logger.LogInformation("SubmitAsync repoOwner:{0} repoName:{1} sha:{2} cloneRoot:{3} resourcePath:{4}",
@@ -37,13 +39,13 @@ namespace MSBLOC.Core.Services
 
             var buildDetails = _binaryLogProcessor.ProcessLog(resourcePath, cloneRoot);
 
-            var logAnalyzerConfiguration = await _gitHubAppModelService.GetLogAnalyzerConfigurationAsync(repoOwner, repoName, sha);
+            var logAnalyzerConfiguration = await _gitHubAppModelService.GetLogAnalyzerConfigurationAsync(owner, repository, sha);
 
-            var annotations = CreateAnnotations(buildDetails, repoOwner, repoName, sha, logAnalyzerConfiguration);
+            var annotations = CreateAnnotations(buildDetails, owner, repository, sha, logAnalyzerConfiguration);
 
             var checkRun = await SubmitCheckRun(annotations,
-                repoOwner,
-                repoName,
+                owner,
+                repository,
                 sha,
                 "MSBuildLog Analyzer",
                 "MSBuildLog Analysis",

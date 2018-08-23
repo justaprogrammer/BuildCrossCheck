@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
@@ -10,6 +11,7 @@ using static Octokit.GraphQL.Variable;
 
 namespace MSBLOC.Core.Services
 {
+    /// <inheritdoc />
     public class GitHubGraphQLClient : IGitHubGraphQLClient
     {
         private static readonly AsyncLazy<ICompiledQuery<IEnumerable<CommitDetails>>> CommitDetailsByPullRequestId =
@@ -48,17 +50,20 @@ namespace MSBLOC.Core.Services
             return _connection.Run(query, variables);
         }
 
-        public async Task<IEnumerable<CommitDetails>> GetCommitDetailsByPullRequestIdAsync(string owner, string name,
+        /// <inheritdoc />
+        public async Task<IReadOnlyList<CommitDetails>> GetCommitDetailsByPullRequestIdAsync(string owner, string repository,
             int pullRequest)
         {
             var query = await CommitDetailsByPullRequestId;
 
-            return await _connection.Run(query, new Dictionary<string, object>()
+            var commitDetailsByPullRequestIdAsync = await _connection.Run(query, new Dictionary<string, object>()
             {
                 {nameof(owner), owner},
-                {nameof(name), name},
+                {nameof(repository), repository},
                 {nameof(pullRequest), pullRequest}
             });
+
+            return commitDetailsByPullRequestIdAsync.ToArray();
         }
     }
 }

@@ -9,7 +9,6 @@
     <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" />
     <PackageReference Include="Microsoft.Build" Version="15.7.179" />
     <PackageReference Include="Microsoft.Build.Framework" Version="15.7.179" />
-    <PackageReference Include="Microsoft.Build.Logging.StructuredLogger" Version="1.1.224" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.7.179" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.7.179" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
@@ -17,6 +16,12 @@
     <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.0.0-pre-05" />
     <PackageReference Include="Octokit" Version="0.32.0-PullRequest1854" />
     <PackageReference Include="Octokit.GraphQL" Version="0.1.0-beta" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="StructuredLogger">
+      <HintPath>..\lib\StructuredLogger.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <Target Name="CreateAliasForStructuredLogger" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">

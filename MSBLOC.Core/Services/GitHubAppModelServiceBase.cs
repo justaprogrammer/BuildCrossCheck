@@ -1,9 +1,13 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Octokit;
 
 namespace MSBLOC.Core.Services
 {
+    /// <summary>
+    /// This service makes calls to the GitHub Api with any authenticated GitHub Client.
+    /// </summary>
     public abstract class GitHubAppModelServiceBase
     {
         protected async Task<string> GetRepositoryFileAsync(IGitHubClient gitHubClient, string owner, string repository,
