@@ -6,6 +6,8 @@ using MoreLinq;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
 using MSBLOC.Core.Model.Builds;
+using MSBLOC.Core.Model.GitHub;
+using MSBLOC.Core.Model.LogAnalyzer;
 
 namespace MSBLOC.Core.Services
 {
@@ -35,7 +37,9 @@ namespace MSBLOC.Core.Services
 
             var buildDetails = _binaryLogProcessor.ProcessLog(resourcePath, cloneRoot);
 
-            var annotations = CreateAnnotations(buildDetails, repoOwner, repoName, sha);
+            var logAnalyzerConfiguration = await _gitHubAppModelService.GetLogAnalyzerConfigurationAsync(repoOwner, repoName, sha);
+
+            var annotations = CreateAnnotations(buildDetails, repoOwner, repoName, sha, logAnalyzerConfiguration);
 
             var checkRun = await SubmitCheckRun(annotations,
                 repoOwner,
@@ -52,13 +56,14 @@ namespace MSBLOC.Core.Services
             return checkRun;
         }
 
-        private Annotation[] CreateAnnotations(BuildDetails buildDetails, string repoOwner, string repoName, string sha)
+        private Annotation[] CreateAnnotations(BuildDetails buildDetails, string repoOwner, string repoName, string sha, LogAnalyzerConfiguration logAnalyzerConfiguration)
         {
-            return buildDetails.BuildMessages.Select(buildMessage => CreateAnnotation(buildDetails, repoOwner, repoName, sha, buildMessage)).ToArray();
+            var lookup = logAnalyzerConfiguration?.Rules.ToLookup(rule => rule.Code);
+            return buildDetails.BuildMessages.Select(buildMessage => CreateAnnotation(buildDetails, repoOwner, repoName, sha, buildMessage, lookup)).ToArray();
         }
 
-        private static Annotation CreateAnnotation(BuildDetails buildDetails, string repoOwner, string repoName, string sha,
-            BuildMessage buildMessage)
+        private static Annotation CreateAnnotation(BuildDetails buildDetails, string repoOwner, string repoName,
+            string sha, BuildMessage buildMessage, ILookup<string, LogAnalyzerRule> lookup)
         {
             var filename =
                 buildDetails.SolutionDetails.GetProjectItemPath(buildMessage.ProjectFile, buildMessage.File)
@@ -66,9 +71,33 @@ namespace MSBLOC.Core.Services
 
             var blobHref = BlobHref(repoOwner, repoName, sha, filename);
 
+            var logAnalyzerRule = lookup?[buildMessage.Code].FirstOrDefault();
+
             var checkWarningLevel = buildMessage.MessageLevel == BuildMessageLevel.Error
                 ? CheckWarningLevel.Failure
                 : CheckWarningLevel.Warning;
+
+            if (logAnalyzerRule != null)
+            {
+                switch (logAnalyzerRule.ReportAs)
+                {
+                    case ReportAs.AsIs:
+                        break;
+                    case ReportAs.Ignore:
+                        return null;
+                    case ReportAs.Notice:
+                        checkWarningLevel = CheckWarningLevel.Notice;
+                        break;
+                    case ReportAs.Warning:
+                        checkWarningLevel = CheckWarningLevel.Warning;
+                        break;
+                    case ReportAs.Error:
+                        checkWarningLevel = CheckWarningLevel.Failure;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
 
             return new Annotation(filename,
                 checkWarningLevel,

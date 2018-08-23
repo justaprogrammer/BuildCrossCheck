@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.GitHub;
 using Nito.AsyncEx;
 using Octokit.GraphQL;
 using Octokit.GraphQL.Core;

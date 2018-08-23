@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.GitHub;
+using MSBLOC.Core.Model.LogAnalyzer;
 
 namespace MSBLOC.Core.Interfaces
 {
@@ -16,5 +18,9 @@ namespace MSBLOC.Core.Interfaces
         Task UpdateCheckRunAsync(long checkRunId, string repoOwner, string repoName,
             string headSha, string checkRunTitle, string checkRunSummary, Annotation[] annotations,
             DateTimeOffset? startedAt, DateTimeOffset? completedAt);
+
+        Task<string> GetRepositoryFileAsync(string owner, string repository, string path, string reference);
+
+        Task<LogAnalyzerConfiguration> GetLogAnalyzerConfigurationAsync(string owner, string repository, string reference);
     }
 }

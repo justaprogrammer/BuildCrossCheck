@@ -3,9 +3,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.LogAnalyzer;
+using Newtonsoft.Json;
 using Octokit;
-using CheckRun = MSBLOC.Core.Model.CheckRun;
-using CheckWarningLevel = MSBLOC.Core.Model.CheckWarningLevel;
+using CheckRun = MSBLOC.Core.Model.GitHub.CheckRun;
+using CheckWarningLevel = MSBLOC.Core.Model.LogAnalyzer.CheckWarningLevel;
 
 namespace MSBLOC.Core.Services
 {
@@ -24,7 +26,7 @@ namespace MSBLOC.Core.Services
         {
             var gitHubClient = await _gitHubUserClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, repoOwner);
 
-            await GetPullRequestChangedPaths(gitHubClient, repoOwner, repoName, number);
+            await GetPullRequestChangedPathsAsync(gitHubClient, repoOwner, repoName, number);
         }
 
         public async Task<CheckRun> CreateCheckRunAsync(string repoOwner, string repoName, string headSha,
@@ -95,6 +97,20 @@ namespace MSBLOC.Core.Services
                         .ToArray()
                 }
             });
+        }
+
+        public async Task<string> GetRepositoryFileAsync(string owner, string repository, string path, string reference)
+        {
+            var gitHubClient = await _gitHubUserClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
+            return await GetRepositoryFileAsync(gitHubClient, owner, repository, path, reference);
+        }
+
+        public async Task<LogAnalyzerConfiguration> GetLogAnalyzerConfigurationAsync(string owner, string repository, string reference)
+        {
+            var fileContent = await GetRepositoryFileAsync(owner, repository, "msbloc.json", reference);
+            if (fileContent == null) return null;
+
+            return JsonConvert.DeserializeObject<LogAnalyzerConfiguration>(fileContent);
         }
 
         private static Octokit.CheckWarningLevel GetCheckWarningLevel(Annotation annotation)

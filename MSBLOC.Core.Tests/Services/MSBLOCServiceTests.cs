@@ -10,6 +10,8 @@ using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
 using MSBLOC.Core.Model.Builds;
+using MSBLOC.Core.Model.GitHub;
+using MSBLOC.Core.Model.LogAnalyzer;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
 using NSubstitute;
@@ -109,7 +111,7 @@ namespace MSBLOC.Core.Tests.Services
                 Arg.Any<DateTimeOffset>(),
                 Arg.Any<DateTimeOffset>());
 
-            var arguments = gitHubAppModelService.ReceivedCalls().First().GetArguments().ToArray();
+            var arguments = gitHubAppModelService.ReceivedCalls().Skip(1).First().GetArguments().ToArray();
             var annotations = (Annotation[]) arguments[7];
             annotations.Should().BeEquivalentTo(null);
         }
@@ -154,7 +156,7 @@ namespace MSBLOC.Core.Tests.Services
                 Arg.Any<DateTimeOffset>(),
                 Arg.Any<DateTimeOffset>());
 
-            var arguments = gitHubAppModelService.ReceivedCalls().First().GetArguments().ToArray();
+            var arguments = gitHubAppModelService.ReceivedCalls().Skip(1).First().GetArguments().ToArray();
             var annotations = (Annotation[]) arguments[7];
             annotations.Should().BeEquivalentTo(new Annotation(
                 filename,
@@ -206,7 +208,7 @@ namespace MSBLOC.Core.Tests.Services
                 Arg.Any<DateTimeOffset>(),
                 Arg.Any<DateTimeOffset>());
 
-            var arguments = gitHubAppModelService.ReceivedCalls().First().GetArguments().ToArray();
+            var arguments = gitHubAppModelService.ReceivedCalls().Skip(1).First().GetArguments().ToArray();
             var annotations = (Annotation[]) arguments[7];
             annotations.Should().BeEquivalentTo(new Annotation(
                 filename,
@@ -258,7 +260,7 @@ namespace MSBLOC.Core.Tests.Services
                 Arg.Any<DateTimeOffset>(),
                 Arg.Any<DateTimeOffset>());
 
-            var arguments = gitHubAppModelService.ReceivedCalls().First().GetArguments().ToArray();
+            var arguments = gitHubAppModelService.ReceivedCalls().Skip(1).First().GetArguments().ToArray();
             var annotations = (Annotation[]) arguments[7];
             annotations.Should().BeEquivalentTo(new Annotation(
                 filename,

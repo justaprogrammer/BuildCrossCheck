@@ -13,8 +13,24 @@ namespace MSBLOC.Core.IntegrationTests.Services
         public async Task ShouldGetPullRequestChangedPaths()
         {
             var testAppModelService = CreateTarget();
-            var paths = await testAppModelService.GetPullRequestChangedPaths("octokit", "octokit.graphql.net", 142);
+            var paths = await testAppModelService.GetPullRequestChangedPathsAsync("octokit", "octokit.graphql.net", 142);
             paths.Length.Should().Be(57);
+        }
+
+        [IntegrationTest]
+        public async Task ShouldGetResitoryFile()
+        {
+            var testAppModelService = CreateTarget();
+            var appveyor = await testAppModelService.GetRepositoryFileAsync("justaprogrammer", "MSBuildLogOctokitChecker", "appveyor.yml", "master");
+            appveyor.Should().NotBeNull();
+        }
+
+        [IntegrationTest]
+        public async Task ShouldNotGetFileThatDoesNotExist()
+        {
+            var testAppModelService = CreateTarget();
+            var appveyor = await testAppModelService.GetRepositoryFileAsync("justaprogrammer", "MSBuildLogOctokitChecker", "appveyor2.yml", "master");
+            appveyor.Should().BeNull();
         }
 
         private TestAppModelService CreateTarget()
@@ -33,9 +49,14 @@ namespace MSBLOC.Core.IntegrationTests.Services
                 _gitHubClient = gitHubClient;
             }
 
-            public async Task<string[]> GetPullRequestChangedPaths(string owner, string name, int pullRequest)
+            public Task<string[]> GetPullRequestChangedPathsAsync(string owner, string repository, int pullRequest)
             {
-                return await GetPullRequestChangedPaths(_gitHubClient, owner, name, pullRequest);
+                return GetPullRequestChangedPathsAsync(_gitHubClient, owner, repository, pullRequest);
+            }
+
+            public Task<string> GetRepositoryFileAsync(string owner, string repository, string filepath, string reference)
+            {
+                return GetRepositoryFileAsync(_gitHubClient, owner, repository, filepath, reference);
             }
         }
     }
