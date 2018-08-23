@@ -3,9 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.LogAnalyzer;
 using Octokit;
-using CheckRun = MSBLOC.Core.Model.CheckRun;
-using CheckWarningLevel = MSBLOC.Core.Model.CheckWarningLevel;
+using CheckRun = MSBLOC.Core.Model.GitHub.CheckRun;
+using CheckWarningLevel = MSBLOC.Core.Model.LogAnalyzer.CheckWarningLevel;
 
 namespace MSBLOC.Core.Services
 {

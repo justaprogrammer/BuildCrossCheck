@@ -4,9 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.GitHub;
 using Nito.AsyncEx;
 using Octokit;
-using AccountType = MSBLOC.Core.Model.AccountType;
+using AccountType = MSBLOC.Core.Model.GitHub.AccountType;
 
 namespace MSBLOC.Core.Services
 {

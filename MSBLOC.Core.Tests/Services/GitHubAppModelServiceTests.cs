@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.LogAnalyzer;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
 using NSubstitute;
@@ -12,7 +13,7 @@ using Octokit;
 using Xunit;
 using Xunit.Abstractions;
 using CheckRun = Octokit.CheckRun;
-using CheckWarningLevel = MSBLOC.Core.Model.CheckWarningLevel;
+using CheckWarningLevel = MSBLOC.Core.Model.LogAnalyzer.CheckWarningLevel;
 
 namespace MSBLOC.Core.Tests.Services
 {
