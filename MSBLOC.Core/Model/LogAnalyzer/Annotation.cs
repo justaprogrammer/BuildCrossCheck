@@ -1,6 +1,4 @@
-﻿using MSBLOC.Core.Model.LogAnalyzer;
-
-namespace MSBLOC.Core.Model
+﻿namespace MSBLOC.Core.Model.LogAnalyzer
 {
     public class Annotation
     {

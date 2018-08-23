@@ -11,16 +11,16 @@ using MSBLOC.Core.Model.LogAnalyzer;
 
 namespace MSBLOC.Core.Services
 {
-    public class MSBLOCService : IMSBLOCService
+    public class LogAnalyzerService : ILogAnalyzer
     {
         private readonly IBinaryLogProcessor _binaryLogProcessor;
         private readonly IGitHubAppModelService _gitHubAppModelService;
         private readonly ILogger _logger;
 
-        public MSBLOCService(
+        public LogAnalyzerService(
             IBinaryLogProcessor binaryLogProcessor,
             IGitHubAppModelService gitHubAppModelService,
-            ILogger<MSBLOCService> logger)
+            ILogger<LogAnalyzerService> logger)
         {
             _logger = logger;
             _binaryLogProcessor = binaryLogProcessor;

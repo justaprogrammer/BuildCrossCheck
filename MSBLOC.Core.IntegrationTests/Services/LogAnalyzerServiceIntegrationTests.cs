@@ -9,15 +9,15 @@ using Xunit.Abstractions;
 
 namespace MSBLOC.Core.IntegrationTests.Services
 {
-    public class MSBLOCServiceIntegrationTests : IntegrationTestsBase
+    public class LogAnalyzerServiceIntegrationTests : IntegrationTestsBase
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly ILogger<MSBLOCServiceIntegrationTests> _logger;
+        private readonly ILogger<LogAnalyzerServiceIntegrationTests> _logger;
 
-        public MSBLOCServiceIntegrationTests(ITestOutputHelper testOutputHelper)
+        public LogAnalyzerServiceIntegrationTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
-            _logger = TestLogger.Create<MSBLOCServiceIntegrationTests>(testOutputHelper);
+            _logger = TestLogger.Create<LogAnalyzerServiceIntegrationTests>(testOutputHelper);
         }
 
         [IntegrationTest]
@@ -59,7 +59,7 @@ namespace MSBLOC.Core.IntegrationTests.Services
             var gitHubAppClientFactory = CreateGitHubAppClientFactory();
             var gitHubAppModelService = new GitHubAppModelService(gitHubAppClientFactory, CreateTokenGenerator());
 
-            var msblocService = new MSBLOCService(parser, gitHubAppModelService, TestLogger.Create<MSBLOCService>(_testOutputHelper));
+            var msblocService = new LogAnalyzerService(parser, gitHubAppModelService, TestLogger.Create<LogAnalyzerService>(_testOutputHelper));
             var checkRun = await msblocService.SubmitAsync(TestAppOwner, TestAppRepo, sha, cloneRoot, resourcePath);
 
             checkRun.Should().NotBeNull();

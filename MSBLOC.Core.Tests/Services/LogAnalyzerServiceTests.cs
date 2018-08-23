@@ -20,25 +20,25 @@ using Xunit.Abstractions;
 
 namespace MSBLOC.Core.Tests.Services
 {
-    public class MSBLOCServiceTests
+    public class LogAnalyzerServiceTests
     {
-        public MSBLOCServiceTests(ITestOutputHelper testOutputHelper)
+        public LogAnalyzerServiceTests(ITestOutputHelper testOutputHelper)
         {
-            _logger = TestLogger.Create<MSBLOCServiceTests>(testOutputHelper);
+            _logger = TestLogger.Create<LogAnalyzerServiceTests>(testOutputHelper);
             _testOutputHelper = testOutputHelper;
         }
 
-        static MSBLOCServiceTests()
+        static LogAnalyzerServiceTests()
         {
             Faker = new Faker();
         }
 
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly ILogger<MSBLOCServiceTests> _logger;
+        private readonly ILogger<LogAnalyzerServiceTests> _logger;
 
         private static readonly Faker Faker;
 
-        private MSBLOCService CreateTarget(
+        private LogAnalyzerService CreateTarget(
             IBinaryLogProcessor binaryLogProcessor = null,
             IGitHubAppModelService gitHubAppModelService = null)
         {
@@ -46,8 +46,8 @@ namespace MSBLOC.Core.Tests.Services
 
             if (gitHubAppModelService == null) gitHubAppModelService = Substitute.For<IGitHubAppModelService>();
 
-            return new MSBLOCService(binaryLogProcessor, gitHubAppModelService,
-                TestLogger.Create<MSBLOCService>(_testOutputHelper));
+            return new LogAnalyzerService(binaryLogProcessor, gitHubAppModelService,
+                TestLogger.Create<LogAnalyzerService>(_testOutputHelper));
         }
 
         private static IEnumerable<string> GenerateFileNames()

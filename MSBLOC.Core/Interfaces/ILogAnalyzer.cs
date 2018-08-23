@@ -4,7 +4,7 @@ using MSBLOC.Core.Model.GitHub;
 
 namespace MSBLOC.Core.Interfaces
 {
-    public interface IMSBLOCService
+    public interface ILogAnalyzer
     {
         /// <summary>
         /// Submits the provided SubmissionData to GitHub

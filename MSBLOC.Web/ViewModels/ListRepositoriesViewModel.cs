@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using MSBLOC.Core.Model;
 using MSBLOC.Core.Model.GitHub;
 using MSBLOC.Infrastructure.Models;
 
