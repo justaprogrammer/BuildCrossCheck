@@ -5,9 +5,7 @@ using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using MoreLinq;
 using MSBLOC.Core.Interfaces;
-using MSBLOC.Core.Model;
 using MSBLOC.Core.Model.Builds;
 
 namespace MSBLOC.Core.Services
@@ -60,8 +58,8 @@ namespace MSBLOC.Core.Services
                 {
                     var buildMessage = new BuildMessage(
                         BuildMessageLevel.Warning,
-                        buildWarning.ProjectFile, 
-                        buildWarning.File, 
+                        buildWarning.ProjectFile,
+                        buildWarning.File,
                         buildWarning.LineNumber,
                         buildWarning.EndLineNumber,
                         buildWarning.Message,
@@ -72,12 +70,12 @@ namespace MSBLOC.Core.Services
                 if (buildEventArgs is BuildErrorEventArgs buildError)
                 {
                     var buildMessage = new BuildMessage(
-                        BuildMessageLevel.Error, 
-                        buildError.ProjectFile, 
-                        buildError.File, 
+                        BuildMessageLevel.Error,
+                        buildError.ProjectFile,
+                        buildError.File,
                         buildError.LineNumber,
-                        buildError.EndLineNumber, 
-                        buildError.Message, 
+                        buildError.EndLineNumber,
+                        buildError.Message,
                         buildError.Code);
                     buildMessages.Add(buildMessage);
                 }
