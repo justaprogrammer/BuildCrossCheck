@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using MoreLinq.Extensions;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model.Builds;
 
