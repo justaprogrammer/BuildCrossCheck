@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Services;
+using MSBLOC.Core.Services.GitHub;
 using MSBLOC.Core.Tests.Util;
 using Xunit;
 using Xunit.Abstractions;

@@ -1,8 +1,8 @@
-using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Interfaces.GitHub;
 using Octokit;
 using Octokit.Internal;
 
-namespace MSBLOC.Core.Services.Factories
+namespace MSBLOC.Core.Services.GitHub
 {
     public class GitHubClientFactoryHelper
     {
