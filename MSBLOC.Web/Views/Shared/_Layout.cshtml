@@ -1,11 +1,16 @@
 ﻿@inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
+@{
+    var homeActive = ((bool?)ViewData["IsHome"] ?? false) ? "active" : string.Empty;
+    var listRepositoriesActive = ((bool?)ViewData["IsListRepositories"] ?? false) ? "active" : string.Empty;
+}
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>@ViewData["Title"] - MSBLOC.Web</title>
-
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
     <environment include="Development">
         <link rel="stylesheet" href="~/css/vendor.min.css" />
         <link rel="stylesheet" href="~/css/site.css" />
@@ -25,18 +30,34 @@
 
         <div class="collapse navbar-collapse" id="navbarsDefault">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
+                <li class="nav-item @homeActive">
                     <a asp-action="Index" asp-controller="Home" class="nav-link">Home</a>
                 </li>
+                <li class="nav-item">
+                    <a href="https://github.com/justaprogrammer/MSBuildLogOctokitChecker/blob/master/docs/integrating.md"
+                       target="_blank"
+                       class="nav-link">Setup</a>
+                </li>
+                <li class="nav-item">
+                    <a href="https://github.com/apps/msbuildlog-octokit-checker" 
+                       target="_blank"
+                       class="nav-link">GitHub App</a>
+                </li>
+                <li class="nav-item">
+                    <a href="https://github.com/justaprogrammer/MSBuildLogOctokitChecker" 
+                       target="_blank"
+                       class="nav-link">GitHub Repo</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav justify-content-end">
                 @if (User.Identity.IsAuthenticated)
                 {
-                    <li class="nav-item active">
-                        <a asp-action="ListRepositories" asp-controller="Account" class="nav-link">Repositories</a>
+                    <li class="nav-item">
+                        <a asp-action="ListRepositories" asp-controller="Account"
+                           class="nav-link @listRepositoriesActive">Repositories</a>
                     </li>
                 }
-            </ul>
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
+                <li class="nav-item">
                     @if (User.Identity.IsAuthenticated)
                     {
                         <a asp-action="SignOut" asp-controller="Account" class="nav-link">Log Out</a>

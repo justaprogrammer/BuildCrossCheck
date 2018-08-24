@@ -21,3 +21,10 @@ artifacts:
     - path: dist
       name: dist.web
       type: WebDeployPackage
+on_finish:
+- ps: >-
+    if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
+    {
+      Import-Module .\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
+      Send-MsbuildLogAppveyor -Path output.binlog -Token $env:MSBLOC_JWT
+    }

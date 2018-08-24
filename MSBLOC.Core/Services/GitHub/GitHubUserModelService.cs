@@ -52,6 +52,7 @@ namespace MSBLOC.Core.Services.GitHub
                             OwnerNodeId = repository.Owner.NodeId,
                             OwnerType = GetAccountType(repository),
                             Owner = repository.Owner.Login,
+                            OwnerUrl = repository.Owner.HtmlUrl,
                             Name = repository.Name,
                             Url = repository.HtmlUrl
                         })
