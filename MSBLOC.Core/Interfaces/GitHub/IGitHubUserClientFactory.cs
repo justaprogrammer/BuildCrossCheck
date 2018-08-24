@@ -1,8 +1,7 @@
 ﻿using System.Threading.Tasks;
-using MSBLOC.Core.Services;
 using Octokit;
 
-namespace MSBLOC.Core.Interfaces
+namespace MSBLOC.Core.Interfaces.GitHub
 {
     /// <summary>
     /// This factory provides GitHub clients configured for GitHub App User-To-Server Authentication.

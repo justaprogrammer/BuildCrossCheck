@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using MSBLOC.Core.Interfaces;
-using MSBLOC.Core.Model;
+using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Core.Model.LogAnalyzer;
 using Newtonsoft.Json;
 using Octokit;
 using CheckRun = MSBLOC.Core.Model.GitHub.CheckRun;
 using CheckWarningLevel = MSBLOC.Core.Model.LogAnalyzer.CheckWarningLevel;
 
-namespace MSBLOC.Core.Services
+namespace MSBLOC.Core.Services.GitHub
 {
     /// <inheritdoc cref="IGitHubAppModelService"/> />
     public class GitHubAppModelService : GitHubAppModelServiceBase, IGitHubAppModelService

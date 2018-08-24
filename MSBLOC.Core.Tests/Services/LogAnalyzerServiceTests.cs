@@ -7,6 +7,8 @@ using Bogus;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Interfaces.GitHub;
+using MSBLOC.Core.Model;
 using MSBLOC.Core.Model.Builds;
 using MSBLOC.Core.Model.GitHub;
 using MSBLOC.Core.Model.LogAnalyzer;

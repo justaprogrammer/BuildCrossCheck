@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using MSBLOC.Core.Model;
 using MSBLOC.Core.Model.GitHub;
 using MSBLOC.Core.Model.LogAnalyzer;
 
-namespace MSBLOC.Core.Interfaces
+namespace MSBLOC.Core.Interfaces.GitHub
 {
     /// <summary>
     /// This service makes calls to the GitHub Api with GitHub App Installation Authentication.
