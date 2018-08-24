@@ -12,7 +12,9 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.GitHub;
 using MSBLOC.Infrastructure.Interfaces;
 using MSBLOC.Infrastructure.Models;
 using MSBLOC.Web.Models;
@@ -37,13 +39,13 @@ namespace MSBLOC.Web.Tests.Services
 
         static AccessTokenServiceTests()
         {
-            FakeUserRepository = new Faker<UserRepository>()
+            FakeUserRepository = new Faker<Repository>()
                 .RuleFor(u => u.Id, (f, u) => f.Random.Int(0))
                 .RuleFor(u => u.Name, (f, u) => f.Person.UserName)
                 .RuleFor(u => u.Owner, (f, u) => f.Person.UserName)
                 .RuleFor(u => u.Url, (f, u) => f.Internet.Url());
 
-            FakeUserInstallation = new Faker<UserInstallation>()
+            FakeUserInstallation = new Faker<Installation>()
                 .RuleFor(u => u.Id, (f, u) => f.Random.Int(0))
                 .RuleFor(u => u.Repositories, (f, u) => FakeUserRepository.Generate(Faker.Random.Int(1, 5)))
                 .RuleFor(u => u.Login, (f, u) => f.Person.UserName);
@@ -59,8 +61,8 @@ namespace MSBLOC.Web.Tests.Services
         private readonly ILogger<AccessTokenServiceTests> _logger;
 
         private static readonly Faker Faker = new Faker();
-        private static readonly Faker<UserRepository> FakeUserRepository;
-        private static readonly Faker<UserInstallation> FakeUserInstallation;
+        private static readonly Faker<Repository> FakeUserRepository;
+        private static readonly Faker<Installation> FakeUserInstallation;
         private static readonly Faker<AccessToken> FakeAccessToken;
 
         private static (long userId, ClaimsPrincipal user) FakeUserClaim()
@@ -122,7 +124,7 @@ namespace MSBLOC.Web.Tests.Services
             var contextAccessor = FakeHttpContextAccessor(user);
 
             var gitHubUserModelService = Substitute.For<IGitHubUserModelService>();
-            gitHubUserModelService.GetUserRepositoryAsync(Arg.Is(userRepository.Id)).Returns(userRepository);
+            gitHubUserModelService.GetRepositoryAsync(Arg.Is(userRepository.Id)).Returns(userRepository);
 
             var service = CreateTarget(
                 tokenRepository: tokenRepository,
@@ -169,7 +171,7 @@ namespace MSBLOC.Web.Tests.Services
                 .Returns(accessTokens);
 
             var gitHubUserModelService = Substitute.For<IGitHubUserModelService>();
-            gitHubUserModelService.GetUserRepositoriesAsync().Returns(repositories);
+            gitHubUserModelService.GetRepositoriesAsync().Returns(repositories);
 
             var service = CreateTarget(
                 tokenRepository: tokenRepository,
@@ -192,7 +194,7 @@ namespace MSBLOC.Web.Tests.Services
 
             var userRepository = FakeUserRepository.Generate();
             var gitHubUserModelService = Substitute.For<IGitHubUserModelService>();
-            gitHubUserModelService.GetUserRepositoryAsync(userRepository.Id).Returns(userRepository);
+            gitHubUserModelService.GetRepositoryAsync(userRepository.Id).Returns(userRepository);
 
             var service = CreateTarget(
                 gitHubUserModelService: gitHubUserModelService,
@@ -233,7 +235,7 @@ namespace MSBLOC.Web.Tests.Services
 
             var userRepository = FakeUserRepository.Generate();
             var gitHubUserModelService = Substitute.For<IGitHubUserModelService>();
-            gitHubUserModelService.GetUserRepositoryAsync(userRepository.Id).Returns(userRepository);
+            gitHubUserModelService.GetRepositoryAsync(userRepository.Id).Returns(userRepository);
 
             var service = CreateTarget(
                 tokenRepository: tokenRepository,

@@ -15,6 +15,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="MSBLOC.Core.IntegrationTests.net471.v3.ncrunchproject" />
+    <None Remove="MSBLOC.Core.IntegrationTests.netcoreapp2.1.v3.ncrunchproject" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.4.1" />
     <PackageReference Include="GitHubJwt" Version="0.0.2" />
     <PackageReference Include="jose-jwt" Version="2.4.0" />

@@ -15,8 +15,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Core.Services;
-using MSBLOC.Core.Services.Factories;
+using MSBLOC.Core.Services.GitHub;
 using MSBLOC.Infrastructure.Extensions;
 using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Interfaces;
@@ -124,7 +125,7 @@ namespace MSBLOC.Web
             });
             services.AddScoped<IAccessTokenService, AccessTokenService>();
 
-            services.AddTransient<IMSBLOCService, MSBLOCService>();
+            services.AddTransient<ILogAnalyzerService, LogAnalyzerService>();
 
             services.AddSwaggerGen(c =>
             {

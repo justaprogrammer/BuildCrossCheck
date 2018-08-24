@@ -4,7 +4,9 @@ using Bogus;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Core.Services;
+using MSBLOC.Core.Services.GitHub;
 using MSBLOC.Core.Tests.Util;
 using NSubstitute;
 using Octokit;
@@ -129,7 +131,7 @@ namespace MSBLOC.Core.Tests.Services
                 gitHubAppsInstallationsClient: gitHubAppsInstallationsClient
             );
 
-            var userInstallation = await gitHubUserModelService.GetUserInstallationAsync(installation1.Id);
+            var userInstallation = await gitHubUserModelService.GetInstallationAsync(installation1.Id);
 
             userInstallation.Id.Should().Be(installation1.Id);
             userInstallation.Repositories.Count.Should().Be(repositoriesResponse1.Repositories.Count);
@@ -164,7 +166,7 @@ namespace MSBLOC.Core.Tests.Services
                 gitHubAppsInstallationsClient: gitHubAppsInstallationsClient
             );
 
-            var userInstallations = await gitHubUserModelService.GetUserInstallationsAsync();
+            var userInstallations = await gitHubUserModelService.GetInstallationsAsync();
             userInstallations.Count.Should().Be(2);
 
             userInstallations[0].Id.Should().Be(installation1.Id);

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Infrastructure.Interfaces;
 using MSBLOC.Web.Interfaces;
 
@@ -41,8 +42,8 @@ namespace MSBLOC.Web.Controllers
             [FromServices] IPersistantDataContext dbContext,
             [FromServices] IGitHubUserModelService gitHubUserModelService)
         {
-            var userInstallations = await gitHubUserModelService.GetUserInstallationsAsync();
-            var repositories = userInstallations.SelectMany(installation => installation.Repositories).ToArray();
+            var installations = await gitHubUserModelService.GetInstallationsAsync();
+            var repositories = installations.SelectMany(installation => installation.Repositories).ToArray();
 
             var issuedAccessTokens = await _accessTokenService.GetTokensForUserRepositoriesAsync();
 

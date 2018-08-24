@@ -9,13 +9,16 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.GitHub;
 using MSBLOC.Infrastructure.Interfaces;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using Newtonsoft.Json.Linq;
 using Octokit;
 using AccessToken = MSBLOC.Infrastructure.Models.AccessToken;
+using Repository = MSBLOC.Core.Model.GitHub.Repository;
 
 namespace MSBLOC.Web.Services
 {
@@ -39,7 +42,7 @@ namespace MSBLOC.Web.Services
 
         public async Task<string> CreateTokenAsync(long githubRepositoryId)
         {
-            UserRepository repository = await _gitHubUserModelService.GetUserRepositoryAsync(githubRepositoryId);
+            Repository repository = await _gitHubUserModelService.GetRepositoryAsync(githubRepositoryId);
 
             if (repository == null)
             {
@@ -103,7 +106,7 @@ namespace MSBLOC.Web.Services
 
         public async Task RevokeTokenAsync(Guid tokenId)
         {
-            var userInstallations = await _gitHubUserModelService.GetUserRepositoriesAsync();
+            var userInstallations = await _gitHubUserModelService.GetRepositoriesAsync();
             var repositoryIds = userInstallations.Select(r => r.Id).ToList();
 
             await _tokenRepository.DeleteAsync(tokenId, repositoryIds);
@@ -111,7 +114,7 @@ namespace MSBLOC.Web.Services
 
         public async Task<IEnumerable<AccessToken>> GetTokensForUserRepositoriesAsync()
         {
-            var userRepositories = await _gitHubUserModelService.GetUserRepositoriesAsync();
+            var userRepositories = await _gitHubUserModelService.GetRepositoriesAsync();
             var repositoryIds = userRepositories.Select(r => r.Id).ToList();
 
             return await _tokenRepository.GetByRepositoryIdsAsync(repositoryIds);

@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using MSBLOC.Core.Interfaces;
-using MSBLOC.Core.Services;
-using MSBLOC.Web.Interfaces;
+using MSBLOC.Core.Interfaces.GitHub;
 using Octokit;
 
 namespace MSBLOC.Web.Services
 {
+    /// <inheritdoc />
     public class GitHubUserClientFactory: IGitHubUserClientFactory
     {
         private readonly IHttpContextAccessor _contextAccessor;
@@ -22,12 +19,14 @@ namespace MSBLOC.Web.Services
             _gitHubClientFactory = gitHubClientFactory;
         }
 
+        /// <inheritdoc />
         public async Task<IGitHubClient> CreateClient()
         {
             var token = await GetAccessToken();
             return _gitHubClientFactory.CreateClient(token);
         }
 
+        /// <inheritdoc />
         public async Task<IGitHubGraphQLClient> CreateGraphQLClient()
         {
             var token = await GetAccessToken();
