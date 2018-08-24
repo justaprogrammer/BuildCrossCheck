@@ -16,7 +16,7 @@ namespace MSBLOC.Core.Interfaces.GitHub
         /// <param name="repository">Name of the repository.</param>
         /// <param name="pullRequest">Number of the pull request.</param>
         /// <returns>A readonly list of commit details</returns>
-        Task<IReadOnlyList<CommitDetails>> GetCommitDetailsByPullRequestIdAsync(string owner, string repository,
+        Task<IReadOnlyList<CommitDetail>> GetCommitDetailsByPullRequestIdAsync(string owner, string repository,
             int pullRequest);
     }
 }

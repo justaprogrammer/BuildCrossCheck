@@ -1,6 +1,6 @@
 namespace MSBLOC.Core.Model.GitHub
 {
-    public class CommitDetails
+    public class CommitDetail
     {
         public string Oid { get; set; }
 
