@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Octokit;
 
-namespace MSBLOC.Core.Services
+namespace MSBLOC.Core.Services.GitHub
 {
     /// <summary>
     /// This service makes calls to the GitHub Api with any authenticated GitHub Client.

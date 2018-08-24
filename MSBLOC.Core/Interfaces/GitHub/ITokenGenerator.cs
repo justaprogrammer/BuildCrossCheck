@@ -1,4 +1,4 @@
-﻿namespace MSBLOC.Core.Interfaces
+﻿namespace MSBLOC.Core.Interfaces.GitHub
 {
     /// <summary>
     /// This service provides functionality to create a GitHub App token for authentrication.

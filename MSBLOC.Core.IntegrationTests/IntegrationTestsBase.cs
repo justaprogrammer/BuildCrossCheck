@@ -2,8 +2,9 @@
 using GitHubJwt;
 using MSBLOC.Core.IntegrationTests.Utilities;
 using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Core.Services;
-using MSBLOC.Core.Services.Factories;
+using MSBLOC.Core.Services.GitHub;
 using Octokit;
 
 namespace MSBLOC.Core.IntegrationTests

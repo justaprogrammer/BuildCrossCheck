@@ -2,16 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MSBLOC.Core.Interfaces;
-using MSBLOC.Core.Model;
-using MSBLOC.Core.Model.GitHub;
+using MSBLOC.Core.Interfaces.GitHub;
 using Nito.AsyncEx;
 using Octokit;
 using AccountType = MSBLOC.Core.Model.GitHub.AccountType;
 using Installation = MSBLOC.Core.Model.GitHub.Installation;
 using Repository = MSBLOC.Core.Model.GitHub.Repository;
 
-namespace MSBLOC.Core.Services
+namespace MSBLOC.Core.Services.GitHub
 {
     /// <inheritdoc />
     public class GitHubUserModelService : IGitHubUserModelService

@@ -1,15 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MSBLOC.Core.Interfaces;
-using MSBLOC.Core.Model;
+using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Core.Model.GitHub;
 using Nito.AsyncEx;
 using Octokit.GraphQL;
 using Octokit.GraphQL.Core;
-using static Octokit.GraphQL.Variable;
 
-namespace MSBLOC.Core.Services
+namespace MSBLOC.Core.Services.GitHub
 {
     /// <inheritdoc />
     public class GitHubGraphQLClient : IGitHubGraphQLClient
@@ -17,8 +15,8 @@ namespace MSBLOC.Core.Services
         private static readonly AsyncLazy<ICompiledQuery<IEnumerable<CommitDetails>>> CommitDetailsByPullRequestId =
             new AsyncLazy<ICompiledQuery<IEnumerable<CommitDetails>>>(() =>
                 Task.FromResult(new Query()
-                    .Repository(Var("owner"), Var("name"))
-                    .PullRequest(Var("pullRequest"))
+                    .Repository(Variable.Var("owner"), Variable.Var("name"))
+                    .PullRequest(Variable.Var("pullRequest"))
                     .Commits(null, null, null, null)
                     .AllPages()
                     .Select(commit => new CommitDetails
