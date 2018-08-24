@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MoreLinq;
 using MSBLOC.Core.Interfaces;
+using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Core.Model;
 using MSBLOC.Core.Model.Builds;
 using MSBLOC.Core.Model.GitHub;

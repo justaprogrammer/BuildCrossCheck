@@ -28,7 +28,7 @@ namespace MSBLOC.Core.Model.Builds
             }
 
             ProjectDirectory = Path.GetDirectoryName(ProjectFile)
-                               ?? throw new ProjectDetailsException("Path.GetDirectoryName(projectFile) is null");
+                               ?? throw new ProjectDetailsException($"Path.GetDirectoryName({nameof(projectFile)}) is null");
 
             _paths = new Dictionary<string, string>();
         }

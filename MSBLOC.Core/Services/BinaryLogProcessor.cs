@@ -63,7 +63,7 @@ namespace MSBLOC.Core.Services
                         buildWarning.ProjectFile,
                         buildWarning.File,
                         buildWarning.LineNumber,
-                        buildWarning.EndLineNumber,
+                        buildWarning.EndLineNumber == 0 ? buildWarning.LineNumber : buildWarning.EndLineNumber,
                         buildWarning.Message,
                         buildWarning.Code,
                         buildDetails);
@@ -76,7 +76,7 @@ namespace MSBLOC.Core.Services
                         buildError.ProjectFile,
                         buildError.File,
                         buildError.LineNumber,
-                        buildError.EndLineNumber,
+                        buildError.EndLineNumber == 0 ? buildError.LineNumber : buildError.EndLineNumber,
                         buildError.Message,
                         buildError.Code,
                         buildDetails);

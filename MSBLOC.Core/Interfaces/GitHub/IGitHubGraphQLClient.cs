@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MSBLOC.Core.Model.GitHub;
 
-namespace MSBLOC.Core.Interfaces
+namespace MSBLOC.Core.Interfaces.GitHub
 {
     /// <summary>
     /// This service makes calls to the GitHub GraphQL Api.
@@ -16,7 +16,7 @@ namespace MSBLOC.Core.Interfaces
         /// <param name="repository">Name of the repository.</param>
         /// <param name="pullRequest">Number of the pull request.</param>
         /// <returns>A readonly list of commit details</returns>
-        Task<IReadOnlyList<CommitDetails>> GetCommitDetailsByPullRequestIdAsync(string owner, string repository,
+        Task<IReadOnlyList<CommitDetail>> GetCommitDetailsByPullRequestIdAsync(string owner, string repository,
             int pullRequest);
     }
 }

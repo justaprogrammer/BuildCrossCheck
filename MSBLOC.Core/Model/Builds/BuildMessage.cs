@@ -13,7 +13,7 @@ namespace MSBLOC.Core.Model.Builds
             ProjectFile = projectFile ?? throw new ArgumentNullException(nameof(projectFile));
             File = file ?? throw new ArgumentNullException(nameof(file));
             LineNumber = lineNumber;
-            EndLineNumber = endLineNumber == 0 ? lineNumber : endLineNumber;
+            EndLineNumber = endLineNumber;
             Message = message ?? throw new ArgumentNullException(nameof(message));
             Code = code ?? throw new ArgumentNullException(nameof(code));
         }
