@@ -39,6 +39,15 @@ namespace MSBLOC.Core.IntegrationTests.Services
             await AssertSubmit(file, sha);
         }
 
+        [IntegrationTest]
+        public async Task ShouldSubmitCodeAnalysis ()
+        {
+            const string file = "testconsoleapp1-codeanalysis.binlog";
+            const string sha = "30d8adf7b233a51ecea1f0c2bb9d5d34d7fc767c";
+
+            await AssertSubmit(file, sha);
+        }
+
         private async Task AssertSubmit(string file, string sha)
         {
             var resourcePath = TestUtils.GetResourcePath(file);

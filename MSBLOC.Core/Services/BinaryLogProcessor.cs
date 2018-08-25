@@ -55,29 +55,35 @@ namespace MSBLOC.Core.Services
                     }
                 }
 
+                BuildMessage buildMessage = null;
                 if (buildEventArgs is BuildWarningEventArgs buildWarning)
                 {
-                    var buildMessage = new BuildMessage(
+                    buildMessage = CreateBuildMessage(
                         BuildMessageLevel.Warning,
                         buildWarning.ProjectFile,
                         buildWarning.File,
                         buildWarning.LineNumber,
                         buildWarning.EndLineNumber == 0 ? buildWarning.LineNumber : buildWarning.EndLineNumber,
                         buildWarning.Message,
-                        buildWarning.Code);
-                    buildMessages.Add(buildMessage);
+                        buildWarning.Code,
+                        buildDetails);
                 }
 
                 if (buildEventArgs is BuildErrorEventArgs buildError)
                 {
-                    var buildMessage = new BuildMessage(
+                    buildMessage = CreateBuildMessage(
                         BuildMessageLevel.Error,
                         buildError.ProjectFile,
                         buildError.File,
                         buildError.LineNumber,
                         buildError.EndLineNumber == 0 ? buildError.LineNumber : buildError.EndLineNumber,
                         buildError.Message,
-                        buildError.Code);
+                        buildError.Code,
+                        buildDetails);
+                }
+
+                if (buildMessage != null)
+                {
                     buildMessages.Add(buildMessage);
                 }
             }
@@ -89,6 +95,25 @@ namespace MSBLOC.Core.Services
             buildDetails.AddMessages(distinctBy);
 
             return buildDetails;
+        }
+
+        private static BuildMessage CreateBuildMessage(BuildMessageLevel buildMessageLevel, string projectFile,
+            string file, int lineNumber, int endLineNumber, string message, string code, BuildDetails buildDetails)
+        {
+            if (code.StartsWith("CA"))
+            {
+                var projectDetails = buildDetails.SolutionDetails[projectFile];
+                file = file.Substring(projectDetails.ProjectDirectory.Length + 1);
+            }
+
+            return new BuildMessage(
+                buildMessageLevel,
+                projectFile,
+                file,
+                lineNumber,
+                endLineNumber,
+                message,
+                code);
         }
     }
 }

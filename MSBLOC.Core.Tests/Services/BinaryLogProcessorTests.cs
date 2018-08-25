@@ -54,6 +54,8 @@ namespace MSBLOC.Core.Tests.Services
                 options => options.IncludingNestedObjects().IncludingProperties());
 
             parsedBinaryLog.SolutionDetails.Keys.ToArray().Should().BeEquivalentTo(cloneRoot + @"TestConsoleApp1\TestConsoleApp1.csproj");
+
+            parsedBinaryLog.BuildMessages.Any(message => Path.IsPathRooted(message.File)).Should().BeFalse();
         }
 
         [Fact]
@@ -80,6 +82,25 @@ namespace MSBLOC.Core.Tests.Services
 
             parsedBinaryLog.SolutionDetails.Keys.ToArray().Should().BeEquivalentTo(
                 cloneRoot + @"TestConsoleApp1\TestConsoleApp1.csproj");
+
+            parsedBinaryLog.BuildMessages.Any(message => Path.IsPathRooted(message.File)).Should().BeFalse();
+        }
+
+        [Fact]
+        public void ShouldTestConsoleApp1CodeAnalysis()
+        {
+            var cloneRoot = @"C:\projects\testconsoleapp1\";
+
+            var solutionDetails = new SolutionDetails(cloneRoot);
+
+            var projectFile = @"C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj";
+            var project = new ProjectDetails(cloneRoot, projectFile);
+            project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
+            solutionDetails.Add(project);
+
+            var parsedBinaryLog = ParseLogs("testconsoleapp1-codeanalysis.binlog", cloneRoot);
+
+            parsedBinaryLog.BuildMessages.Any(message => Path.IsPathRooted(message.File)).Should().BeFalse();
         }
 
         [Fact]
