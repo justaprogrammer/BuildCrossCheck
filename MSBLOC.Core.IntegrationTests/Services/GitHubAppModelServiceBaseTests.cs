@@ -12,11 +12,19 @@ namespace MSBLOC.Core.IntegrationTests.Services
     public class GitHubAppModelServiceBaseTests : IntegrationTestsBase
     {
         [IntegrationTest]
-        public async Task ShouldGetPullRequestChangedPaths()
+        public async Task ShouldGetResitoryFile()
         {
             var testAppModelService = CreateTarget();
-            var paths = await testAppModelService.GetPullRequestChangedPaths("octokit", "octokit.graphql.net", 142);
-            paths.Length.Should().Be(57);
+            var appveyor = await testAppModelService.GetRepositoryFileAsync("justaprogrammer", "MSBuildLogOctokitChecker", "appveyor.yml", "master");
+            appveyor.Should().NotBeNull();
+        }
+
+        [IntegrationTest]
+        public async Task ShouldNotGetFileThatDoesNotExist()
+        {
+            var testAppModelService = CreateTarget();
+            var appveyor = await testAppModelService.GetRepositoryFileAsync("justaprogrammer", "MSBuildLogOctokitChecker", "appveyor2.yml", "master");
+            appveyor.Should().BeNull();
         }
 
         private TestAppModelService CreateTarget()
@@ -35,9 +43,9 @@ namespace MSBLOC.Core.IntegrationTests.Services
                 _gitHubClient = gitHubClient;
             }
 
-            public async Task<string[]> GetPullRequestChangedPaths(string owner, string name, int pullRequest)
+            public Task<string> GetRepositoryFileAsync(string owner, string repository, string filepath, string reference)
             {
-                return await GetPullRequestChangedPaths(_gitHubClient, owner, name, pullRequest);
+                return GetRepositoryFileAsync(_gitHubClient, owner, repository, filepath, reference);
             }
         }
     }

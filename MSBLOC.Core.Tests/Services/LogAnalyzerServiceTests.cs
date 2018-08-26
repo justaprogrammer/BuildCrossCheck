@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
 using FluentAssertions;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Interfaces.GitHub;
@@ -56,8 +55,8 @@ namespace MSBLOC.Core.Tests.Services
             while (true) yield return Path.Combine(Faker.Lorem.Word(), Faker.System.FileName("cs"));
         }
 
-        private async Task<IGitHubAppModelService> SubmitBuild(BuildDetails buildDetails, string repoOwner,
-            string repoName, string headSha)
+        private async Task<IGitHubAppModelService> SubmitBuild(BuildDetails buildDetails, string owner,
+            string repository, string sha, LogAnalyzerConfiguration analyzerConfiguration = null)
         {
             var binaryLogProcessor = Substitute.For<IBinaryLogProcessor>();
             binaryLogProcessor.ProcessLog(null, null).ReturnsForAnyArgs(buildDetails);
@@ -66,6 +65,9 @@ namespace MSBLOC.Core.Tests.Services
             var url = Faker.Internet.Url();
 
             var gitHubAppModelService = Substitute.For<IGitHubAppModelService>();
+
+            gitHubAppModelService.GetLogAnalyzerConfigurationAsync(null, null, null).ReturnsForAnyArgs(analyzerConfiguration);
+
             gitHubAppModelService.CreateCheckRunAsync(null, null, null, null, null, null, false, null, null, null)
                 .ReturnsForAnyArgs(new CheckRun
                 {
@@ -79,7 +81,7 @@ namespace MSBLOC.Core.Tests.Services
             var expectedBinLogPath = Faker.System.FilePath();
 
             var checkRun = await msblocService
-                .SubmitAsync(repoOwner, repoName, headSha, expectedCloneRoot, expectedBinLogPath).ConfigureAwait(false);
+                .SubmitAsync(owner, repository, sha, expectedCloneRoot, expectedBinLogPath).ConfigureAwait(false);
             checkRun.Id.Should().Be(id);
             checkRun.Url.Should().Be(url);
 
@@ -94,26 +96,33 @@ namespace MSBLOC.Core.Tests.Services
             var cloneRoot = @"c:" + Faker.System.DirectoryPath().Replace("/", @"\");
             var buildDetails = new BuildDetails(new SolutionDetails(cloneRoot));
 
-            var repoOwner = Faker.Lorem.Word();
-            var repoName = Faker.Lorem.Word();
-            var headSha = Faker.Random.String();
+            var owner = Faker.Lorem.Word();
+            var repository = Faker.Lorem.Word();
+            var sha = Faker.Random.String();
 
-            var gitHubAppModelService = await SubmitBuild(buildDetails, repoOwner, repoName, headSha);
+            var gitHubAppModelService = await SubmitBuild(buildDetails, owner, repository, sha);
 
-            await gitHubAppModelService.Received(1).CreateCheckRunAsync(
-                Arg.Is(repoOwner),
-                Arg.Is(repoName),
-                Arg.Is(headSha),
-                Arg.Is("MSBuildLog Analyzer"),
-                Arg.Is("MSBuildLog Analysis"),
-                Arg.Is(""),
-                Arg.Is(true),
-                Arg.Any<Annotation[]>(),
-                Arg.Any<DateTimeOffset>(),
-                Arg.Any<DateTimeOffset>());
+            Received.InOrder(async () =>
+            {
+                await gitHubAppModelService.Received(1).GetLogAnalyzerConfigurationAsync(Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha));
 
-            var arguments = gitHubAppModelService.ReceivedCalls().First().GetArguments().ToArray();
-            var annotations = (Annotation[]) arguments[7];
+                await gitHubAppModelService.Received(1).CreateCheckRunAsync(
+                    Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha),
+                    Arg.Is("MSBuildLog Analyzer"),
+                    Arg.Is("MSBuildLog Analysis"),
+                    Arg.Is(""),
+                    Arg.Is(true),
+                    Arg.Any<Annotation[]>(),
+                    Arg.Any<DateTimeOffset>(),
+                    Arg.Any<DateTimeOffset>());
+            });
+
+            var arguments = gitHubAppModelService.ReceivedCalls().Skip(1).First().GetArguments().ToArray();
+            var annotations = (Annotation[])arguments[7];
             annotations.Should().BeEquivalentTo(null);
         }
 
@@ -128,7 +137,7 @@ namespace MSBLOC.Core.Tests.Services
             var projectCodeFile = Path.Combine(Faker.Lorem.Word(), Faker.System.FileName("cs"));
             projectDetails.AddItems(projectCodeFile);
 
-            var solutionDetails = new SolutionDetails(cloneRoot) {projectDetails};
+            var solutionDetails = new SolutionDetails(cloneRoot) { projectDetails };
 
             var buildDetails = new BuildDetails(solutionDetails);
             var lineNumber = Faker.Random.Int(2);
@@ -139,26 +148,33 @@ namespace MSBLOC.Core.Tests.Services
                 lineNumber, endLineNumber, message, messageCode));
 
             var filename = Path.Combine(projectPath, projectCodeFile).Substring(cloneRoot.Length).Replace(@"\", "/").TrimStart('/');
-            var repoOwner = Faker.Lorem.Word();
-            var repoName = Faker.Lorem.Word();
-            var headSha = Faker.Random.String();
+            var owner = Faker.Lorem.Word();
+            var repository = Faker.Lorem.Word();
+            var sha = Faker.Random.String();
 
-            var gitHubAppModelService = await SubmitBuild(buildDetails, repoOwner, repoName, headSha);
+            var gitHubAppModelService = await SubmitBuild(buildDetails, owner, repository, sha);
 
-            await gitHubAppModelService.Received(1).CreateCheckRunAsync(
-                Arg.Is(repoOwner),
-                Arg.Is(repoName),
-                Arg.Is(headSha),
-                Arg.Is("MSBuildLog Analyzer"),
-                Arg.Is("MSBuildLog Analysis"),
-                Arg.Is(""),
-                Arg.Is(true),
-                Arg.Any<Annotation[]>(),
-                Arg.Any<DateTimeOffset>(),
-                Arg.Any<DateTimeOffset>());
+            Received.InOrder(async () =>
+            {
+                await gitHubAppModelService.Received(1).GetLogAnalyzerConfigurationAsync(Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha));
 
-            var arguments = gitHubAppModelService.ReceivedCalls().First().GetArguments().ToArray();
-            var annotations = (Annotation[]) arguments[7];
+                await gitHubAppModelService.Received(1).CreateCheckRunAsync(
+                    Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha),
+                    Arg.Is("MSBuildLog Analyzer"),
+                    Arg.Is("MSBuildLog Analysis"),
+                    Arg.Is(""),
+                    Arg.Is(true),
+                    Arg.Any<Annotation[]>(),
+                    Arg.Any<DateTimeOffset>(),
+                    Arg.Any<DateTimeOffset>());
+            });
+
+            var arguments = gitHubAppModelService.ReceivedCalls().Skip(1).First().GetArguments().ToArray();
+            var annotations = (Annotation[])arguments[7];
             annotations.Should().BeEquivalentTo(new Annotation(
                 filename,
                 CheckWarningLevel.Warning,
@@ -166,7 +182,142 @@ namespace MSBLOC.Core.Tests.Services
                 messageCode + ": " + message,
                 lineNumber,
                 endLineNumber,
-                $"https://github.com/{repoOwner}/{repoName}/blob/{headSha}/{filename}"));
+                $"https://github.com/{owner}/{repository}/blob/{sha}/{filename}"));
+        }
+
+        [Fact]
+        public async Task SubmitBuildDetailsWithWarningAsError()
+        {
+            var cloneRoot = @"c:" + Faker.System.DirectoryPath().Replace("/", @"\");
+            var projectPath = Path.Combine(cloneRoot, Faker.Lorem.Word());
+            var projectFile = Path.Combine(projectPath, Faker.System.FileName("csproj"));
+
+            var projectDetails = new ProjectDetails(cloneRoot, projectFile);
+            var projectCodeFile = Path.Combine(Faker.Lorem.Word(), Faker.System.FileName("cs"));
+            projectDetails.AddItems(projectCodeFile);
+
+            var solutionDetails = new SolutionDetails(cloneRoot) { projectDetails };
+
+            var buildDetails = new BuildDetails(solutionDetails);
+            var lineNumber = Faker.Random.Int(2);
+            var endLineNumber = lineNumber + 1;
+            var message = Faker.Lorem.Sentence();
+            var messageCode = Faker.Lorem.Word();
+            buildDetails.AddMessage(new BuildMessage(BuildMessageLevel.Warning, projectFile, projectCodeFile,
+                lineNumber, endLineNumber, message, messageCode));
+
+            var filename = Path.Combine(projectPath, projectCodeFile).Substring(cloneRoot.Length).Replace(@"\", "/").TrimStart('/');
+            var owner = Faker.Lorem.Word();
+            var repository = Faker.Lorem.Word();
+            var sha = Faker.Random.String();
+
+            var logAnalyzerConfiguration = new LogAnalyzerConfiguration
+            {
+                Rules = new List<LogAnalyzerRule>
+                {
+                    new LogAnalyzerRule
+                    {
+                        Code = messageCode,
+                        ReportAs = ReportAs.Error
+                    }
+                }
+            };
+
+            var gitHubAppModelService = await SubmitBuild(buildDetails, owner, repository, sha, logAnalyzerConfiguration);
+
+            Received.InOrder(async () =>
+            {
+                await gitHubAppModelService.Received(1).GetLogAnalyzerConfigurationAsync(Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha));
+
+                await gitHubAppModelService.Received(1).CreateCheckRunAsync(
+                    Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha),
+                    Arg.Is("MSBuildLog Analyzer"),
+                    Arg.Is("MSBuildLog Analysis"),
+                    Arg.Is(""),
+                    Arg.Is(false),
+                    Arg.Any<Annotation[]>(),
+                    Arg.Any<DateTimeOffset>(),
+                    Arg.Any<DateTimeOffset>());
+            });
+
+            var arguments = gitHubAppModelService.ReceivedCalls().Skip(1).First().GetArguments().ToArray();
+            var annotations = (Annotation[])arguments[7];
+            annotations.Should().BeEquivalentTo(new Annotation(
+                filename,
+                CheckWarningLevel.Failure,
+                messageCode,
+                messageCode + ": " + message,
+                lineNumber,
+                endLineNumber,
+                $"https://github.com/{owner}/{repository}/blob/{sha}/{filename}"));
+        }
+
+        [Fact]
+        public async Task SubmitBuildDetailsWithWarningIgnored()
+        {
+            var cloneRoot = @"c:" + Faker.System.DirectoryPath().Replace("/", @"\");
+            var projectPath = Path.Combine(cloneRoot, Faker.Lorem.Word());
+            var projectFile = Path.Combine(projectPath, Faker.System.FileName("csproj"));
+
+            var projectDetails = new ProjectDetails(cloneRoot, projectFile);
+            var projectCodeFile = Path.Combine(Faker.Lorem.Word(), Faker.System.FileName("cs"));
+            projectDetails.AddItems(projectCodeFile);
+
+            var solutionDetails = new SolutionDetails(cloneRoot) { projectDetails };
+
+            var buildDetails = new BuildDetails(solutionDetails);
+            var lineNumber = Faker.Random.Int(2);
+            var endLineNumber = lineNumber + 1;
+            var message = Faker.Lorem.Sentence();
+            var messageCode = Faker.Lorem.Word();
+            buildDetails.AddMessage(new BuildMessage(BuildMessageLevel.Warning, projectFile, projectCodeFile,
+                lineNumber, endLineNumber, message, messageCode));
+
+            var filename = Path.Combine(projectPath, projectCodeFile).Substring(cloneRoot.Length).Replace(@"\", "/").TrimStart('/');
+            var owner = Faker.Lorem.Word();
+            var repository = Faker.Lorem.Word();
+            var sha = Faker.Random.String();
+
+            var logAnalyzerConfiguration = new LogAnalyzerConfiguration
+            {
+                Rules = new List<LogAnalyzerRule>
+                {
+                    new LogAnalyzerRule
+                    {
+                        Code = messageCode,
+                        ReportAs = ReportAs.Ignore
+                    }
+                }
+            };
+
+            var gitHubAppModelService = await SubmitBuild(buildDetails, owner, repository, sha, logAnalyzerConfiguration);
+
+            Received.InOrder(async () =>
+            {
+                await gitHubAppModelService.Received(1).GetLogAnalyzerConfigurationAsync(Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha));
+
+                await gitHubAppModelService.Received(1).CreateCheckRunAsync(
+                    Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha),
+                    Arg.Is("MSBuildLog Analyzer"),
+                    Arg.Is("MSBuildLog Analysis"),
+                    Arg.Is(""),
+                    Arg.Is(true),
+                    Arg.Any<Annotation[]>(),
+                    Arg.Any<DateTimeOffset>(),
+                    Arg.Any<DateTimeOffset>());
+            });
+
+            var arguments = gitHubAppModelService.ReceivedCalls().Skip(1).First().GetArguments().ToArray();
+            var annotations = (Annotation[])arguments[7];
+            annotations.Should().BeNull();
         }
 
         [Fact]
@@ -180,7 +331,7 @@ namespace MSBLOC.Core.Tests.Services
             var projectCodeFile = Path.Combine(Faker.Lorem.Word(), Faker.System.FileName("cs"));
             projectDetails.AddItems(projectCodeFile);
 
-            var solutionDetails = new SolutionDetails(cloneRoot) {projectDetails};
+            var solutionDetails = new SolutionDetails(cloneRoot) { projectDetails };
 
             var buildDetails = new BuildDetails(solutionDetails);
             var lineNumber = Faker.Random.Int(2);
@@ -191,26 +342,33 @@ namespace MSBLOC.Core.Tests.Services
                 lineNumber, endLineNumber, message, messageCode));
 
             var filename = Path.Combine(projectPath, projectCodeFile).Substring(cloneRoot.Length).Replace(@"\", "/").TrimStart('/');
-            var repoOwner = Faker.Lorem.Word();
-            var repoName = Faker.Lorem.Word();
-            var headSha = Faker.Random.String();
+            var owner = Faker.Lorem.Word();
+            var repository = Faker.Lorem.Word();
+            var sha = Faker.Random.String();
 
-            var gitHubAppModelService = await SubmitBuild(buildDetails, repoOwner, repoName, headSha);
+            var gitHubAppModelService = await SubmitBuild(buildDetails, owner, repository, sha);
 
-            await gitHubAppModelService.Received(1).CreateCheckRunAsync(
-                Arg.Is(repoOwner),
-                Arg.Is(repoName),
-                Arg.Is(headSha),
-                Arg.Is("MSBuildLog Analyzer"),
-                Arg.Is("MSBuildLog Analysis"),
-                Arg.Is(""),
-                Arg.Is(true),
-                Arg.Any<Annotation[]>(),
-                Arg.Any<DateTimeOffset>(),
-                Arg.Any<DateTimeOffset>());
+            Received.InOrder(async () =>
+            {
+                await gitHubAppModelService.Received(1).GetLogAnalyzerConfigurationAsync(Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha));
 
-            var arguments = gitHubAppModelService.ReceivedCalls().First().GetArguments().ToArray();
-            var annotations = (Annotation[]) arguments[7];
+                await gitHubAppModelService.Received(1).CreateCheckRunAsync(
+                    Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha),
+                    Arg.Is("MSBuildLog Analyzer"),
+                    Arg.Is("MSBuildLog Analysis"),
+                    Arg.Is(""),
+                    Arg.Is(true),
+                    Arg.Any<Annotation[]>(),
+                    Arg.Any<DateTimeOffset>(),
+                    Arg.Any<DateTimeOffset>());
+            });
+
+            var arguments = gitHubAppModelService.ReceivedCalls().Skip(1).First().GetArguments().ToArray();
+            var annotations = (Annotation[])arguments[7];
             annotations.Should().BeEquivalentTo(new Annotation(
                 filename,
                 CheckWarningLevel.Warning,
@@ -218,7 +376,7 @@ namespace MSBLOC.Core.Tests.Services
                 messageCode + ": " + message,
                 lineNumber,
                 endLineNumber,
-                $"https://github.com/{repoOwner}/{repoName}/blob/{headSha}/{filename}"));
+                $"https://github.com/{owner}/{repository}/blob/{sha}/{filename}"));
         }
 
         [Fact]
@@ -232,7 +390,7 @@ namespace MSBLOC.Core.Tests.Services
             var projectCodeFile = Path.Combine(Faker.Lorem.Word(), Faker.System.FileName("cs"));
             projectDetails.AddItems(projectCodeFile);
 
-            var solutionDetails = new SolutionDetails(cloneRoot) {projectDetails};
+            var solutionDetails = new SolutionDetails(cloneRoot) { projectDetails };
 
             var buildDetails = new BuildDetails(solutionDetails);
             var lineNumber = Faker.Random.Int(2);
@@ -243,26 +401,33 @@ namespace MSBLOC.Core.Tests.Services
                 lineNumber, endLineNumber, message, messageCode));
 
             var filename = Path.Combine(projectPath, projectCodeFile).Substring(cloneRoot.Length).Replace(@"\", "/").TrimStart('/');
-            var repoOwner = Faker.Lorem.Word();
-            var repoName = Faker.Lorem.Word();
-            var headSha = Faker.Random.String();
+            var owner = Faker.Lorem.Word();
+            var repository = Faker.Lorem.Word();
+            var sha = Faker.Random.String();
 
-            var gitHubAppModelService = await SubmitBuild(buildDetails, repoOwner, repoName, headSha);
+            var gitHubAppModelService = await SubmitBuild(buildDetails, owner, repository, sha);
 
-            await gitHubAppModelService.Received(1).CreateCheckRunAsync(
-                Arg.Is(repoOwner),
-                Arg.Is(repoName),
-                Arg.Is(headSha),
-                Arg.Is("MSBuildLog Analyzer"),
-                Arg.Is("MSBuildLog Analysis"),
-                Arg.Is(""),
-                Arg.Is(false),
-                Arg.Any<Annotation[]>(),
-                Arg.Any<DateTimeOffset>(),
-                Arg.Any<DateTimeOffset>());
+            Received.InOrder(async () =>
+            {
+                await gitHubAppModelService.Received(1).GetLogAnalyzerConfigurationAsync(Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha));
 
-            var arguments = gitHubAppModelService.ReceivedCalls().First().GetArguments().ToArray();
-            var annotations = (Annotation[]) arguments[7];
+                await gitHubAppModelService.Received(1).CreateCheckRunAsync(
+                    Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha),
+                    Arg.Is("MSBuildLog Analyzer"),
+                    Arg.Is("MSBuildLog Analysis"),
+                    Arg.Is(""),
+                    Arg.Is(false),
+                    Arg.Any<Annotation[]>(),
+                    Arg.Any<DateTimeOffset>(),
+                    Arg.Any<DateTimeOffset>());
+            });
+
+            var arguments = gitHubAppModelService.ReceivedCalls().Skip(1).First().GetArguments().ToArray();
+            var annotations = (Annotation[])arguments[7];
             annotations.Should().BeEquivalentTo(new Annotation(
                 filename,
                 CheckWarningLevel.Failure,
@@ -270,7 +435,7 @@ namespace MSBLOC.Core.Tests.Services
                 messageCode + ": " + message,
                 lineNumber,
                 endLineNumber,
-                $"https://github.com/{repoOwner}/{repoName}/blob/{headSha}/{filename}"));
+                $"https://github.com/{owner}/{repository}/blob/{sha}/{filename}"));
         }
 
         [Fact]
@@ -282,7 +447,7 @@ namespace MSBLOC.Core.Tests.Services
 
             var projectDetails = new ProjectDetails(cloneRoot, projectFile);
 
-            var solutionDetails = new SolutionDetails(cloneRoot) {projectDetails};
+            var solutionDetails = new SolutionDetails(cloneRoot) { projectDetails };
             var buildDetails = new BuildDetails(solutionDetails);
 
             var projectCodeFiles = GenerateFileNames().Distinct().Take(Faker.Random.Int(50, 200)).ToArray();
@@ -296,36 +461,43 @@ namespace MSBLOC.Core.Tests.Services
             buildDetails.BuildMessages.Count.Should().BeGreaterThan(0);
             buildDetails.BuildMessages.Count.Should().BeLessOrEqualTo(50);
 
-            var repoOwner = Faker.Lorem.Word();
-            var repoName = Faker.Lorem.Word();
-            var headSha = Faker.Random.String();
+            var owner = Faker.Lorem.Word();
+            var repository = Faker.Lorem.Word();
+            var sha = Faker.Random.String();
 
-            var gitHubAppModelService = await SubmitBuild(buildDetails, repoOwner, repoName, headSha);
+            var gitHubAppModelService = await SubmitBuild(buildDetails, owner, repository, sha);
 
-            await gitHubAppModelService.Received(1)
-                .CreateCheckRunAsync(
-                    Arg.Is(repoOwner),
-                    Arg.Is(repoName),
-                    Arg.Is(headSha),
-                    Arg.Is("MSBuildLog Analyzer"),
-                    Arg.Is("MSBuildLog Analysis"),
-                    Arg.Is(""),
-                    Arg.Is(true),
-                    Arg.Is<Annotation[]>(annotations => annotations.Length == buildDetails.BuildMessages.Count),
-                    Arg.Any<DateTimeOffset>(),
-                    Arg.Any<DateTimeOffset>());
+            Received.InOrder(async () =>
+            {
+                await gitHubAppModelService.Received(1).GetLogAnalyzerConfigurationAsync(Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha));
+
+                await gitHubAppModelService.Received(1)
+                    .CreateCheckRunAsync(
+                        Arg.Is(owner),
+                        Arg.Is(repository),
+                        Arg.Is(sha),
+                        Arg.Is("MSBuildLog Analyzer"),
+                        Arg.Is("MSBuildLog Analysis"),
+                        Arg.Is(""),
+                        Arg.Is(true),
+                        Arg.Is<Annotation[]>(annotations => annotations.Length == buildDetails.BuildMessages.Count),
+                        Arg.Any<DateTimeOffset>(),
+                        Arg.Any<DateTimeOffset>());
+            });
 
             await gitHubAppModelService.DidNotReceive()
-                .UpdateCheckRunAsync(
-                    Arg.Any<long>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>(),
-                    Arg.Any<Annotation[]>(),
-                    Arg.Any<DateTimeOffset?>(),
-                    Arg.Any<DateTimeOffset?>());
+                    .UpdateCheckRunAsync(
+                        Arg.Any<long>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<Annotation[]>(),
+                        Arg.Any<DateTimeOffset?>(),
+                        Arg.Any<DateTimeOffset?>());
         }
 
         [Fact]
@@ -337,7 +509,7 @@ namespace MSBLOC.Core.Tests.Services
 
             var projectDetails = new ProjectDetails(cloneRoot, projectFile);
 
-            var solutionDetails = new SolutionDetails(cloneRoot) {projectDetails};
+            var solutionDetails = new SolutionDetails(cloneRoot) { projectDetails };
             var buildDetails = new BuildDetails(solutionDetails);
 
             var projectCodeFiles = GenerateFileNames().Distinct().Take(Faker.Random.Int(100, 200)).ToArray();
@@ -351,18 +523,22 @@ namespace MSBLOC.Core.Tests.Services
             buildDetails.BuildMessages.Count.Should().BeGreaterThan(50);
             buildDetails.BuildMessages.Count.Should().BeLessOrEqualTo(100);
 
-            var repoOwner = Faker.Lorem.Word();
-            var repoName = Faker.Lorem.Word();
-            var headSha = Faker.Random.String();
+            var owner = Faker.Lorem.Word();
+            var repository = Faker.Lorem.Word();
+            var sha = Faker.Random.String();
 
-            var gitHubAppModelService = await SubmitBuild(buildDetails, repoOwner, repoName, headSha);
+            var gitHubAppModelService = await SubmitBuild(buildDetails, owner, repository, sha);
 
             Received.InOrder(async () =>
             {
+                await gitHubAppModelService.Received(1).GetLogAnalyzerConfigurationAsync(Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha));
+
                 await gitHubAppModelService.Received(1).CreateCheckRunAsync(
-                    Arg.Is(repoOwner),
-                    Arg.Is(repoName),
-                    Arg.Is(headSha),
+                    Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha),
                     Arg.Is("MSBuildLog Analyzer"),
                     Arg.Is("MSBuildLog Analysis"),
                     Arg.Is(""),
@@ -394,7 +570,7 @@ namespace MSBLOC.Core.Tests.Services
 
             var projectDetails = new ProjectDetails(cloneRoot, projectFile);
 
-            var solutionDetails = new SolutionDetails(cloneRoot) {projectDetails};
+            var solutionDetails = new SolutionDetails(cloneRoot) { projectDetails };
             var buildDetails = new BuildDetails(solutionDetails);
 
             var projectCodeFiles = GenerateFileNames().Distinct().Take(Faker.Random.Int(200, 300)).ToArray();
@@ -410,18 +586,22 @@ namespace MSBLOC.Core.Tests.Services
 
             _logger.LogInformation("Build Message Count: {0}", buildDetails.BuildMessages.Count);
 
-            var repoOwner = Faker.Lorem.Word();
-            var repoName = Faker.Lorem.Word();
-            var headSha = Faker.Random.String();
+            var owner = Faker.Lorem.Word();
+            var repository = Faker.Lorem.Word();
+            var sha = Faker.Random.String();
 
-            var gitHubAppModelService = await SubmitBuild(buildDetails, repoOwner, repoName, headSha);
+            var gitHubAppModelService = await SubmitBuild(buildDetails, owner, repository, sha);
 
             Received.InOrder(async () =>
             {
+                await gitHubAppModelService.Received(1).GetLogAnalyzerConfigurationAsync(Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha));
+
                 await gitHubAppModelService.Received(1).CreateCheckRunAsync(
-                    Arg.Is(repoOwner),
-                    Arg.Is(repoName),
-                    Arg.Is(headSha),
+                    Arg.Is(owner),
+                    Arg.Is(repository),
+                    Arg.Is(sha),
                     Arg.Is("MSBuildLog Analyzer"),
                     Arg.Is("MSBuildLog Analysis"),
                     Arg.Is(""),

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using Bogus;
 using FluentAssertions;
@@ -49,6 +50,8 @@ namespace MSBLOC.Core.Tests.Services
             IGitHubAppClientFactory gitHubAppClientFactory = null,
             IGitHubClient gitHubClient = null,
             IChecksClient checkClient = null,
+            IRepositoryContentsClient repositoryContentsClient = null,
+            IRepositoriesClient repositoriesClient = null,
             ICheckRunsClient checkRunsClient = null,
             ITokenGenerator tokenGenerator = null)
         {
@@ -60,10 +63,19 @@ namespace MSBLOC.Core.Tests.Services
                 checkClient.Run.Returns(checkRunsClient);
             }
 
+            if (repositoryContentsClient == null) repositoryContentsClient = Substitute.For<IRepositoryContentsClient>();
+
+            if (repositoriesClient == null)
+            {
+                repositoriesClient = Substitute.For<IRepositoriesClient>();
+                repositoriesClient.Content.Returns(repositoryContentsClient);
+            }
+
             if (gitHubClient == null)
             {
                 gitHubClient = Substitute.For<IGitHubClient>();
                 gitHubClient.Check.Returns(checkClient);
+                gitHubClient.Repository.Returns(repositoriesClient);
             }
 
             if (gitHubAppClientFactory == null)
@@ -298,6 +310,70 @@ namespace MSBLOC.Core.Tests.Services
                 Faker.Date.RecentOffset(1));
 
             await checkRunsClient.Received(1).Update(owner, name, checkRunId, Arg.Any<CheckRunUpdate>());
+        }
+
+        [Fact]
+        public async Task ShouldGetFileContents()
+        {
+            var owner = Faker.Internet.UserName();
+            var name = Faker.Lorem.Word();
+            var path = Faker.System.FilePath();
+            var reference = Faker.Random.String();
+            var expectedContent = Faker.Lorem.Paragraph();
+            var encodedExpectedContent = Convert.ToBase64String(Encoding.UTF8.GetBytes(expectedContent));
+
+            var repositoryContentsClient = Substitute.For<IRepositoryContentsClient>();
+            repositoryContentsClient.GetAllContentsByRef(owner, name, path, reference)
+                .Returns(new[]
+                {
+                    new RepositoryContent(null, null, null, 0, ContentType.File, null, null, null, null, null, encodedExpectedContent, null, null)
+                });
+
+            var gitHubAppModelService = CreateTarget(repositoryContentsClient: repositoryContentsClient);
+            var content = await gitHubAppModelService.GetRepositoryFileAsync(owner, name, path, reference);
+            content.Should().Be(expectedContent);
+        }
+
+        [Fact]
+        public async Task ShouldGetLogAnalyzerConfiguration()
+        {
+            var owner = Faker.Internet.UserName();
+            var name = Faker.Lorem.Word();
+
+            var path = "msbloc.json";
+
+            var reference = Faker.Random.String();
+
+            var expectedContent = @"{rules:[{code:""Code1"", reportAs: ""warning""}, {code:""Code2"", reportAs: ""error""}]}";
+
+            var encodedExpectedContent = Convert.ToBase64String(Encoding.UTF8.GetBytes(expectedContent));
+
+            var repositoryContentsClient = Substitute.For<IRepositoryContentsClient>();
+            repositoryContentsClient.GetAllContentsByRef(owner, name, path, reference)
+                .Returns(new[]
+                {
+                    new RepositoryContent(null, null, null, 0, ContentType.File, null, null, null, null, null, encodedExpectedContent, null, null)
+                });
+
+            var gitHubAppModelService = CreateTarget(repositoryContentsClient: repositoryContentsClient);
+            var analyzerConfiguration = await gitHubAppModelService.GetLogAnalyzerConfigurationAsync(owner, name, reference);
+            analyzerConfiguration.Should().NotBeNull();
+            analyzerConfiguration.Rules.Should().BeEquivalentTo(
+                new LogAnalyzerRule { Code = "Code1", ReportAs = ReportAs.Warning },
+                new LogAnalyzerRule { Code = "Code2", ReportAs = ReportAs.Error }
+                );
+        }
+
+        [Fact]
+        public async Task ShouldNotGetLogAnalyzerConfigurationIfDoesntExist()
+        {
+            var owner = Faker.Internet.UserName();
+            var name = Faker.Lorem.Word();
+            var reference = Faker.Random.String();
+
+            var gitHubAppModelService = CreateTarget();
+            var content = await gitHubAppModelService.GetLogAnalyzerConfigurationAsync(owner, name, reference);
+            content.Should().BeNull();
         }
     }
 }

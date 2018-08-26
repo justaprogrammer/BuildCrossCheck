@@ -10,11 +10,18 @@ namespace MSBLOC.Core.Services.GitHub
     /// </summary>
     public abstract class GitHubAppModelServiceBase
     {
-        [Obsolete("This is more of an example than anything else")]
-        protected async Task<string[]> GetPullRequestChangedPaths(IGitHubClient gitHubClient, string owner, string name, int number)
+        protected async Task<string> GetRepositoryFileAsync(IGitHubClient gitHubClient, string owner, string repository,
+            string path, string reference)
         {
-            var pullRequestFiles = await gitHubClient.PullRequest.Files(owner, name, number);
-            return pullRequestFiles.Select(pullRequestFile => pullRequestFile.FileName).ToArray();
+            try
+            {
+                var repositoryContents = await gitHubClient.Repository.Content.GetAllContentsByRef(owner, repository, path, reference);
+                return repositoryContents.FirstOrDefault()?.Content;
+            }
+            catch (System.Exception ex)
+            {
+                return null;
+            }
         }
     }
 }

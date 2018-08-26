@@ -10,9 +10,6 @@ namespace MSBLOC.Core.Interfaces.GitHub
     /// </summary>
     public interface IGitHubAppModelService
     {
-        [Obsolete("This is more of an example than anything else")]
-        Task<string[]> GetPullRequestChangedPathsAsync(string repoOwner, string repoName, int number);
-
         /// <summary>
         /// Creates a CheckRun in the GitHub Api.
         /// </summary>
@@ -48,5 +45,9 @@ namespace MSBLOC.Core.Interfaces.GitHub
         Task UpdateCheckRunAsync(long checkRunId, string owner, string repository,
             string sha, string checkRunTitle, string checkRunSummary, Annotation[] annotations,
             DateTimeOffset? startedAt, DateTimeOffset? completedAt);
+
+        Task<string> GetRepositoryFileAsync(string owner, string repository, string path, string reference);
+
+        Task<LogAnalyzerConfiguration> GetLogAnalyzerConfigurationAsync(string owner, string repository, string reference);
     }
 }

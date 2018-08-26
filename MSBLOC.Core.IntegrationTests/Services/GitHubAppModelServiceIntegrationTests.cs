@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using FluentAssertions;
 using MSBLOC.Core.IntegrationTests.Utilities;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Interfaces.GitHub;
@@ -10,10 +11,19 @@ namespace MSBLOC.Core.IntegrationTests.Services
     public class GitHubAppModelServiceIntegrationTests : IntegrationTestsBase
     {
         [IntegrationTest]
-        public async Task ShouldConstruct()
+        public async Task ShouldGetRepositoryFile()
         {
             var gitHubAppModelService = CreateGitHubAppModelService();
-            await gitHubAppModelService.GetPullRequestChangedPathsAsync("justaprogrammer", "TestConsoleApp1", 1);
+            var content = await gitHubAppModelService.GetRepositoryFileAsync("justaprogrammer", "TestConsoleApp1", "appveyor.yml", "appveyor");
+            content.Should().NotBeNull();
+        }
+
+        [IntegrationTest]
+        public async Task ShouldNotGetRepositoryFileThatDoesNotExist()
+        {
+            var gitHubAppModelService = CreateGitHubAppModelService();
+            var content = await gitHubAppModelService.GetRepositoryFileAsync("justaprogrammer", "TestConsoleApp1", "appveyor2.yml", "appveyor");
+            content.Should().BeNull();
         }
 
         private IGitHubAppModelService CreateGitHubAppModelService()
