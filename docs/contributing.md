@@ -1,8 +1,9 @@
 # Contributing
 
-## Running Web Application
-
+## Initial Setup
 1. Create a GitHub app
+
+## Running Web Application
 1. 
 
 ## Running Integration Tests
