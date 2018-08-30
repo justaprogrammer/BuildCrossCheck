@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using MSBLOC.Core.IntegrationTests.Utilities;
@@ -14,17 +14,27 @@ namespace MSBLOC.Core.IntegrationTests.Services
             var gitHubAppsClient = gitHubClient.GitHubApps;
 
             var repositoryInstallation = await gitHubAppsClient.GetRepositoryInstallationForCurrent(TestAppOwner, TestAppRepo);
-            repositoryInstallation.Id.ToString().Should().Be(TestAppInstallationId);
+            repositoryInstallation.Id.Should().Be(TestAppInstallationId);
         }
 
         [IntegrationTest]
-        public async Task ShouldFindRepositoryInstallationById()
+        public async Task ShouldFindInstallationById()
         {
             var gitHubClient = CreateGitHubAppClient();
             var gitHubAppsClient = gitHubClient.GitHubApps;
 
-            var repositoryInstallation = await gitHubAppsClient.GetRepositoryInstallationForCurrent(long.Parse(TestAppInstallationId));
-            repositoryInstallation.Id.ToString().Should().Be(TestAppInstallationId);
+            var installation = await gitHubAppsClient.GetInstallationForCurrent(TestAppInstallationId);
+            installation.Id.Should().Be(TestAppInstallationId);
+        }
+
+        [IntegrationTest]
+        public async Task ShouldFindAllInstallation()
+        {
+            var gitHubClient = CreateGitHubAppClient();
+            var gitHubAppsClient = gitHubClient.GitHubApps;
+
+            var installations = await gitHubAppsClient.GetAllInstallationsForCurrent();
+            installations.Any(installation => installation.Id == TestAppInstallationId).Should().BeTrue();
         }
     }
 }
