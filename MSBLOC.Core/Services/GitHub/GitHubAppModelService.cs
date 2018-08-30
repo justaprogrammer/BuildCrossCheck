@@ -6,7 +6,7 @@ using MSBLOC.Core.Model.LogAnalyzer;
 using Newtonsoft.Json;
 using Octokit;
 using CheckRun = MSBLOC.Core.Model.GitHub.CheckRun;
-using CheckWarningLevel = MSBLOC.Core.Model.LogAnalyzer.CheckWarningLevel;
+using AnnotationLevel = MSBLOC.Core.Model.LogAnalyzer.CheckWarningLevel;
 
 namespace MSBLOC.Core.Services.GitHub
 {
@@ -108,16 +108,16 @@ namespace MSBLOC.Core.Services.GitHub
             return JsonConvert.DeserializeObject<LogAnalyzerConfiguration>(fileContent);
         }
 
-        private static Octokit.CheckWarningLevel GetCheckWarningLevel(Annotation annotation)
+        private static Octokit.AnnotationLevel GetCheckWarningLevel(Annotation annotation)
         {
             switch (annotation.CheckWarningLevel)
             {
-                case CheckWarningLevel.Notice:
-                    return Octokit.CheckWarningLevel.Notice;
-                case CheckWarningLevel.Warning:
-                    return Octokit.CheckWarningLevel.Warning;
-                case CheckWarningLevel.Failure:
-                    return Octokit.CheckWarningLevel.Failure;
+                case AnnotationLevel.Notice:
+                    return Octokit.AnnotationLevel.Notice;
+                case AnnotationLevel.Warning:
+                    return Octokit.AnnotationLevel.Warning;
+                case AnnotationLevel.Failure:
+                    return Octokit.AnnotationLevel.Failure;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
