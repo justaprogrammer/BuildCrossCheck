@@ -91,16 +91,16 @@ namespace MSBLOC.Core.Tests.Services
         private static readonly Faker<Installation> FakeInstallation;
 
         private static GitHubUserModelService CreateTarget(
-            IGitHubAppsInstallationsClient gitHubAppsInstallationsClient = null,
+            IGitHubAppInstallationsClient gitHubAppsInstallationsClient = null,
             IGitHubAppsClient gitHubAppsClient = null,
             IGitHubUserClientFactory gitHubUserClientFactory = null,
             IGitHubClient gitHubClient = null)
         {
             gitHubAppsInstallationsClient =
-                gitHubAppsInstallationsClient ?? Substitute.For<IGitHubAppsInstallationsClient>();
+                gitHubAppsInstallationsClient ?? Substitute.For<IGitHubAppInstallationsClient>();
 
             gitHubAppsClient = gitHubAppsClient ?? Substitute.For<IGitHubAppsClient>();
-            gitHubAppsClient.Installations.Returns(gitHubAppsInstallationsClient);
+            gitHubAppsClient.Installation.Returns(gitHubAppsInstallationsClient);
 
             gitHubClient = gitHubClient ?? Substitute.For<IGitHubClient>();
             gitHubClient.GitHubApps.Returns(gitHubAppsClient);
@@ -110,32 +110,6 @@ namespace MSBLOC.Core.Tests.Services
 
             var gitHubUserModelService = new GitHubUserModelService(gitHubUserClientFactory);
             return gitHubUserModelService;
-        }
-
-        [Fact]
-        public async Task ShouldGetUserInstallation()
-        {
-            var installation1 = FakeInstallation.Generate();
-            var repositoriesResponse1 = FakeRepositoriesResponse.Generate();
-
-            var gitHubAppsClient = Substitute.For<IGitHubAppsClient>();
-            gitHubAppsClient.GetInstallation(installation1.Id).Returns(installation1);
-
-            var gitHubAppsInstallationsClient = Substitute.For<IGitHubAppsInstallationsClient>();
-
-            gitHubAppsInstallationsClient.GetAllRepositoriesForUser(installation1.Id)
-                .Returns(repositoriesResponse1);
-
-            var gitHubUserModelService = CreateTarget(
-                gitHubAppsClient: gitHubAppsClient,
-                gitHubAppsInstallationsClient: gitHubAppsInstallationsClient
-            );
-
-            var userInstallation = await gitHubUserModelService.GetInstallationAsync(installation1.Id);
-
-            userInstallation.Id.Should().Be(installation1.Id);
-            userInstallation.Repositories.Count.Should().Be(repositoriesResponse1.Repositories.Count);
-            userInstallation.Repositories[0].Id.Should().Be(repositoriesResponse1.Repositories[0].Id);
         }
 
         [Fact]
@@ -150,15 +124,15 @@ namespace MSBLOC.Core.Tests.Services
             var installationsResponse = new InstallationsResponse(2, new[] {installation1, installation2});
 
             var gitHubAppsClient = Substitute.For<IGitHubAppsClient>();
-            gitHubAppsClient.GetAllInstallationsForUser()
+            gitHubAppsClient.GetAllInstallationsForCurrentUser()
                 .Returns(installationsResponse);
 
-            var gitHubAppsInstallationsClient = Substitute.For<IGitHubAppsInstallationsClient>();
+            var gitHubAppsInstallationsClient = Substitute.For<IGitHubAppInstallationsClient>();
 
-            gitHubAppsInstallationsClient.GetAllRepositoriesForUser(installation1.Id)
+            gitHubAppsInstallationsClient.GetAllRepositoriesForCurrentUser(installation1.Id)
                 .Returns(repositoriesResponse1);
 
-            gitHubAppsInstallationsClient.GetAllRepositoriesForUser(installation2.Id)
+            gitHubAppsInstallationsClient.GetAllRepositoriesForCurrentUser(installation2.Id)
                 .Returns(repositoriesResponse2);
 
             var gitHubUserModelService = CreateTarget(

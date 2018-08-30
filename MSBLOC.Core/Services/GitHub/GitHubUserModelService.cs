@@ -28,16 +28,16 @@ namespace MSBLOC.Core.Services.GitHub
         {
             var gitHubUserClient = await _lazyGitHubUserClient;
             var gitHubAppsUserClient = gitHubUserClient.GitHubApps;
-            var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installations;
+            var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installation;
 
             var userInstallations = new List<Installation>();
 
-            var installationsResponse = await gitHubAppsUserClient.GetAllInstallationsForUser().ConfigureAwait(false);
+            var installationsResponse = await gitHubAppsUserClient.GetAllInstallationsForCurrentUser().ConfigureAwait(false);
 
             foreach (var installation in installationsResponse.Installations)
             {
                 var repositoriesResponse = await gitHubAppsInstallationsUserClient
-                    .GetAllRepositoriesForUser(installation.Id).ConfigureAwait(false);
+                    .GetAllRepositoriesForCurrentUser(installation.Id).ConfigureAwait(false);
 
                 var userInstallation = new Installation
                 {
@@ -63,24 +63,6 @@ namespace MSBLOC.Core.Services.GitHub
             }
 
             return userInstallations;
-        }
-
-        /// <inheritdoc />
-        public async Task<Installation> GetInstallationAsync(long installationId)
-        {
-            var gitHubUserClient = await _lazyGitHubUserClient.ConfigureAwait(false);
-            var gitHubAppsUserClient = gitHubUserClient.GitHubApps;
-            var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installations;
-
-            var installation = await gitHubAppsUserClient.GetInstallation(installationId).ConfigureAwait(false);
-            var repositoriesResponse = await gitHubAppsInstallationsUserClient
-                .GetAllRepositoriesForUser(installation.Id).ConfigureAwait(false);
-
-            var repositoriesResponseRepositories = repositoriesResponse.Repositories;
-
-            var userInstallation = BuildInstallation(installation, repositoriesResponseRepositories);
-
-            return userInstallation;
         }
 
         /// <inheritdoc />

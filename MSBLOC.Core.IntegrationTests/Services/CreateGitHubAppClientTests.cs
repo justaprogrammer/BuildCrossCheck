@@ -13,7 +13,7 @@ namespace MSBLOC.Core.IntegrationTests.Services
             var gitHubClient = CreateGitHubAppClient();
             var gitHubAppsClient = gitHubClient.GitHubApps;
 
-            var repositoryInstallation = await gitHubAppsClient.GetRepositoryInstallation(TestAppOwner, TestAppRepo);
+            var repositoryInstallation = await gitHubAppsClient.GetRepositoryInstallationForCurrent(TestAppOwner, TestAppRepo);
             repositoryInstallation.Id.ToString().Should().Be(TestAppInstallationId);
         }
 
@@ -23,7 +23,7 @@ namespace MSBLOC.Core.IntegrationTests.Services
             var gitHubClient = CreateGitHubAppClient();
             var gitHubAppsClient = gitHubClient.GitHubApps;
 
-            var repositoryInstallation = await gitHubAppsClient.GetInstallation(Int64.Parse(TestAppInstallationId));
+            var repositoryInstallation = await gitHubAppsClient.GetRepositoryInstallationForCurrent(long.Parse(TestAppInstallationId));
             repositoryInstallation.Id.ToString().Should().Be(TestAppInstallationId);
         }
     }
