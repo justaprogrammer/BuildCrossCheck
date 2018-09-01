@@ -14,9 +14,13 @@ build_script:
     msbuild MSBuildLogOctokitChecker.sln --% /p:Configuration=Release /bl:output.binlog /verbosity:minimal
 after_build:
     - cmd: dotnet publish MSBLOC.Web  --configuration Release --output %appveyor_build_folder%\dist
+after_test:
+- ps: |  
+    choco install --no-progress opencover.portable codecov
+    OpenCover.Console.exe "-target:$env:xunit20\xunit.console.x86.exe" --% "-targetargs: MSBLOC.Core.Tests\bin\Release\net471\MSBLOC.Core.Tests.dll MSBLOC.Core.IntegrationTests\bin\Release\net471\MSBLOC.Core.IntegrationTests.dll" -filter:"+[MSBLOC*]* -[MSBLOC*Tests]*" -register:user -output:".\coverage.xml"
+    codecov -f "coverage.xml"
 artifacts:
-    - path: output.binlog
-      name: log
+    - path: coverage.xml
       type: File
     - path: dist
       name: dist.web
