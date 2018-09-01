@@ -17,7 +17,7 @@ after_build:
 after_test:
 - ps: |  
     choco install --no-progress opencover.portable codecov
-    OpenCover.Console.exe "-target:$env:xunit20\xunit.console.x86.exe" --% "-targetargs: MSBLOC.Core.Tests\bin\Release\net471\MSBLOC.Core.Tests.dll MSBLOC.Core.IntegrationTests\bin\Release\net471\MSBLOC.Core.IntegrationTests.dll" -filter:"+[MSBLOC*]* -[MSBLOC*Tests]*" -register:user -output:".\coverage.xml"
+    OpenCover.Console.exe "-target:$env:xunit20\xunit.console.x86.exe" --% "-targetargs: MSBLOC.Core.Tests\bin\Release\net471\MSBLOC.Core.Tests.dll -noshadow" -filter:"+[MSBLOC*]* -[MSBLOC*Tests]*" -register:user -output:".\coverage.xml"
     codecov -f "coverage.xml"
 artifacts:
     - path: coverage.xml
