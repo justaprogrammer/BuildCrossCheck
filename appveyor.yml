@@ -16,11 +16,16 @@ after_build:
     - cmd: dotnet publish MSBLOC.Web  --configuration Release --output %appveyor_build_folder%\dist
 after_test:
 - ps: |  
-    choco install --no-progress opencover.portable codecov
-    OpenCover.Console.exe "-target:$env:xunit20\xunit.console.x86.exe" --% "-targetargs: MSBLOC.Core.Tests\bin\Release\net471\MSBLOC.Core.Tests.dll MSBLOC.Core.IntegrationTests\bin\Release\net471\MSBLOC.Core.IntegrationTests.dll" -filter:"+[MSBLOC*]* -[MSBLOC*Tests]*" -register:user -output:".\coverage.xml"
-    codecov -f "coverage.xml"
+    dotnet tool install --global coverlet.console
+    coverlet .\MSBLOC.Core.Tests\bin\Release\netcoreapp2.1\MSBLOC.Core.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Core.Tests.coverage.xml"
+    coverlet .\MSBLOC.Web.Tests\bin\Release\netcoreapp2.1\MSBLOC.Web.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.Web.Tests\MSBLOC.Web.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Web.Tests.coverage.xml"
+    choco install --no-progress codecov
+    codecov -f ".\MSBLOC.Core.Tests.coverage.xml"
+    codecov -f ".\MSBLOC.Web.Tests.coverage.xml"
 artifacts:
-    - path: coverage.xml
+    - path: MSBLOC.Core.Tests.coverage.xml
+      type: File
+    - path: MSBLOC.Web.Tests.coverage.xml
       type: File
     - path: dist
       name: dist.web
