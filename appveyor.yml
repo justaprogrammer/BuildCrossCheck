@@ -23,7 +23,9 @@ after_test:
     codecov -f ".\MSBLOC.Core.Tests.coverage.xml"
     codecov -f ".\MSBLOC.Web.Tests.coverage.xml"
 artifacts:
-    - path: coverage.xml
+    - path: MSBLOC.Core.Tests.coverage.xml
+      type: File
+    - path: MSBLOC.Web.Tests.coverage.xml
       type: File
     - path: dist
       name: dist.web
