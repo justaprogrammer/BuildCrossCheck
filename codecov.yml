@@ -22,7 +22,7 @@ parsers:
 
 comment:
   layout: "header, reach, diff, flags, files"
-  behavior: default
+  behavior: new
   require_changes: no
   
 fixes:
