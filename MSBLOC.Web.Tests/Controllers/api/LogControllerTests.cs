@@ -19,7 +19,7 @@ using Microsoft.Extensions.Primitives;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Model;
 using MSBLOC.Core.Model.GitHub;
-using MSBLOC.Web.Controllers.api;
+using MSBLOC.Web.Controllers.Api;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 using MSBLOC.Web.Tests.Util;

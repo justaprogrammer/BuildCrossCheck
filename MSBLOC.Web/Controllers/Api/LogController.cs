@@ -20,7 +20,7 @@ using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 
-namespace MSBLOC.Web.Controllers.api
+namespace MSBLOC.Web.Controllers.Api
 {
     [Authorize]
     [Route("api/[controller]")]
