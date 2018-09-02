@@ -17,8 +17,8 @@ after_build:
 after_test:
 - ps: |  
     dotnet tool install --global coverlet.console
-    coverlet .\MSBLOC.Core.Tests\bin\Debug\netcoreapp2.1\MSBLOC.Core.Tests.dll --target "dotnet" --targetargs "test .\MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Core.Tests.coverage.xml"
-    coverlet .\MSBLOC.Web.Tests\bin\Debug\netcoreapp2.1\MSBLOC.Web.Tests.dll --target "dotnet" --targetargs "test .\MSBLOC.Web.Tests\MSBLOC.Web.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Web.Tests.coverage.xml"
+    coverlet .\MSBLOC.Core.Tests\bin\Release\netcoreapp2.1\MSBLOC.Core.Tests.dll --target "dotnet" --targetargs "test .\MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Core.Tests.coverage.xml"
+    coverlet .\MSBLOC.Web.Tests\bin\Release\netcoreapp2.1\MSBLOC.Web.Tests.dll --target "dotnet" --targetargs "test .\MSBLOC.Web.Tests\MSBLOC.Web.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Web.Tests.coverage.xml"
     choco install --no-progress codecov
     codecov -f ".\MSBLOC.Core.Tests.coverage.xml"
     codecov -f ".\MSBLOC.Web.Tests.coverage.xml"
