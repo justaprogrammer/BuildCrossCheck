@@ -1,7 +1,9 @@
 ﻿extern alias StructuredLogger;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -23,78 +25,85 @@ namespace MSBLOC.Core.Services
         /// <inheritdoc />
         public BuildDetails ProcessLog(string binLogPath, string cloneRoot)
         {
-            var binLogReader = new StructuredLogger::Microsoft.Build.Logging.BinaryLogReplayEventSource();
-
-            var solutionDetails = new SolutionDetails(cloneRoot);
-            var buildDetails = new BuildDetails(solutionDetails);
-            var buildMessages = new List<BuildMessage>();
-
-            foreach (var record in binLogReader.ReadRecords(binLogPath))
+            try
             {
-                var buildEventArgs = record.Args;
-                if (buildEventArgs is ProjectStartedEventArgs startedEventArgs)
+                var binLogReader = new StructuredLogger::Microsoft.Build.Logging.BinaryLogReplayEventSource();
+
+                var solutionDetails = new SolutionDetails(cloneRoot);
+                var buildDetails = new BuildDetails(solutionDetails);
+                var buildMessages = new List<BuildMessage>();
+
+                foreach (var record in binLogReader.ReadRecords(binLogPath))
                 {
-                    var notPresent = !solutionDetails.ContainsKey(startedEventArgs.ProjectFile);
-
-                    var items = startedEventArgs.Items?.Cast<DictionaryEntry>()
-                        .Where(entry => (string)entry.Key == "Compile")
-                        .Select(entry => entry.Value)
-                        .Cast<ITaskItem>()
-                        .Select(item => item.ItemSpec)
-                        .ToArray();
-
-                    if (notPresent && (items?.Any() ?? false))
+                    var buildEventArgs = record.Args;
+                    if (buildEventArgs is ProjectStartedEventArgs startedEventArgs)
                     {
-                        var projectDetails = new ProjectDetails(cloneRoot, startedEventArgs.ProjectFile);
-                        solutionDetails.Add(projectDetails);
+                        var notPresent = !solutionDetails.ContainsKey(startedEventArgs.ProjectFile);
 
-                        if (items != null)
+                        var items = startedEventArgs.Items?.Cast<DictionaryEntry>()
+                            .Where(entry => (string)entry.Key == "Compile")
+                            .Select(entry => entry.Value)
+                            .Cast<ITaskItem>()
+                            .Select(item => item.ItemSpec)
+                            .ToArray();
+
+                        if (notPresent && (items?.Any() ?? false))
                         {
-                            projectDetails.AddItems(items);
+                            var projectDetails = new ProjectDetails(cloneRoot, startedEventArgs.ProjectFile);
+                            solutionDetails.Add(projectDetails);
+
+                            if (items != null)
+                            {
+                                projectDetails.AddItems(items);
+                            }
                         }
+                    }
+
+                    BuildMessage buildMessage = null;
+                    if (buildEventArgs is BuildWarningEventArgs buildWarning)
+                    {
+                        buildMessage = CreateBuildMessage(
+                            BuildMessageLevel.Warning,
+                            buildWarning.ProjectFile,
+                            buildWarning.File,
+                            buildWarning.LineNumber,
+                            buildWarning.EndLineNumber == 0 ? buildWarning.LineNumber : buildWarning.EndLineNumber,
+                            buildWarning.Message,
+                            buildWarning.Code,
+                            buildDetails);
+                    }
+
+                    if (buildEventArgs is BuildErrorEventArgs buildError)
+                    {
+                        buildMessage = CreateBuildMessage(
+                            BuildMessageLevel.Error,
+                            buildError.ProjectFile,
+                            buildError.File,
+                            buildError.LineNumber,
+                            buildError.EndLineNumber == 0 ? buildError.LineNumber : buildError.EndLineNumber,
+                            buildError.Message,
+                            buildError.Code,
+                            buildDetails);
+                    }
+
+                    if (buildMessage != null)
+                    {
+                        buildMessages.Add(buildMessage);
                     }
                 }
 
-                BuildMessage buildMessage = null;
-                if (buildEventArgs is BuildWarningEventArgs buildWarning)
-                {
-                    buildMessage = CreateBuildMessage(
-                        BuildMessageLevel.Warning,
-                        buildWarning.ProjectFile,
-                        buildWarning.File,
-                        buildWarning.LineNumber,
-                        buildWarning.EndLineNumber == 0 ? buildWarning.LineNumber : buildWarning.EndLineNumber,
-                        buildWarning.Message,
-                        buildWarning.Code,
-                        buildDetails);
-                }
+                var distinctBy = buildMessages
+                    .DistinctBy(message => (message.ProjectFile, message.MessageLevel, message.File, message.Code, message.Message, message.LineNumber, message.EndLineNumber))
+                    .ToArray();
 
-                if (buildEventArgs is BuildErrorEventArgs buildError)
-                {
-                    buildMessage = CreateBuildMessage(
-                        BuildMessageLevel.Error,
-                        buildError.ProjectFile,
-                        buildError.File,
-                        buildError.LineNumber,
-                        buildError.EndLineNumber == 0 ? buildError.LineNumber : buildError.EndLineNumber,
-                        buildError.Message,
-                        buildError.Code,
-                        buildDetails);
-                }
+                buildDetails.AddMessages(distinctBy);
 
-                if (buildMessage != null)
-                {
-                    buildMessages.Add(buildMessage);
-                }
+                return buildDetails;
             }
-
-            var distinctBy = buildMessages
-                .DistinctBy(message => (message.ProjectFile, message.MessageLevel, message.File, message.Code, message.Message, message.LineNumber, message.EndLineNumber))
-                .ToArray();
-
-            buildDetails.AddMessages(distinctBy);
-
-            return buildDetails;
+            catch (Exception ex)
+            {
+                throw new BinaryLogProcessingException($"Error processing log. binLogPath:'{binLogPath}' cloneRoot:'{cloneRoot}'", ex);
+            }
         }
 
         private static BuildMessage CreateBuildMessage(BuildMessageLevel buildMessageLevel, string projectFile,
@@ -114,6 +123,28 @@ namespace MSBLOC.Core.Services
                 endLineNumber,
                 message,
                 code);
+        }
+    }
+
+    [Serializable]
+    public class BinaryLogProcessingException : Exception
+    {
+        public BinaryLogProcessingException()
+        {
+        }
+
+        public BinaryLogProcessingException(string message) : base(message)
+        {
+        }
+
+        public BinaryLogProcessingException(string message, Exception inner) : base(message, inner)
+        {
+        }
+
+        protected BinaryLogProcessingException(
+            SerializationInfo info,
+            StreamingContext context) : base(info, context)
+        {
         }
     }
 }

@@ -15,6 +15,9 @@ namespace MSBLOC.Core.Services
     /// <inheritdoc />
     public class LogAnalyzerService : ILogAnalyzerService
     {
+        private const string CheckRunName = "MSBuildLog Analyzer";
+        private const string CheckRunTitle = "MSBuildLog Analysis";
+
         private readonly IBinaryLogProcessor _binaryLogProcessor;
         private readonly IGitHubAppModelService _gitHubAppModelService;
         private readonly ILogger _logger;
@@ -38,25 +41,46 @@ namespace MSBLOC.Core.Services
 
             var startedAt = DateTimeOffset.Now;
 
-            var buildDetails = _binaryLogProcessor.ProcessLog(resourcePath, cloneRoot);
+            try
+            {
 
-            var logAnalyzerConfiguration = await _gitHubAppModelService.GetLogAnalyzerConfigurationAsync(owner, repository, sha);
+                var buildDetails = _binaryLogProcessor.ProcessLog(resourcePath, cloneRoot);
 
-            var annotations = CreateAnnotations(buildDetails, owner, repository, sha, logAnalyzerConfiguration);
+                var logAnalyzerConfiguration = await _gitHubAppModelService.GetLogAnalyzerConfigurationAsync(owner, repository, sha);
 
-            var checkRun = await SubmitCheckRun(annotations,
-                owner,
-                repository,
-                sha,
-                "MSBuildLog Analyzer",
-                "MSBuildLog Analysis",
-                "",
-                startedAt,
-                DateTimeOffset.Now).ConfigureAwait(false);
+                var annotations = CreateAnnotations(buildDetails, owner, repository, sha, logAnalyzerConfiguration);
 
-            _logger.LogInformation($"CheckRun Created - {checkRun.Url}");
+                var success = (annotations?.All(annotation => annotation.CheckWarningLevel != CheckWarningLevel.Failure) ?? true);
 
-            return checkRun;
+                var checkRun = await SubmitCheckRun(annotations,
+                    owner,
+                    repository,
+                    sha,
+                    CheckRunName,
+                    CheckRunTitle,
+                    "",
+                    startedAt,
+                    DateTimeOffset.Now, success).ConfigureAwait(false);
+
+                _logger.LogInformation($"CheckRun Created - {checkRun.Url}");
+
+                return checkRun;
+            }
+            catch (Exception ex)
+            {
+                var checkRun = await SubmitCheckRun(null,
+                    owner,
+                    repository,
+                    sha,
+                    CheckRunName,
+                    CheckRunTitle,
+                    ex.ToString(),
+                    startedAt,
+                    DateTimeOffset.Now, false)
+                    .ConfigureAwait(false);
+
+                return checkRun;
+            }
         }
 
         private Annotation[] CreateAnnotations(BuildDetails buildDetails, string repoOwner, string repoName, string sha, LogAnalyzerConfiguration logAnalyzerConfiguration)
@@ -122,21 +146,23 @@ namespace MSBLOC.Core.Services
         protected async Task<CheckRun> SubmitCheckRun(Annotation[] annotations,
             string owner, string name, string headSha,
             string checkRunName, string checkRunTitle, string checkRunSummary,
-            DateTimeOffset startedAt, DateTimeOffset completedAt)
+            DateTimeOffset startedAt, DateTimeOffset completedAt, bool success)
         {
             var annotationBatches = annotations?.Batch(50).ToArray();
 
-            var isFailure = annotations?.Any(annotation => annotation.CheckWarningLevel == CheckWarningLevel.Failure) ?? false;
-            var isSuccess = !isFailure;
-
             var checkRun = await _gitHubAppModelService.CreateCheckRunAsync(owner, name, headSha, checkRunName,
-                    checkRunTitle, checkRunSummary, isSuccess, annotationBatches?.FirstOrDefault()?.ToArray(), startedAt, completedAt)
+                    checkRunTitle, checkRunSummary, success, annotationBatches?.FirstOrDefault()?.ToArray(), startedAt, completedAt)
                 .ConfigureAwait(false);
 
-            foreach (var annotationBatch in annotationBatches.Skip(1))
-                await _gitHubAppModelService.UpdateCheckRunAsync(checkRun.Id, owner, name, headSha, checkRunTitle,
-                    checkRunSummary,
-                    annotationBatch.ToArray(), startedAt, completedAt).ConfigureAwait(false);
+            if (annotationBatches != null)
+            {
+                foreach (var annotationBatch in annotationBatches.Skip(1))
+                {
+                    await _gitHubAppModelService.UpdateCheckRunAsync(checkRun.Id, owner, name, headSha, checkRunTitle,
+                        checkRunSummary,
+                        annotationBatch.ToArray(), startedAt, completedAt).ConfigureAwait(false);
+                }
+            }
 
             return checkRun;
         }

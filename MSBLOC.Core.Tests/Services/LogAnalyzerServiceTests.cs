@@ -15,6 +15,7 @@ using MSBLOC.Core.Model.LogAnalyzer;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Tests.Util;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -634,6 +635,45 @@ namespace MSBLOC.Core.Tests.Services
                         Arg.Any<DateTimeOffset?>(),
                         Arg.Any<DateTimeOffset?>());
             });
+        }
+
+        [Fact]
+        public async Task ShouldCaptureError()
+        {
+            var owner = Faker.Lorem.Word();
+            var repository = Faker.Lorem.Word();
+            var sha = Faker.Random.String();
+
+            var binaryLogProcessor = Substitute.For<IBinaryLogProcessor>();
+            var binaryLogProcessingException = new BinaryLogProcessingException("Test Exception", new Exception());
+            binaryLogProcessor.ProcessLog(null, null).ThrowsForAnyArgs(binaryLogProcessingException);
+
+            var id = Faker.Random.Long();
+            var url = Faker.Internet.Url();
+
+            var gitHubAppModelService = Substitute.For<IGitHubAppModelService>();
+
+            gitHubAppModelService.GetLogAnalyzerConfigurationAsync(null, null, null).ReturnsForAnyArgs((LogAnalyzerConfiguration) null);
+
+            gitHubAppModelService.CreateCheckRunAsync(null, null, null, null, null, null, false, null, null, null)
+                .ReturnsForAnyArgs(new CheckRun
+                {
+                    Id = id,
+                    Url = url
+                });
+
+            var msblocService = CreateTarget(binaryLogProcessor, gitHubAppModelService);
+
+            var expectedCloneRoot = Faker.System.DirectoryPath();
+            var expectedBinLogPath = Faker.System.FilePath();
+
+            var checkRun = await msblocService
+                .SubmitAsync(owner, repository, sha, expectedCloneRoot, expectedBinLogPath).ConfigureAwait(false);
+
+            await gitHubAppModelService.Received(1).CreateCheckRunAsync(owner, repository, sha, "MSBuildLog Analyzer", "MSBuildLog Analysis", binaryLogProcessingException.ToString(), false, null, Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>());
+
+            checkRun.Id.Should().Be(id);
+            checkRun.Url.Should().Be(url);
         }
     }
 }
