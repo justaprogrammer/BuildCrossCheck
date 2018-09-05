@@ -82,19 +82,6 @@ namespace MSBLOC.Core.Services.GitHub
             return BuildRepository(repository);
         }
 
-        private static Installation BuildInstallation(Octokit.Installation installation,
-            IReadOnlyList<Octokit.Repository> repositories)
-        {
-            return new Installation
-            {
-                Id = installation.Id,
-                Login = installation.Account.Login,
-                Repositories = repositories
-                    .Select(BuildRepository)
-                    .ToArray()
-            };
-        }
-
         private static Repository BuildRepository(Octokit.Repository repository)
         {
             return new Repository
