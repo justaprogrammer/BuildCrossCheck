@@ -8,13 +8,11 @@
         public string Message { get; }
         public int LineNumber { get; }
         public int EndLine { get; }
-        public string BlobHref { get; }
 
         public Annotation(string filename, CheckWarningLevel checkWarningLevel, string title, string message,
-            int lineNumber, int endLine, string blobHref)
+            int lineNumber, int endLine)
         {
             Filename = filename;
-            BlobHref = blobHref;
             CheckWarningLevel = checkWarningLevel;
             Title = title;
             Message = message;

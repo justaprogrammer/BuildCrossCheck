@@ -1,9 +1,7 @@
 ﻿using System.Threading.Tasks;
 using GitHubJwt;
 using MSBLOC.Core.IntegrationTests.Utilities;
-using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Interfaces.GitHub;
-using MSBLOC.Core.Services;
 using MSBLOC.Core.Services.GitHub;
 using Octokit;
 
@@ -18,7 +16,7 @@ namespace MSBLOC.Core.IntegrationTests
 
         protected string TestAppOwner { get; } = Helper.IntegrationTestAppOwner;
         protected string TestAppRepo { get; } = Helper.IntegrationTestAppRepo;
-        protected string TestAppInstallationId { get; } = Helper.IntegrationTestAppInstallationId;
+        protected long TestAppInstallationId { get; } = long.Parse(Helper.IntegrationTestAppInstallationId);
         protected string TestToken { get; } = Helper.IntegrationTestToken;
         protected string TestUsername { get; } = Helper.IntegrationTestUsername;
 

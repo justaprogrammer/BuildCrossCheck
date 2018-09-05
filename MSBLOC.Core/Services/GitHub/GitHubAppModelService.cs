@@ -6,7 +6,7 @@ using MSBLOC.Core.Model.LogAnalyzer;
 using Newtonsoft.Json;
 using Octokit;
 using CheckRun = MSBLOC.Core.Model.GitHub.CheckRun;
-using CheckWarningLevel = MSBLOC.Core.Model.LogAnalyzer.CheckWarningLevel;
+using CheckAnnotationLevel = MSBLOC.Core.Model.LogAnalyzer.CheckWarningLevel;
 
 namespace MSBLOC.Core.Services.GitHub
 {
@@ -48,7 +48,7 @@ namespace MSBLOC.Core.Services.GitHub
                 Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
                 {
                     Annotations = annotations?
-                        .Select(annotation => new NewCheckRunAnnotation(annotation.Filename, annotation.BlobHref,
+                        .Select(annotation => new NewCheckRunAnnotation(annotation.Filename, 
                             annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
                             annotation.Message))
                         .ToArray()
@@ -86,7 +86,7 @@ namespace MSBLOC.Core.Services.GitHub
                 Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
                 {
                     Annotations = annotations
-                        .Select(annotation => new NewCheckRunAnnotation(annotation.Filename, annotation.BlobHref,
+                        .Select(annotation => new NewCheckRunAnnotation(annotation.Filename,
                             annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
                             annotation.Message))
                         .ToArray()
@@ -108,16 +108,16 @@ namespace MSBLOC.Core.Services.GitHub
             return JsonConvert.DeserializeObject<LogAnalyzerConfiguration>(fileContent);
         }
 
-        private static Octokit.CheckWarningLevel GetCheckWarningLevel(Annotation annotation)
+        private static Octokit.CheckAnnotationLevel GetCheckWarningLevel(Annotation annotation)
         {
             switch (annotation.CheckWarningLevel)
             {
-                case CheckWarningLevel.Notice:
-                    return Octokit.CheckWarningLevel.Notice;
-                case CheckWarningLevel.Warning:
-                    return Octokit.CheckWarningLevel.Warning;
-                case CheckWarningLevel.Failure:
-                    return Octokit.CheckWarningLevel.Failure;
+                case CheckAnnotationLevel.Notice:
+                    return Octokit.CheckAnnotationLevel.Notice;
+                case CheckAnnotationLevel.Warning:
+                    return Octokit.CheckAnnotationLevel.Warning;
+                case CheckAnnotationLevel.Failure:
+                    return Octokit.CheckAnnotationLevel.Failure;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
