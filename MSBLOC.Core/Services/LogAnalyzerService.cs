@@ -99,8 +99,6 @@ namespace MSBLOC.Core.Services
                 buildDetails.SolutionDetails.GetProjectItemPath(buildMessage.ProjectFile, buildMessage.File)
                     .TrimStart('/');
 
-            var blobHref = BlobHref(repoOwner, repoName, sha, filename);
-
             var logAnalyzerRule = lookup?[buildMessage.Code].FirstOrDefault();
 
             var checkWarningLevel = buildMessage.MessageLevel == BuildMessageLevel.Error
@@ -134,13 +132,7 @@ namespace MSBLOC.Core.Services
                 buildMessage.Code,
                 $"{buildMessage.Code}: {buildMessage.Message}",
                 buildMessage.LineNumber,
-                buildMessage.EndLineNumber,
-                blobHref);
-        }
-
-        public static string BlobHref(string owner, string repository, string sha, string file)
-        {
-            return $"https://github.com/{owner}/{repository}/blob/{sha}/{file.Replace(@"\", "/")}";
+                buildMessage.EndLineNumber);
         }
 
         protected async Task<CheckRun> SubmitCheckRun(Annotation[] annotations,

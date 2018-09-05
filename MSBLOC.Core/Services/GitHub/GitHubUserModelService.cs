@@ -28,16 +28,16 @@ namespace MSBLOC.Core.Services.GitHub
         {
             var gitHubUserClient = await _lazyGitHubUserClient;
             var gitHubAppsUserClient = gitHubUserClient.GitHubApps;
-            var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installations;
+            var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installation;
 
             var userInstallations = new List<Installation>();
 
-            var installationsResponse = await gitHubAppsUserClient.GetAllInstallationsForUser().ConfigureAwait(false);
+            var installationsResponse = await gitHubAppsUserClient.GetAllInstallationsForCurrentUser().ConfigureAwait(false);
 
             foreach (var installation in installationsResponse.Installations)
             {
                 var repositoriesResponse = await gitHubAppsInstallationsUserClient
-                    .GetAllRepositoriesForUser(installation.Id).ConfigureAwait(false);
+                    .GetAllRepositoriesForCurrentUser(installation.Id).ConfigureAwait(false);
 
                 var userInstallation = new Installation
                 {
@@ -66,24 +66,6 @@ namespace MSBLOC.Core.Services.GitHub
         }
 
         /// <inheritdoc />
-        public async Task<Installation> GetInstallationAsync(long installationId)
-        {
-            var gitHubUserClient = await _lazyGitHubUserClient.ConfigureAwait(false);
-            var gitHubAppsUserClient = gitHubUserClient.GitHubApps;
-            var gitHubAppsInstallationsUserClient = gitHubAppsUserClient.Installations;
-
-            var installation = await gitHubAppsUserClient.GetInstallation(installationId).ConfigureAwait(false);
-            var repositoriesResponse = await gitHubAppsInstallationsUserClient
-                .GetAllRepositoriesForUser(installation.Id).ConfigureAwait(false);
-
-            var repositoriesResponseRepositories = repositoriesResponse.Repositories;
-
-            var userInstallation = BuildInstallation(installation, repositoriesResponseRepositories);
-
-            return userInstallation;
-        }
-
-        /// <inheritdoc />
         public async Task<IReadOnlyList<Repository>> GetRepositoriesAsync()
         {
             var userInstallations = await GetInstallationsAsync().ConfigureAwait(false);
@@ -98,19 +80,6 @@ namespace MSBLOC.Core.Services.GitHub
 
             var repository = await repositoriesClient.Get(repositoryId).ConfigureAwait(false);
             return BuildRepository(repository);
-        }
-
-        private static Installation BuildInstallation(Octokit.Installation installation,
-            IReadOnlyList<Octokit.Repository> repositories)
-        {
-            return new Installation
-            {
-                Id = installation.Id,
-                Login = installation.Account.Login,
-                Repositories = repositories
-                    .Select(BuildRepository)
-                    .ToArray()
-            };
         }
 
         private static Repository BuildRepository(Octokit.Repository repository)

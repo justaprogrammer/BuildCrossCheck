@@ -16,13 +16,6 @@ namespace MSBLOC.Core.Interfaces.GitHub
         Task<IReadOnlyList<Installation>> GetInstallationsAsync();
 
         /// <summary>
-        /// Gets an installation by id of the GitHub available to the current user.
-        /// </summary>
-        /// <param name="installationId">The installation id.</param>
-        /// <returns>A readonly list of Installations</returns>
-        Task<Installation> GetInstallationAsync(long installationId);
-
-        /// <summary>
         /// Get all repositories from all installations of the GitHub available to the current user.
         /// </summary>
         /// <returns>A readonly list of repositories</returns>

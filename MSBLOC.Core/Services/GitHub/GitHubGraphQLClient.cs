@@ -15,7 +15,7 @@ namespace MSBLOC.Core.Services.GitHub
         private static readonly AsyncLazy<ICompiledQuery<IEnumerable<CommitDetail>>> CommitDetailsByPullRequestId =
             new AsyncLazy<ICompiledQuery<IEnumerable<CommitDetail>>>(() =>
                 Task.FromResult(new Query()
-                    .Repository(Variable.Var("owner"), Variable.Var("name"))
+                    .Repository(Variable.Var("owner"), Variable.Var("repository"))
                     .PullRequest(Variable.Var("pullRequest"))
                     .Commits(null, null, null, null)
                     .AllPages()

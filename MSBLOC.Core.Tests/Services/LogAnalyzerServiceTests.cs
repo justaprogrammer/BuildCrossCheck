@@ -182,8 +182,7 @@ namespace MSBLOC.Core.Tests.Services
                 messageCode,
                 messageCode + ": " + message,
                 lineNumber,
-                endLineNumber,
-                $"https://github.com/{owner}/{repository}/blob/{sha}/{filename}"));
+                endLineNumber));
         }
 
         [Fact]
@@ -253,8 +252,7 @@ namespace MSBLOC.Core.Tests.Services
                 messageCode,
                 messageCode + ": " + message,
                 lineNumber,
-                endLineNumber,
-                $"https://github.com/{owner}/{repository}/blob/{sha}/{filename}"));
+                endLineNumber));
         }
 
         [Fact]
@@ -376,8 +374,7 @@ namespace MSBLOC.Core.Tests.Services
                 messageCode,
                 messageCode + ": " + message,
                 lineNumber,
-                endLineNumber,
-                $"https://github.com/{owner}/{repository}/blob/{sha}/{filename}"));
+                endLineNumber));
         }
 
         [Fact]
@@ -435,8 +432,7 @@ namespace MSBLOC.Core.Tests.Services
                 messageCode,
                 messageCode + ": " + message,
                 lineNumber,
-                endLineNumber,
-                $"https://github.com/{owner}/{repository}/blob/{sha}/{filename}"));
+                endLineNumber));
         }
 
         [Fact]

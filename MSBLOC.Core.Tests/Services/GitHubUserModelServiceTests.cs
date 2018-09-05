@@ -72,14 +72,14 @@ namespace MSBLOC.Core.Tests.Services
                 .RuleFor(i => i.AppId, (f, i) => appId)
                 .RuleFor(i => i.Account, (f, i) => fakeUser.Generate());
 
-            var fakeRepository = new Faker<Repository>()
+            FakeRepository = new Faker<Repository>()
                 .RuleFor(response => response.Id, (faker1, repository) => faker1.Random.Long(0))
                 .RuleFor(response => response.Owner, (faker1, repository) => fakeUser.Generate())
                 .RuleFor(response => response.Name, (faker1, repository) => faker1.Lorem.Word())
                 .RuleFor(response => response.Url, (faker1, repository) => faker1.Internet.Url());
 
             FakeRepositoriesResponse = new Faker<RepositoriesResponse>()
-                .RuleFor(r => r.Repositories, (f, r) => fakeRepository.Generate(Faker.Random.Int(1, 10)))
+                .RuleFor(r => r.Repositories, (f, r) => FakeRepository.Generate(Faker.Random.Int(1, 10)))
                 .RuleFor(r => r.TotalCount, (f, r) => r.Repositories.Count);
         }
 
@@ -89,53 +89,32 @@ namespace MSBLOC.Core.Tests.Services
         private static readonly Faker Faker = new Faker();
         private static readonly Faker<RepositoriesResponse> FakeRepositoriesResponse;
         private static readonly Faker<Installation> FakeInstallation;
+        private static readonly Faker<Repository> FakeRepository;
 
         private static GitHubUserModelService CreateTarget(
-            IGitHubAppsInstallationsClient gitHubAppsInstallationsClient = null,
+            IGitHubAppInstallationsClient gitHubAppsInstallationsClient = null,
             IGitHubAppsClient gitHubAppsClient = null,
             IGitHubUserClientFactory gitHubUserClientFactory = null,
-            IGitHubClient gitHubClient = null)
+            IGitHubClient gitHubClient = null,
+            IRepositoriesClient repositoryClient = null)
         {
             gitHubAppsInstallationsClient =
-                gitHubAppsInstallationsClient ?? Substitute.For<IGitHubAppsInstallationsClient>();
+                gitHubAppsInstallationsClient ?? Substitute.For<IGitHubAppInstallationsClient>();
 
             gitHubAppsClient = gitHubAppsClient ?? Substitute.For<IGitHubAppsClient>();
-            gitHubAppsClient.Installations.Returns(gitHubAppsInstallationsClient);
+            gitHubAppsClient.Installation.Returns(gitHubAppsInstallationsClient);
 
             gitHubClient = gitHubClient ?? Substitute.For<IGitHubClient>();
             gitHubClient.GitHubApps.Returns(gitHubAppsClient);
 
+            repositoryClient = repositoryClient ?? Substitute.For<IRepositoriesClient>();
+
+            gitHubClient.Repository.Returns(repositoryClient);
+
             gitHubUserClientFactory = gitHubUserClientFactory ?? Substitute.For<IGitHubUserClientFactory>();
             gitHubUserClientFactory.CreateClient().Returns(gitHubClient);
 
-            var gitHubUserModelService = new GitHubUserModelService(gitHubUserClientFactory);
-            return gitHubUserModelService;
-        }
-
-        [Fact]
-        public async Task ShouldGetUserInstallation()
-        {
-            var installation1 = FakeInstallation.Generate();
-            var repositoriesResponse1 = FakeRepositoriesResponse.Generate();
-
-            var gitHubAppsClient = Substitute.For<IGitHubAppsClient>();
-            gitHubAppsClient.GetInstallation(installation1.Id).Returns(installation1);
-
-            var gitHubAppsInstallationsClient = Substitute.For<IGitHubAppsInstallationsClient>();
-
-            gitHubAppsInstallationsClient.GetAllRepositoriesForUser(installation1.Id)
-                .Returns(repositoriesResponse1);
-
-            var gitHubUserModelService = CreateTarget(
-                gitHubAppsClient: gitHubAppsClient,
-                gitHubAppsInstallationsClient: gitHubAppsInstallationsClient
-            );
-
-            var userInstallation = await gitHubUserModelService.GetInstallationAsync(installation1.Id);
-
-            userInstallation.Id.Should().Be(installation1.Id);
-            userInstallation.Repositories.Count.Should().Be(repositoriesResponse1.Repositories.Count);
-            userInstallation.Repositories[0].Id.Should().Be(repositoriesResponse1.Repositories[0].Id);
+            return new GitHubUserModelService(gitHubUserClientFactory);
         }
 
         [Fact]
@@ -150,15 +129,15 @@ namespace MSBLOC.Core.Tests.Services
             var installationsResponse = new InstallationsResponse(2, new[] {installation1, installation2});
 
             var gitHubAppsClient = Substitute.For<IGitHubAppsClient>();
-            gitHubAppsClient.GetAllInstallationsForUser()
+            gitHubAppsClient.GetAllInstallationsForCurrentUser()
                 .Returns(installationsResponse);
 
-            var gitHubAppsInstallationsClient = Substitute.For<IGitHubAppsInstallationsClient>();
+            var gitHubAppsInstallationsClient = Substitute.For<IGitHubAppInstallationsClient>();
 
-            gitHubAppsInstallationsClient.GetAllRepositoriesForUser(installation1.Id)
+            gitHubAppsInstallationsClient.GetAllRepositoriesForCurrentUser(installation1.Id)
                 .Returns(repositoriesResponse1);
 
-            gitHubAppsInstallationsClient.GetAllRepositoriesForUser(installation2.Id)
+            gitHubAppsInstallationsClient.GetAllRepositoriesForCurrentUser(installation2.Id)
                 .Returns(repositoriesResponse2);
 
             var gitHubUserModelService = CreateTarget(
@@ -176,6 +155,59 @@ namespace MSBLOC.Core.Tests.Services
             userInstallations[1].Id.Should().Be(installation2.Id);
             userInstallations[1].Repositories.Count.Should().Be(repositoriesResponse2.Repositories.Count);
             userInstallations[1].Repositories[0].Id.Should().Be(repositoriesResponse2.Repositories[0].Id);
+        }
+
+        [Fact]
+        public async Task ShouldGetRepositories()
+        {
+            var installation1 = FakeInstallation.Generate();
+            var repositoriesResponse1 = FakeRepositoriesResponse.Generate();
+
+            var installation2 = FakeInstallation.Generate();
+            var repositoriesResponse2 = FakeRepositoriesResponse.Generate();
+
+            var installationsResponse = new InstallationsResponse(2, new[] {installation1, installation2});
+
+            var gitHubAppsClient = Substitute.For<IGitHubAppsClient>();
+            gitHubAppsClient.GetAllInstallationsForCurrentUser()
+                .Returns(installationsResponse);
+
+            var gitHubAppsInstallationsClient = Substitute.For<IGitHubAppInstallationsClient>();
+
+            gitHubAppsInstallationsClient.GetAllRepositoriesForCurrentUser(installation1.Id)
+                .Returns(repositoriesResponse1);
+
+            gitHubAppsInstallationsClient.GetAllRepositoriesForCurrentUser(installation2.Id)
+                .Returns(repositoriesResponse2);
+
+            var gitHubUserModelService = CreateTarget(
+                gitHubAppsClient: gitHubAppsClient,
+                gitHubAppsInstallationsClient: gitHubAppsInstallationsClient
+            );
+
+            var repositories = await gitHubUserModelService.GetRepositoriesAsync();
+
+            repositories.Count.Should().Be(repositoriesResponse1.TotalCount + repositoriesResponse2.TotalCount);
+        }
+
+        [Fact]
+        public async Task ShouldGetRepository()
+        {
+            var repositoryResponse = FakeRepository.Generate();
+
+            var repositoryClient = Substitute.For<IRepositoriesClient>();
+            repositoryClient.Get(repositoryResponse.Id).Returns(repositoryResponse);
+
+            var gitHubUserModelService = CreateTarget(
+                repositoryClient: repositoryClient
+            );
+
+            var repository = await gitHubUserModelService.GetRepositoryAsync(repositoryResponse.Id);
+
+            repository.Id.Should().Be(repositoryResponse.Id);
+            repository.Name.Should().Be(repositoryResponse.Name);
+            repository.Owner.Should().Be(repositoryResponse.Owner.Login);
+            repository.Url.Should().Be(repositoryResponse.Url);
         }
     }
 }
