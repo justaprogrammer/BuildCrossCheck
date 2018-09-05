@@ -48,7 +48,7 @@ namespace MSBLOC.Core.Services.GitHub
                 Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
                 {
                     Annotations = annotations?
-                        .Select(annotation => new NewCheckRunAnnotation(annotation.Filename, annotation.BlobHref,
+                        .Select(annotation => new NewCheckRunAnnotation(annotation.Filename, 
                             annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
                             annotation.Message))
                         .ToArray()
@@ -86,7 +86,7 @@ namespace MSBLOC.Core.Services.GitHub
                 Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
                 {
                     Annotations = annotations
-                        .Select(annotation => new NewCheckRunAnnotation(annotation.Filename, annotation.BlobHref,
+                        .Select(annotation => new NewCheckRunAnnotation(annotation.Filename,
                             annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
                             annotation.Message))
                         .ToArray()

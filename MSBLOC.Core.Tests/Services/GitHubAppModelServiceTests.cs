@@ -30,7 +30,7 @@ namespace MSBLOC.Core.Tests.Services
                 {
                     var lineNumber = f.Random.Int(1);
                     return new Annotation(f.System.FileName(), f.PickRandom<CheckWarningLevel>(),
-                        f.Lorem.Word(), f.Lorem.Sentence(), lineNumber, lineNumber, f.Internet.Url());
+                        f.Lorem.Word(), f.Lorem.Sentence(), lineNumber, lineNumber);
                 });
         }
 
