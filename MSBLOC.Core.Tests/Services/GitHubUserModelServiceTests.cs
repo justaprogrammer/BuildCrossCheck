@@ -151,5 +151,38 @@ namespace MSBLOC.Core.Tests.Services
             userInstallations[1].Repositories.Count.Should().Be(repositoriesResponse2.Repositories.Count);
             userInstallations[1].Repositories[0].Id.Should().Be(repositoriesResponse2.Repositories[0].Id);
         }
+
+        [Fact]
+        public async Task ShouldGetUserRepositories()
+        {
+            var installation1 = FakeInstallation.Generate();
+            var repositoriesResponse1 = FakeRepositoriesResponse.Generate();
+
+            var installation2 = FakeInstallation.Generate();
+            var repositoriesResponse2 = FakeRepositoriesResponse.Generate();
+
+            var installationsResponse = new InstallationsResponse(2, new[] {installation1, installation2});
+
+            var gitHubAppsClient = Substitute.For<IGitHubAppsClient>();
+            gitHubAppsClient.GetAllInstallationsForCurrentUser()
+                .Returns(installationsResponse);
+
+            var gitHubAppsInstallationsClient = Substitute.For<IGitHubAppInstallationsClient>();
+
+            gitHubAppsInstallationsClient.GetAllRepositoriesForCurrentUser(installation1.Id)
+                .Returns(repositoriesResponse1);
+
+            gitHubAppsInstallationsClient.GetAllRepositoriesForCurrentUser(installation2.Id)
+                .Returns(repositoriesResponse2);
+
+            var gitHubUserModelService = CreateTarget(
+                gitHubAppsClient: gitHubAppsClient,
+                gitHubAppsInstallationsClient: gitHubAppsInstallationsClient
+            );
+
+            var repositories = await gitHubUserModelService.GetRepositoriesAsync();
+
+            repositories.Count.Should().Be(repositoriesResponse1.TotalCount + repositoriesResponse2.TotalCount);
+        }
     }
 }
