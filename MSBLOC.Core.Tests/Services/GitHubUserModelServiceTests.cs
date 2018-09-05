@@ -72,14 +72,14 @@ namespace MSBLOC.Core.Tests.Services
                 .RuleFor(i => i.AppId, (f, i) => appId)
                 .RuleFor(i => i.Account, (f, i) => fakeUser.Generate());
 
-            var fakeRepository = new Faker<Repository>()
+            FakeRepository = new Faker<Repository>()
                 .RuleFor(response => response.Id, (faker1, repository) => faker1.Random.Long(0))
                 .RuleFor(response => response.Owner, (faker1, repository) => fakeUser.Generate())
                 .RuleFor(response => response.Name, (faker1, repository) => faker1.Lorem.Word())
                 .RuleFor(response => response.Url, (faker1, repository) => faker1.Internet.Url());
 
             FakeRepositoriesResponse = new Faker<RepositoriesResponse>()
-                .RuleFor(r => r.Repositories, (f, r) => fakeRepository.Generate(Faker.Random.Int(1, 10)))
+                .RuleFor(r => r.Repositories, (f, r) => FakeRepository.Generate(Faker.Random.Int(1, 10)))
                 .RuleFor(r => r.TotalCount, (f, r) => r.Repositories.Count);
         }
 
@@ -89,12 +89,14 @@ namespace MSBLOC.Core.Tests.Services
         private static readonly Faker Faker = new Faker();
         private static readonly Faker<RepositoriesResponse> FakeRepositoriesResponse;
         private static readonly Faker<Installation> FakeInstallation;
+        private static readonly Faker<Repository> FakeRepository;
 
         private static GitHubUserModelService CreateTarget(
             IGitHubAppInstallationsClient gitHubAppsInstallationsClient = null,
             IGitHubAppsClient gitHubAppsClient = null,
             IGitHubUserClientFactory gitHubUserClientFactory = null,
-            IGitHubClient gitHubClient = null)
+            IGitHubClient gitHubClient = null,
+            IRepositoriesClient repositoryClient = null)
         {
             gitHubAppsInstallationsClient =
                 gitHubAppsInstallationsClient ?? Substitute.For<IGitHubAppInstallationsClient>();
@@ -105,11 +107,14 @@ namespace MSBLOC.Core.Tests.Services
             gitHubClient = gitHubClient ?? Substitute.For<IGitHubClient>();
             gitHubClient.GitHubApps.Returns(gitHubAppsClient);
 
+            repositoryClient = repositoryClient ?? Substitute.For<IRepositoriesClient>();
+
+            gitHubClient.Repository.Returns(repositoryClient);
+
             gitHubUserClientFactory = gitHubUserClientFactory ?? Substitute.For<IGitHubUserClientFactory>();
             gitHubUserClientFactory.CreateClient().Returns(gitHubClient);
 
-            var gitHubUserModelService = new GitHubUserModelService(gitHubUserClientFactory);
-            return gitHubUserModelService;
+            return new GitHubUserModelService(gitHubUserClientFactory);
         }
 
         [Fact]
@@ -153,7 +158,7 @@ namespace MSBLOC.Core.Tests.Services
         }
 
         [Fact]
-        public async Task ShouldGetUserRepositories()
+        public async Task ShouldGetRepositories()
         {
             var installation1 = FakeInstallation.Generate();
             var repositoriesResponse1 = FakeRepositoriesResponse.Generate();
@@ -183,6 +188,26 @@ namespace MSBLOC.Core.Tests.Services
             var repositories = await gitHubUserModelService.GetRepositoriesAsync();
 
             repositories.Count.Should().Be(repositoriesResponse1.TotalCount + repositoriesResponse2.TotalCount);
+        }
+
+        [Fact]
+        public async Task ShouldGetRepository()
+        {
+            var repositoryResponse = FakeRepository.Generate();
+
+            var repositoryClient = Substitute.For<IRepositoriesClient>();
+            repositoryClient.Get(repositoryResponse.Id).Returns(repositoryResponse);
+
+            var gitHubUserModelService = CreateTarget(
+                repositoryClient: repositoryClient
+            );
+
+            var repository = await gitHubUserModelService.GetRepositoryAsync(repositoryResponse.Id);
+
+            repository.Id.Should().Be(repositoryResponse.Id);
+            repository.Name.Should().Be(repositoryResponse.Name);
+            repository.Owner.Should().Be(repositoryResponse.Owner.Login);
+            repository.Url.Should().Be(repositoryResponse.Url);
         }
     }
 }
