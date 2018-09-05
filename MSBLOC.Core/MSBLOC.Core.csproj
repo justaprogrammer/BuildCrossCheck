@@ -14,7 +14,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="morelinq" Version="3.0.0" />
     <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.0.0-pre-05" />
-    <PackageReference Include="Octokit" Version="0.32.0-PullRequest1854" />
+    <PackageReference Include="Octokit" Version="0.32.0-PullRequest1864" />
     <PackageReference Include="Octokit.GraphQL" Version="0.1.0-beta" />
   </ItemGroup>
 
