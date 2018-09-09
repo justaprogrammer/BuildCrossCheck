@@ -13,7 +13,7 @@ using MSBLOC.Web.Interfaces;
 
 namespace MSBLOC.Web.Controllers.Api
 {
-    public abstract class MultiPartFormControllerBase<TController> : Controller
+    public abstract class MultiPartFormControllerBase<TController> : ApiControllerBase
     {
         private readonly FormOptions _defaultFormOptions = new FormOptions();
 

@@ -19,12 +19,12 @@ namespace MSBLOC.Web.Controllers.Api
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class BinaryLogController : ApiControllerBase
+    public class BinaryLogController : MultiPartFormControllerBase<BinaryLogController>
     {
         private readonly ILogAnalyzerService _logAnalyzerService;
 
         public BinaryLogController(ILogger<BinaryLogController> logger, ITempFileService tempFileService, ILogAnalyzerService logAnalyzerService)
-            :base(logger, tempFileService)
+            : base(logger, tempFileService)
         {
             _logAnalyzerService = logAnalyzerService;
         }
@@ -77,17 +77,6 @@ namespace MSBLOC.Web.Controllers.Api
         {
             var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(dataToBind), CultureInfo.CurrentCulture);
             return TryUpdateModelAsync(model, string.Empty, formValueProvider);
-        }
-
-        [HttpGet]
-        [Route("test")]
-        public IActionResult Test()
-        {
-            return Json(new
-            {
-                User.Identity.IsAuthenticated,
-                Claims = User.Claims.ToDictionary(c => c.Type, c => c.Value)
-            });
         }
     }
 }

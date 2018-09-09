@@ -1,15 +1,10 @@
 ﻿using System.Linq;
-using Microsoft.Extensions.Logging;
-using MSBLOC.Web.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MSBLOC.Web.Controllers.Api
 {
-    public class ApiControllerBase : MultiPartFormControllerBase<BinaryLogController>
+    public class ApiControllerBase : Controller
     {
-        protected ApiControllerBase(ILogger<BinaryLogController> logger, ITempFileService tempFileService) : base(logger, tempFileService)
-        {
-        }
-
         protected string RepositoryName => User.Claims.FirstOrDefault(c => c.Type == "urn:msbloc:repositoryName")?.Value;
         protected string RepositoryOwner => User.Claims.FirstOrDefault(c => c.Type == "urn:msbloc:repositoryOwner")?.Value;
     }
