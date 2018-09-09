@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -31,7 +32,7 @@ namespace MSBLOC.Web.Controllers.Api
 
         [HttpPost]
         [DisableFormValueModelBinding]
-        [MultiPartFormBinding(typeof(BinaryLogUploadData))]
+        [MultiPartFormBinding(typeof(LogUploadData))]
         [Route("upload")]
         [Produces("application/json")]
         public async Task<IActionResult> Upload()
@@ -42,41 +43,22 @@ namespace MSBLOC.Web.Controllers.Api
             }
 
             // Bind form data to a model
-            var binaryLogUploadData = new BinaryLogUploadData();
+            var logUploadData = await GetModelAsync<LogUploadData>();
 
-            var accumulator = await BuildMultiPartFormAccumulator<BinaryLogUploadData>();
-            var bindingSuccessful = await BindDataAsync(binaryLogUploadData, accumulator.GetResults());
-
-            if (!bindingSuccessful || !ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var requiredFormFileProperties = FormFileAttributeHelper.GetRequiredFormFileProperties(typeof(BinaryLogUploadData));
-            foreach (var requiredFormFileProperty in requiredFormFileProperties)
-            {
-                var fileName = requiredFormFileProperty.GetValue(binaryLogUploadData);
-                if (!TempFileService.Files.Contains(fileName))
-                {
-                    ModelState.AddModelError(requiredFormFileProperty.Name, $"File '{requiredFormFileProperty.Name}' with name: '{fileName}' not found in request.");
-                    return BadRequest(ModelState);
-                }
-            }
-
+            var resourcePath = TempFileService.GetFilePath(logUploadData.LogFile);
             var checkRun = await _binaryLogAnalyzerService.SubmitAsync(
                 RepositoryOwner,
                 RepositoryName,
-                binaryLogUploadData.CommitSha,
-                binaryLogUploadData.CloneRoot,
-                TempFileService.GetFilePath(binaryLogUploadData.BinaryLogFile));
+                logUploadData.CommitSha,
+                logUploadData.CloneRoot,
+                resourcePath);
 
             return Json(checkRun);
-        }
-
-        protected virtual Task<bool> BindDataAsync(BinaryLogUploadData model, Dictionary<string, StringValues> dataToBind)
-        {
-            var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(dataToBind), CultureInfo.CurrentCulture);
-            return TryUpdateModelAsync(model, string.Empty, formValueProvider);
         }
     }
 }

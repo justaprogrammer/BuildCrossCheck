@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using MSBLOC.Web.Controllers.Extensions;
 using MSBLOC.Web.Extensions;
@@ -26,7 +31,7 @@ namespace MSBLOC.Web.Controllers.Api
             Logger = logger;
         }
 
-        protected async Task<KeyValueAccumulator> BuildMultiPartFormAccumulator<TModel>()
+        protected async Task<KeyValueAccumulator> BuildMultiPartFormAccumulator<TModel>() where TModel : class, new()
         {
             var httpContextRequest = HttpContext.Request;
 
@@ -52,8 +57,8 @@ namespace MSBLOC.Web.Controllers.Api
                     {
                         var fileName = contentDisposition.FileName.Value;
 
-                        if (!FormFileAttributeHelper.GetFormFileNames(typeof(TModel))
-                            .Contains(contentDisposition.Name.Value))
+                        var formFileNames = FormFileAttributeHelper.GetFormFileNames(typeof(TModel));
+                        if (!formFileNames.Contains(contentDisposition.Name.Value))
                         {
                             Logger.LogWarning($"Unknown file '{contentDisposition.Name.Value}' with fileName: '{fileName}' is being ignored.");
                             // Drains any remaining section body that has not been consumed and
@@ -111,6 +116,38 @@ namespace MSBLOC.Web.Controllers.Api
             }
 
             return formAccumulator;
+        }
+
+        protected void ValidateModel<TFormFileModel>(TFormFileModel logUploadData)
+        {
+            foreach (var requiredFormFileProperty in FormFileAttributeHelper.GetRequiredFormFileProperties(typeof(TFormFileModel)))
+            {
+                var fileName = requiredFormFileProperty.GetValue(logUploadData);
+                if (!TempFileService.Files.Contains(fileName))
+                {
+                    ModelState.AddModelError(requiredFormFileProperty.Name,
+                        $"File '{requiredFormFileProperty.Name}' with name: '{fileName}' not found in request.");
+                }
+            }
+        }
+
+        protected virtual Task<bool> BindModelAsync<TFormFileModel>(TFormFileModel model, Dictionary<string, StringValues> dataToBind) where TFormFileModel : class
+        {
+            var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(dataToBind), CultureInfo.CurrentCulture);
+            return TryUpdateModelAsync(model, string.Empty, formValueProvider);
+        }
+
+        protected async Task<TFormFileModel> GetModelAsync<TFormFileModel>() where TFormFileModel : class, new()
+        {
+            var logUploadData = new TFormFileModel();
+            var accumulator = await BuildMultiPartFormAccumulator<TFormFileModel>();
+            var bindingSuccessful = await BindModelAsync(logUploadData, accumulator.GetResults());
+            if (bindingSuccessful)
+            {
+                ValidateModel(logUploadData);
+            }
+
+            return logUploadData;
         }
     }
 }

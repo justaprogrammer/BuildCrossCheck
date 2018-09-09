@@ -168,17 +168,17 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 });
             fileService.Files.Returns(new[] { name });
 
-            var formData = new BinaryLogUploadData
+            var logUploadData = new LogUploadData
             {
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot",
-                BinaryLogFile = string.Empty //Bad Data
+                LogFile = string.Empty //Bad Data
             };
 
             var fileController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
                 msblocService)
             {
-                ControllerContext = await RequestWithFiles(fileDictionary, formData),
+                ControllerContext = await RequestWithFiles(fileDictionary, logUploadData),
                 MetadataProvider = new EmptyModelMetadataProvider(),
                 ModelBinderFactory = Substitute.For<IModelBinderFactory>(),
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
@@ -212,17 +212,17 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 });
             fileService.Files.Returns(new[] { name });
 
-            var formData = new BinaryLogUploadData
+            var logUploadData = new LogUploadData
             {
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot",
-                BinaryLogFile = "someOtherFileName.txt" //Bad Data
+                LogFile = "someOtherFileName.txt" //Bad Data
             };
 
             var fileController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
                 msblocService)
             {
-                ControllerContext = await RequestWithFiles(fileDictionary, formData),
+                ControllerContext = await RequestWithFiles(fileDictionary, logUploadData),
                 MetadataProvider = new EmptyModelMetadataProvider(),
                 ModelBinderFactory = Substitute.For<IModelBinderFactory>(),
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
@@ -264,7 +264,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             msblocService.SubmitAsync(null, null, null, null, null).ReturnsForAnyArgs(checkRun);
 
-            var submissionData = new BinaryLogUploadData
+            var logUploadData = new LogUploadData
             {
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot"
@@ -285,7 +285,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
                 msblocService)
             {
-                ControllerContext = await RequestWithFiles(fileDictionary, submissionData, claims),
+                ControllerContext = await RequestWithFiles(fileDictionary, logUploadData, claims),
                 MetadataProvider = new EmptyModelMetadataProvider(),
                 ModelBinderFactory = Substitute.For<IModelBinderFactory>(),
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
@@ -297,8 +297,8 @@ namespace MSBLOC.Web.Tests.Controllers.api
             await msblocService.Received(1).SubmitAsync(
                 repoOwner,
                 repoName,
-                submissionData.CommitSha,
-                submissionData.CloneRoot,
+                logUploadData.CommitSha,
+                logUploadData.CloneRoot,
                 string.Empty);
 
             receivedFiles.Should().BeEquivalentTo(fileDictionary);
@@ -311,7 +311,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
         }
 
         private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary,
-            BinaryLogUploadData formData = null,
+            LogUploadData formData = null,
             IEnumerable<Claim> claims = null)
         {
             var boundary = "---9908908098";
@@ -322,7 +322,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             {
                 foreach (var kvp in fileDictionary)
                 {
-                    var fileRole = (isFirst) ? nameof(BinaryLogUploadData.BinaryLogFile) : "SomeOtherUnusedRole";
+                    var fileRole = (isFirst) ? nameof(LogUploadData.LogFile) : "SomeOtherUnusedRole";
                     isFirst = false;
                     formDataContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes(kvp.Value)), fileRole, kvp.Key);
                 }
@@ -358,11 +358,11 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             }
 
-            protected override Task<bool> BindDataAsync(BinaryLogUploadData model, Dictionary<string, StringValues> dataToBind)
+            protected override Task<bool> BindModelAsync<T>(T model, Dictionary<string, StringValues> dataToBind)
             {
                 foreach (var item in dataToBind)
                 {
-                    var propertyInfo = typeof(BinaryLogUploadData).GetProperty(item.Key);
+                    var propertyInfo = typeof(LogUploadData).GetProperty(item.Key);
                     var value = Convert.ChangeType(item.Value.ToString(), propertyInfo.PropertyType);
                     propertyInfo.SetValue(model, value);
                 }
