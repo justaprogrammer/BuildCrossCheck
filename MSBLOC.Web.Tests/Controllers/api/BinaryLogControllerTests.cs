@@ -30,19 +30,19 @@ using Xunit.Abstractions;
 
 namespace MSBLOC.Web.Tests.Controllers.api
 {
-    public class LogControllerTests
+    public class BinaryLogControllerTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly ILogger<LogControllerTests> _logger;
+        private readonly ILogger<BinaryLogControllerTests> _logger;
         private static readonly Faker Faker;
 
-        public LogControllerTests(ITestOutputHelper testOutputHelper)
+        public BinaryLogControllerTests(ITestOutputHelper testOutputHelper)
         {
-            _logger = TestLogger.Create<LogControllerTests>(testOutputHelper);
+            _logger = TestLogger.Create<BinaryLogControllerTests>(testOutputHelper);
             _testOutputHelper = testOutputHelper;
         }
 
-        static LogControllerTests()
+        static BinaryLogControllerTests()
         {
             Faker = new Faker();
         }
@@ -69,7 +69,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
+            var fileController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary),
@@ -105,7 +105,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
+            var fileController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileContents),
@@ -127,7 +127,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileService = Substitute.For<ITempFileService>();
             var msblocService = Substitute.For<ILogAnalyzerService>();
 
-            var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
+            var fileController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = new ControllerContext
@@ -168,14 +168,14 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 });
             fileService.Files.Returns(new[] { name });
 
-            var formData = new SubmissionData
+            var formData = new BinaryLogUploadData
             {
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot",
                 BinaryLogFile = string.Empty //Bad Data
             };
 
-            var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
+            var fileController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, formData),
@@ -212,14 +212,14 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 });
             fileService.Files.Returns(new[] { name });
 
-            var formData = new SubmissionData
+            var formData = new BinaryLogUploadData
             {
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot",
                 BinaryLogFile = "someOtherFileName.txt" //Bad Data
             };
 
-            var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
+            var fileController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, formData),
@@ -264,7 +264,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
             msblocService.SubmitAsync(null, null, null, null, null).ReturnsForAnyArgs(checkRun);
 
-            var submissionData = new SubmissionData
+            var submissionData = new BinaryLogUploadData
             {
                 CommitSha = "12345",
                 CloneRoot = "c:/cloneRoot"
@@ -282,7 +282,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 new Claim("urn:msbloc:repositoryOwnerId", faker.Random.Long().ToString())
             };
 
-            var fileController = new LogControllerStub(TestLogger.Create<LogController>(_testOutputHelper), fileService,
+            var fileController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
                 msblocService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, submissionData, claims),
@@ -311,7 +311,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
         }
 
         private static async Task<ControllerContext> RequestWithFiles(IDictionary<string, string> fileDictionary,
-            SubmissionData formData = null,
+            BinaryLogUploadData formData = null,
             IEnumerable<Claim> claims = null)
         {
             var boundary = "---9908908098";
@@ -322,7 +322,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             {
                 foreach (var kvp in fileDictionary)
                 {
-                    var fileRole = (isFirst) ? nameof(SubmissionData.BinaryLogFile) : "SomeOtherUnusedRole";
+                    var fileRole = (isFirst) ? nameof(BinaryLogUploadData.BinaryLogFile) : "SomeOtherUnusedRole";
                     isFirst = false;
                     formDataContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes(kvp.Value)), fileRole, kvp.Key);
                 }
@@ -351,18 +351,18 @@ namespace MSBLOC.Web.Tests.Controllers.api
             }
         }
 
-        private class LogControllerStub : LogController
+        private class BinaryLogControllerStub : BinaryLogController
         {
-            public LogControllerStub(ILogger<LogController> logger, ITempFileService tempFileService, ILogAnalyzerService logAnalyzerService) : base(logger, tempFileService, logAnalyzerService)
+            public BinaryLogControllerStub(ILogger<BinaryLogController> logger, ITempFileService tempFileService, ILogAnalyzerService logAnalyzerService) : base(logger, tempFileService, logAnalyzerService)
             {
 
             }
 
-            protected override Task<bool> BindDataAsync(SubmissionData model, Dictionary<string, StringValues> dataToBind)
+            protected override Task<bool> BindDataAsync(BinaryLogUploadData model, Dictionary<string, StringValues> dataToBind)
             {
                 foreach (var item in dataToBind)
                 {
-                    var propertyInfo = typeof(SubmissionData).GetProperty(item.Key);
+                    var propertyInfo = typeof(BinaryLogUploadData).GetProperty(item.Key);
                     var value = Convert.ChangeType(item.Value.ToString(), propertyInfo.PropertyType);
                     propertyInfo.SetValue(model, value);
                 }

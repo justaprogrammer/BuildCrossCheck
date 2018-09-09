@@ -3,7 +3,7 @@ using MSBLOC.Web.Attributes;
 
 namespace MSBLOC.Web.Models
 {
-    public class SubmissionData
+    public class BinaryLogUploadData
     {
         [Required]
         public string CommitSha { get; set; }

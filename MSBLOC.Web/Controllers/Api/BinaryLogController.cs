@@ -24,22 +24,22 @@ namespace MSBLOC.Web.Controllers.Api
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class LogController : Controller
+    public class BinaryLogController : Controller
     {
         private static readonly FormOptions DefaultFormOptions = new FormOptions();
         private static readonly Lazy<IList<string>> SubmissionDataFormFileNamesLazy = new Lazy<IList<string>>(() =>
         {
-            return typeof(SubmissionData).GetProperties()
+            return typeof(BinaryLogUploadData).GetProperties()
                 .Where(p => p.GetCustomAttributes(typeof(FormFileAttribute), false).Any())
                 .Select(p => p.Name)
                 .ToList();
         });
 
-        private readonly ILogger<LogController> _logger;
+        private readonly ILogger<BinaryLogController> _logger;
         private readonly ITempFileService _tempFileService;
         private readonly ILogAnalyzerService _logAnalyzerService;
 
-        public LogController(ILogger<LogController> logger, ITempFileService tempFileService, ILogAnalyzerService logAnalyzerService)
+        public BinaryLogController(ILogger<BinaryLogController> logger, ITempFileService tempFileService, ILogAnalyzerService logAnalyzerService)
         {
             _logger = logger;
             _tempFileService = tempFileService;
@@ -48,7 +48,7 @@ namespace MSBLOC.Web.Controllers.Api
 
         [HttpPost]
         [DisableFormValueModelBinding]
-        [MultiPartFormBinding(typeof(SubmissionData))]
+        [MultiPartFormBinding(typeof(BinaryLogUploadData))]
         [Route("upload")]
         [Produces("application/json")]
         public async Task<IActionResult> Upload()
@@ -146,9 +146,9 @@ namespace MSBLOC.Web.Controllers.Api
             }
 
             // Bind form data to a model
-            var submissionData = new SubmissionData();
+            var binaryLogUploadData = new BinaryLogUploadData();
 
-            var bindingSuccessful = await BindDataAsync(submissionData, formAccumulator.GetResults());
+            var bindingSuccessful = await BindDataAsync(binaryLogUploadData, formAccumulator.GetResults());
 
             if (!bindingSuccessful)
             {
@@ -158,13 +158,13 @@ namespace MSBLOC.Web.Controllers.Api
                 }
             }
 
-            var requiredFormFileProperties = typeof(SubmissionData).GetProperties()
+            var requiredFormFileProperties = typeof(BinaryLogUploadData).GetProperties()
                 .Where(p => p.GetCustomAttributes(typeof(RequiredAttribute), true).Any())
                 .Where(p => p.GetCustomAttributes(typeof(FormFileAttribute), true).Any());
 
             foreach (var requiredFormFileProperty in requiredFormFileProperties)
             {
-                var fileName = requiredFormFileProperty.GetValue(submissionData);
+                var fileName = requiredFormFileProperty.GetValue(binaryLogUploadData);
                 if (!_tempFileService.Files.Contains(fileName))
                 {
                     ModelState.AddModelError(requiredFormFileProperty.Name, $"File '{requiredFormFileProperty.Name}' with name: '{fileName}' not found in request.");
@@ -178,14 +178,14 @@ namespace MSBLOC.Web.Controllers.Api
             var checkRun = await _logAnalyzerService.SubmitAsync(
                 repositoryOwner,
                 repositoryName,
-                submissionData.CommitSha,
-                submissionData.CloneRoot,
-                _tempFileService.GetFilePath(submissionData.BinaryLogFile));
+                binaryLogUploadData.CommitSha,
+                binaryLogUploadData.CloneRoot,
+                _tempFileService.GetFilePath(binaryLogUploadData.BinaryLogFile));
 
             return Json(checkRun);
         }
 
-        protected virtual async Task<bool> BindDataAsync(SubmissionData model, Dictionary<string, StringValues> dataToBind)
+        protected virtual async Task<bool> BindDataAsync(BinaryLogUploadData model, Dictionary<string, StringValues> dataToBind)
         {
             var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(dataToBind), CultureInfo.CurrentCulture);
             var bindingSuccessful = await TryUpdateModelAsync(model, "", formValueProvider);
@@ -203,50 +203,6 @@ namespace MSBLOC.Web.Controllers.Api
                 return Encoding.UTF8;
             }
             return mediaType.Encoding;
-        }
-
-        private static class MultipartRequestHelper
-        {
-            public static string GetBoundary(MediaTypeHeaderValue contentType, int lengthLimit)
-            {
-                var boundary = HeaderUtilities.RemoveQuotes(contentType.Boundary).Value;
-                if (string.IsNullOrWhiteSpace(boundary))
-                {
-                    throw new InvalidDataException("Missing content-type boundary.");
-                }
-
-                if (boundary.Length > lengthLimit)
-                {
-                    throw new InvalidDataException(
-                        $"Multipart boundary length limit {lengthLimit} exceeded.");
-                }
-
-                return boundary;
-            }
-
-            public static bool IsMultipartContentType(string contentType)
-            {
-                return !string.IsNullOrEmpty(contentType)
-                       && contentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) >= 0;
-            }
-
-            public static bool HasFormDataContentDisposition(ContentDispositionHeaderValue contentDisposition)
-            {
-                // Content-Disposition: form-data; name="key";
-                return contentDisposition != null
-                       && contentDisposition.DispositionType.Equals("form-data")
-                       && string.IsNullOrEmpty(contentDisposition.FileName.Value)
-                       && string.IsNullOrEmpty(contentDisposition.FileNameStar.Value);
-            }
-
-            public static bool HasFileContentDisposition(ContentDispositionHeaderValue contentDisposition)
-            {
-                // Content-Disposition: form-data; name="myfile1"; filename="Misc 002.jpg"
-                return contentDisposition != null
-                       && contentDisposition.DispositionType.Equals("form-data")
-                       && (!string.IsNullOrEmpty(contentDisposition.FileName.Value)
-                           || !string.IsNullOrEmpty(contentDisposition.FileNameStar.Value));
-            }
         }
 
         [HttpGet]
