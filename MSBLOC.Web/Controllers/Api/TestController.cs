@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ namespace MSBLOC.Web.Controllers.Api
     {
         [HttpGet]
         [Route("test")]
+        [ExcludeFromCodeCoverage]
         public IActionResult TestAuthentication()
         {
             return Json(new

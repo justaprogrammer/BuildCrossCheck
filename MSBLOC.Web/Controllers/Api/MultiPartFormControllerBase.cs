@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -131,12 +132,6 @@ namespace MSBLOC.Web.Controllers.Api
             }
         }
 
-        protected virtual Task<bool> BindModelAsync<TFormFileModel>(TFormFileModel model, Dictionary<string, StringValues> dataToBind) where TFormFileModel : class
-        {
-            var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(dataToBind), CultureInfo.CurrentCulture);
-            return TryUpdateModelAsync(model, string.Empty, formValueProvider);
-        }
-
         protected async Task<TFormFileModel> GetModelAsync<TFormFileModel>() where TFormFileModel : class, new()
         {
             var logUploadData = new TFormFileModel();
@@ -148,6 +143,13 @@ namespace MSBLOC.Web.Controllers.Api
             }
 
             return logUploadData;
+        }
+
+        [ExcludeFromCodeCoverage]
+        protected virtual Task<bool> BindModelAsync<TFormFileModel>(TFormFileModel model, Dictionary<string, StringValues> dataToBind) where TFormFileModel : class
+        {
+            var formValueProvider = new FormValueProvider(BindingSource.Form, new FormCollection(dataToBind), CultureInfo.CurrentCulture);
+            return TryUpdateModelAsync(model, string.Empty, formValueProvider);
         }
     }
 }
