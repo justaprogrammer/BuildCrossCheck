@@ -6,7 +6,7 @@ namespace MSBLOC.Core.Interfaces
     /// <summary>
     /// This service provides functionality to analyze a binary log file and submits it's findings to GitHub.
     /// </summary>
-    public interface ILogAnalyzerService
+    public interface IBinaryLogAnalyzerService
     {
         /// <summary>
         /// Analyzes a binary log file and submits it's findings to GitHub.

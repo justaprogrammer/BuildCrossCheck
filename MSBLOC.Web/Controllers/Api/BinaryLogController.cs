@@ -21,12 +21,12 @@ namespace MSBLOC.Web.Controllers.Api
     [Route("api/[controller]")]
     public class BinaryLogController : MultiPartFormControllerBase<BinaryLogController>
     {
-        private readonly ILogAnalyzerService _logAnalyzerService;
+        private readonly IBinaryLogAnalyzerService _binaryLogAnalyzerService;
 
-        public BinaryLogController(ILogger<BinaryLogController> logger, ITempFileService tempFileService, ILogAnalyzerService logAnalyzerService)
+        public BinaryLogController(ILogger<BinaryLogController> logger, ITempFileService tempFileService, IBinaryLogAnalyzerService binaryLogAnalyzerService)
             : base(logger, tempFileService)
         {
-            _logAnalyzerService = logAnalyzerService;
+            _binaryLogAnalyzerService = binaryLogAnalyzerService;
         }
 
         [HttpPost]
@@ -63,7 +63,7 @@ namespace MSBLOC.Web.Controllers.Api
                 }
             }
 
-            var checkRun = await _logAnalyzerService.SubmitAsync(
+            var checkRun = await _binaryLogAnalyzerService.SubmitAsync(
                 RepositoryOwner,
                 RepositoryName,
                 binaryLogUploadData.CommitSha,

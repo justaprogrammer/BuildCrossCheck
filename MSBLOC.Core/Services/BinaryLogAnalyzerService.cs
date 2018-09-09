@@ -13,7 +13,7 @@ using MSBLOC.Core.Model.LogAnalyzer;
 namespace MSBLOC.Core.Services
 {
     /// <inheritdoc />
-    public class LogAnalyzerService : ILogAnalyzerService
+    public class BinaryLogAnalyzerService : IBinaryLogAnalyzerService
     {
         private const string CheckRunName = "MSBuildLog Analyzer";
         private const string CheckRunTitle = "MSBuildLog Analysis";
@@ -22,10 +22,10 @@ namespace MSBLOC.Core.Services
         private readonly IGitHubAppModelService _gitHubAppModelService;
         private readonly ILogger _logger;
 
-        public LogAnalyzerService(
+        public BinaryLogAnalyzerService(
             IBinaryLogProcessor binaryLogProcessor,
             IGitHubAppModelService gitHubAppModelService,
-            ILogger<LogAnalyzerService> logger)
+            ILogger<BinaryLogAnalyzerService> logger)
         {
             _logger = logger;
             _binaryLogProcessor = binaryLogProcessor;

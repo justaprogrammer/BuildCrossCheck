@@ -56,7 +56,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> {{name, fileContent}};
 
             var fileService = Substitute.For<ITempFileService>();
-            var msblocService = Substitute.For<ILogAnalyzerService>();
+            var msblocService = Substitute.For<IBinaryLogAnalyzerService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -92,7 +92,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 .ToDictionary(f => $"{string.Join("_", new Faker().Lorem.Words(4))}.txt", f => f);
 
             var fileService = Substitute.For<ITempFileService>();
-            var msblocService = Substitute.For<ILogAnalyzerService>();
+            var msblocService = Substitute.For<IBinaryLogAnalyzerService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -125,7 +125,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
         public async Task UploadBadRequestTest()
         {
             var fileService = Substitute.For<ITempFileService>();
-            var msblocService = Substitute.For<ILogAnalyzerService>();
+            var msblocService = Substitute.For<IBinaryLogAnalyzerService>();
 
             var fileController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
                 msblocService)
@@ -154,7 +154,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> { { name, fileContent } };
 
             var fileService = Substitute.For<ITempFileService>();
-            var msblocService = Substitute.For<ILogAnalyzerService>();
+            var msblocService = Substitute.For<IBinaryLogAnalyzerService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -198,7 +198,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> { { name, fileContent } };
 
             var fileService = Substitute.For<ITempFileService>();
-            var msblocService = Substitute.For<ILogAnalyzerService>();
+            var msblocService = Substitute.For<IBinaryLogAnalyzerService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -242,7 +242,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> {{name, fileContent}};
 
             var fileService = Substitute.For<ITempFileService>();
-            var msblocService = Substitute.For<ILogAnalyzerService>();
+            var msblocService = Substitute.For<IBinaryLogAnalyzerService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -353,7 +353,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
         private class BinaryLogControllerStub : BinaryLogController
         {
-            public BinaryLogControllerStub(ILogger<BinaryLogController> logger, ITempFileService tempFileService, ILogAnalyzerService logAnalyzerService) : base(logger, tempFileService, logAnalyzerService)
+            public BinaryLogControllerStub(ILogger<BinaryLogController> logger, ITempFileService tempFileService, IBinaryLogAnalyzerService binaryLogAnalyzerService) : base(logger, tempFileService, binaryLogAnalyzerService)
             {
 
             }
