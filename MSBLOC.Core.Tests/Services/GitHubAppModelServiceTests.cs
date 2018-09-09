@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Bogus;
 using FluentAssertions;
+using FluentAssertions.Specialized;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Interfaces.GitHub;
@@ -194,22 +195,26 @@ namespace MSBLOC.Core.Tests.Services
             var gitHubAppModelService = CreateTarget();
 
             gitHubAppModelService.Awaiting(async s =>
-            {
-                var annotations = FakeAnnotation.Generate(51).ToArray();
+                {
+                    var annotations = FakeAnnotation.Generate(51).ToArray();
 
-                await s.CreateCheckRunAsync(
-                    Faker.Internet.UserName(),
-                    Faker.Lorem.Word(),
-                    Faker.Random.String(),
-                    Faker.Lorem.Word(), 
-                    Faker.Lorem.Sentence(), 
-                    Faker.Lorem.Paragraph(), 
-                    false,
-                    annotations, 
-                    Faker.Date.RecentOffset(2), 
-                    Faker.Date.RecentOffset(1));
+                    await s.CreateCheckRunAsync(
+                        Faker.Internet.UserName(),
+                        Faker.Lorem.Word(),
+                        Faker.Random.String(),
+                        Faker.Lorem.Word(), 
+                        Faker.Lorem.Sentence(), 
+                        Faker.Lorem.Paragraph(), 
+                        false,
+                        annotations, 
+                        Faker.Date.RecentOffset(2), 
+                        Faker.Date.RecentOffset(1));
 
-            }).Should().Throw<ArgumentException>().WithMessage("Cannot create more than 50 annotations at a time");
+                }).Should()
+                .Throw<GitHubAppModelException>()
+                .WithMessage("Error creating CheckRun.")
+                .WithInnerException<ArgumentException>()
+                .WithMessage("Cannot create more than 50 annotations at a time");
         }
 
         [Fact]
@@ -217,24 +222,23 @@ namespace MSBLOC.Core.Tests.Services
         {
             var gitHubAppModelService = CreateTarget();
 
-            var exceptionAssertions = gitHubAppModelService.Awaiting(async s =>
-            {
-                var annotations = FakeAnnotation.Generate(51).ToArray();
+            gitHubAppModelService.Awaiting(async s =>
+                {
+                    var annotations1 = FakeAnnotation.Generate(51).ToArray();
 
-                await s.UpdateCheckRunAsync(
-                    Faker.Random.Long(),
-                    Faker.Internet.UserName(),
-                    Faker.Lorem.Word(),
-                    Faker.Random.String(),
-                    Faker.Lorem.Sentence(),
-                    Faker.Lorem.Paragraph(),
-                    annotations,
-                    Faker.Date.RecentOffset(2),
-                    Faker.Date.RecentOffset(1));
+                    await s.UpdateCheckRunAsync(
+                        Faker.Random.Long(),
+                        Faker.Internet.UserName(),
+                        Faker.Lorem.Word(),
+                        Faker.Random.String(),
+                        Faker.Lorem.Sentence(),
+                        Faker.Lorem.Paragraph(),
+                        annotations1,
+                        Faker.Date.RecentOffset(2),
+                        Faker.Date.RecentOffset(1));
 
-            }).Should().Throw<GitHubAppModelException>();
-
-            exceptionAssertions
+                }).Should()
+                .Throw<GitHubAppModelException>()
                 .WithMessage("Error updating CheckRun.")
                 .WithInnerException<ArgumentException>()
                 .WithMessage("Cannot create more than 50 annotations at a time");
@@ -267,7 +271,7 @@ namespace MSBLOC.Core.Tests.Services
             }).Should().Throw<GitHubAppModelException>();
 
             exceptionAssertions
-                .WithMessage("Error updating CheckRun.")
+                .WithMessage("Error creating CheckRun.")
                 .WithInnerException<InvalidOperationException>()
                 .WithMessage("ICheckRunsClient is null");
         }
@@ -280,21 +284,24 @@ namespace MSBLOC.Core.Tests.Services
             var gitHubAppModelService = CreateTarget(checkClient: checkClient);
 
             gitHubAppModelService.Awaiting(async s =>
-            {
-                var annotations = FakeAnnotation.Generate(1).ToArray();
+                {
+                    var annotations1 = FakeAnnotation.Generate(1).ToArray();
 
-                await s.UpdateCheckRunAsync(
-                    Faker.Random.Long(),
-                    Faker.Internet.UserName(),
-                    Faker.Lorem.Word(),
-                    Faker.Random.String(),
-                    Faker.Lorem.Sentence(),
-                    Faker.Lorem.Paragraph(),
-                    annotations,
-                    Faker.Date.RecentOffset(2),
-                    Faker.Date.RecentOffset(1));
+                    await s.UpdateCheckRunAsync(
+                        Faker.Random.Long(),
+                        Faker.Internet.UserName(),
+                        Faker.Lorem.Word(),
+                        Faker.Random.String(),
+                        Faker.Lorem.Sentence(),
+                        Faker.Lorem.Paragraph(),
+                        annotations1,
+                        Faker.Date.RecentOffset(2),
+                        Faker.Date.RecentOffset(1));
 
-            }).Should().Throw<InvalidOperationException>().WithMessage("ICheckRunsClient is null");
+                }).Should().Throw<GitHubAppModelException>()
+                .WithMessage("Error updating CheckRun.")
+                .WithInnerException<InvalidOperationException>()
+                .WithMessage("ICheckRunsClient is null");
         }
 
         [Fact]
