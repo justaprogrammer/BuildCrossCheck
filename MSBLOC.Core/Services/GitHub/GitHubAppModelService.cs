@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Core.Model.LogAnalyzer;
@@ -150,28 +149,6 @@ namespace MSBLOC.Core.Services.GitHub
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        }
-    }
-
-    [Serializable]
-    public class GitHubAppModelException : Exception
-    {
-        public GitHubAppModelException()
-        {
-        }
-
-        public GitHubAppModelException(string message) : base(message)
-        {
-        }
-
-        public GitHubAppModelException(string message, Exception inner) : base(message, inner)
-        {
-        }
-
-        protected GitHubAppModelException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
-        {
         }
     }
 }

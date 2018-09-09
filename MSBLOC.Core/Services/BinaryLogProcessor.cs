@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -123,28 +122,6 @@ namespace MSBLOC.Core.Services
                 endLineNumber,
                 message,
                 code);
-        }
-    }
-
-    [Serializable]
-    public class BinaryLogProcessingException : Exception
-    {
-        public BinaryLogProcessingException()
-        {
-        }
-
-        public BinaryLogProcessingException(string message) : base(message)
-        {
-        }
-
-        public BinaryLogProcessingException(string message, Exception inner) : base(message, inner)
-        {
-        }
-
-        protected BinaryLogProcessingException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
-        {
         }
     }
 }
