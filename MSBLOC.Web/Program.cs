@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Azure.KeyVault;
@@ -15,11 +11,13 @@ namespace MSBLOC.Web
 {
     public class Program
     {
+        [ExcludeFromCodeCoverage]
         public static void Main(string[] args)
         {
             BuildWebHost(args).Run();
         }
 
+        [ExcludeFromCodeCoverage]
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration(new Program().MSBLOCConfigureAppConfiguration)
@@ -48,12 +46,14 @@ namespace MSBLOC.Web
             }
         }
 
+        [ExcludeFromCodeCoverage]
         protected virtual KeyVaultClient GetKeyVaultClient()
         {
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
             return new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
         }
 
+        [ExcludeFromCodeCoverage]
         protected virtual IConfigurationBuilder GetConfigurationBuilder()
         {
             return new ConfigurationBuilder();
