@@ -29,43 +29,50 @@ namespace MSBLOC.Core.Services.GitHub
             DateTimeOffset? startedAt,
             DateTimeOffset? completedAt)
         {
-            if (owner == null) throw new ArgumentNullException(nameof(owner));
-            if (repository == null) throw new ArgumentNullException(nameof(repository));
-            if (sha == null) throw new ArgumentNullException(nameof(sha));
-            if (checkRunTitle == null) throw new ArgumentNullException(nameof(checkRunTitle));
-            if (checkRunSummary == null) throw new ArgumentNullException(nameof(checkRunSummary));
-
-            if ((annotations?.Length ?? 0) > 50)
-                throw new ArgumentException("Cannot create more than 50 annotations at a time");
-
-            var gitHubClient = await _gitHubAppClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
-            var checkRunsClient = gitHubClient?.Check?.Run;
-
-            if (checkRunsClient == null) throw new InvalidOperationException("ICheckRunsClient is null");
-
-            var newCheckRun = new NewCheckRun(checkRunName, sha)
+            try
             {
-                Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
+                if (owner == null) throw new ArgumentNullException(nameof(owner));
+                if (repository == null) throw new ArgumentNullException(nameof(repository));
+                if (sha == null) throw new ArgumentNullException(nameof(sha));
+                if (checkRunTitle == null) throw new ArgumentNullException(nameof(checkRunTitle));
+                if (checkRunSummary == null) throw new ArgumentNullException(nameof(checkRunSummary));
+
+                if ((annotations?.Length ?? 0) > 50)
+                    throw new ArgumentException("Cannot create more than 50 annotations at a time");
+
+                var gitHubClient = await _gitHubAppClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
+                var checkRunsClient = gitHubClient?.Check?.Run;
+
+                if (checkRunsClient == null) throw new InvalidOperationException("ICheckRunsClient is null");
+
+                var newCheckRun = new NewCheckRun(checkRunName, sha)
                 {
-                    Annotations = annotations?
-                        .Select(annotation => new NewCheckRunAnnotation(annotation.Filename, 
-                            annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
-                            annotation.Message))
-                        .ToArray()
-                },
-                Status = CheckStatus.Completed,
-                StartedAt = startedAt,
-                CompletedAt = completedAt,
-                Conclusion = checkRunIsSuccess ? CheckConclusion.Success : CheckConclusion.Failure
-            };
+                    Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
+                    {
+                        Annotations = annotations?
+                            .Select(annotation => new NewCheckRunAnnotation(annotation.Filename,
+                                annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
+                                annotation.Message))
+                            .ToArray()
+                    },
+                    Status = CheckStatus.Completed,
+                    StartedAt = startedAt,
+                    CompletedAt = completedAt,
+                    Conclusion = checkRunIsSuccess ? CheckConclusion.Success : CheckConclusion.Failure
+                };
 
-            var checkRun = await checkRunsClient.Create(owner, repository, newCheckRun);
+                var checkRun = await checkRunsClient.Create(owner, repository, newCheckRun);
 
-            return new CheckRun
+                return new CheckRun
+                {
+                    Id = checkRun.Id,
+                    Url = checkRun.HtmlUrl,
+                };
+            }
+            catch (Exception ex)
             {
-                Id = checkRun.Id,
-                Url = checkRun.HtmlUrl,
-            };
+                throw new GitHubAppModelException("Error creating CheckRun.", ex);
+            }
         }
 
         /// <inheritdoc />
@@ -73,31 +80,45 @@ namespace MSBLOC.Core.Services.GitHub
             string sha, string checkRunTitle, string checkRunSummary, Annotation[] annotations,
             DateTimeOffset? startedAt, DateTimeOffset? completedAt)
         {
-            if (annotations.Length > 50)
-                throw new ArgumentException("Cannot create more than 50 annotations at a time");
-
-            var gitHubClient = await _gitHubAppClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
-            var checkRunsClient = gitHubClient?.Check?.Run;
-
-            if (checkRunsClient == null) throw new InvalidOperationException("ICheckRunsClient is null");
-
-            await checkRunsClient.Update(owner, repository, checkRunId, new CheckRunUpdate()
+            try
             {
-                Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
+                if (annotations.Length > 50)
+                    throw new ArgumentException("Cannot create more than 50 annotations at a time");
+
+                var gitHubClient = await _gitHubAppClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
+                var checkRunsClient = gitHubClient?.Check?.Run;
+
+                if (checkRunsClient == null) throw new InvalidOperationException("ICheckRunsClient is null");
+
+                await checkRunsClient.Update(owner, repository, checkRunId, new CheckRunUpdate()
                 {
-                    Annotations = annotations
-                        .Select(annotation => new NewCheckRunAnnotation(annotation.Filename,
-                            annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
-                            annotation.Message))
-                        .ToArray()
-                }
-            });
+                    Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
+                    {
+                        Annotations = annotations
+                            .Select(annotation => new NewCheckRunAnnotation(annotation.Filename,
+                                annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
+                                annotation.Message))
+                            .ToArray()
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new GitHubAppModelException("Error updating CheckRun.", ex);
+            }
         }
 
         public async Task<string> GetRepositoryFileAsync(string owner, string repository, string path, string reference)
         {
-            var gitHubClient = await _gitHubAppClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
-            return await GetRepositoryFileAsync(gitHubClient, owner, repository, path, reference);
+            try
+            {
+                var gitHubClient = await _gitHubAppClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
+                return await GetRepositoryFileAsync(gitHubClient, owner, repository, path, reference);
+            }
+            catch (Exception ex)
+            {
+                throw new GitHubAppModelException("Error getting repository file.", ex);
+            }
         }
 
         public async Task<LogAnalyzerConfiguration> GetLogAnalyzerConfigurationAsync(string owner, string repository, string reference)
@@ -105,7 +126,14 @@ namespace MSBLOC.Core.Services.GitHub
             var fileContent = await GetRepositoryFileAsync(owner, repository, "msbloc.json", reference);
             if (fileContent == null) return null;
 
-            return JsonConvert.DeserializeObject<LogAnalyzerConfiguration>(fileContent);
+            try
+            {
+                return JsonConvert.DeserializeObject<LogAnalyzerConfiguration>(fileContent);
+            }
+            catch (Exception ex)
+            {
+                throw new GitHubAppModelException("Error deserializing LogAnalyzerConfiguration.", ex);
+            }
         }
 
         private static Octokit.CheckAnnotationLevel GetCheckWarningLevel(Annotation annotation)

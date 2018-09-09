@@ -201,16 +201,19 @@ namespace MSBLOC.Core.Tests.Services
             project.AddItems("Program.cs", @"Properties\AssemblyInfo.cs");
             solutionDetails.Add(project);
 
-            var projectDetailsException = Assert.Throws<ProjectDetailsException>(() =>
+            var incorrectConsoleRoot = @"C:\projects\testconsoleapp2\";
+
+            var binaryLogProcessingException = Assert.Throws<BinaryLogProcessingException>(() =>
             {
-                var parsedBinaryLog = ParseLogs("testconsoleapp1-1warning.binlog", @"C:\projects\testconsoleapp2\");
+                var parsedBinaryLog = ParseLogs("testconsoleapp1-1warning.binlog", incorrectConsoleRoot);
 
                 parsedBinaryLog.BuildMessages.ToArray().Should().BeEquivalentTo(new BuildMessage[0]);
 
                 parsedBinaryLog.SolutionDetails.Should().BeEquivalentTo(solutionDetails, options => options.IncludingNestedObjects().IncludingProperties());
             });
 
-            projectDetailsException.Message.Should().Be(@"Project file path ""C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj"" is not a subpath of ""C:\projects\testconsoleapp2\""");
+            binaryLogProcessingException.Message.Should().MatchRegex($"^Error processing log. binLogPath:\'.*?testconsoleapp1-1warning.binlog\' cloneRoot:\'{incorrectConsoleRoot.Replace("\\", "\\\\")}\'$");
+            binaryLogProcessingException.InnerException.Message.Should().Be($@"Project file path ""C:\projects\testconsoleapp1\TestConsoleApp1\TestConsoleApp1.csproj"" is not a subpath of ""{incorrectConsoleRoot}""");
         }
 
         private BuildDetails ParseLogs(string resourceName, string cloneRoot)
