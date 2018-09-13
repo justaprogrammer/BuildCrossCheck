@@ -106,7 +106,6 @@ namespace MSBLOC.Web
             services.AddSingleton<IProxyGenerator, ProxyGenerator>();
             
             services.AddScoped<ITempFileService, LocalTempFileService>();
-            services.AddScoped<IBinaryLogProcessor, BinaryLogProcessor>();
             services.AddScoped<ITokenGenerator>(s =>
             {
                 var gitHubAppId = s.GetService<IOptions<GitHubAppOptions>>().Value.Id;
@@ -127,7 +126,7 @@ namespace MSBLOC.Web
             });
             services.AddScoped<IAccessTokenService, AccessTokenService>();
 
-            services.AddTransient<IBinaryLogAnalyzerService, BinaryLogAnalyzerService>();
+            services.AddTransient<ICheckRunSubmissionService, CheckRunSubmissionService>();
 
             services.AddSwaggerGen(c =>
             {

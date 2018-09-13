@@ -4,9 +4,9 @@ using MSBLOC.Core.Model.GitHub;
 namespace MSBLOC.Core.Interfaces
 {
     /// <summary>
-    /// This service provides functionality to analyze a binary log file and submits it's findings to GitHub.
+    /// This service provides functionality to submit check run data to GitHub.
     /// </summary>
-    public interface IBinaryLogAnalyzerService
+    public interface ICheckRunSubmissionService
     {
         /// <summary>
         /// Analyzes a binary log file and submits it's findings to GitHub.
