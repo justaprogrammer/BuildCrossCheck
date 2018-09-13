@@ -52,7 +52,7 @@ We do not keep a copy of you binary log file.
           if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
           {
               Import-Module .\tools\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
-              Send-MsbuildLogAppveyor output.binlog -Path output.binlog -Token $env:MSBLOC_JWT
+              Send-MsbuildLogAppveyor -Path output.binlog -Token $env:MSBLOC_JWT
           }
    ```
    The key points are as follows
