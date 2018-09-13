@@ -30,19 +30,19 @@ using Xunit.Abstractions;
 
 namespace MSBLOC.Web.Tests.Controllers.api
 {
-    public class BinaryLogControllerTests
+    public class CheckRunControllerTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly ILogger<BinaryLogControllerTests> _logger;
+        private readonly ILogger<CheckRunControllerTests> _logger;
         private static readonly Faker Faker;
 
-        public BinaryLogControllerTests(ITestOutputHelper testOutputHelper)
+        public CheckRunControllerTests(ITestOutputHelper testOutputHelper)
         {
-            _logger = TestLogger.Create<BinaryLogControllerTests>(testOutputHelper);
+            _logger = TestLogger.Create<CheckRunControllerTests>(testOutputHelper);
             _testOutputHelper = testOutputHelper;
         }
 
-        static BinaryLogControllerTests()
+        static CheckRunControllerTests()
         {
             Faker = new Faker();
         }
@@ -56,7 +56,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> {{name, fileContent}};
 
             var fileService = Substitute.For<ITempFileService>();
-            var binaryLogAnalyzerService = Substitute.For<IBinaryLogAnalyzerService>();
+            var msblocService = Substitute.For<IBinaryLogAnalyzerService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -69,8 +69,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var binaryLogController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
-                binaryLogAnalyzerService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -78,7 +77,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
             };
 
-            await binaryLogController.Upload();
+            await checkRunController.Upload();
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
 
@@ -92,7 +91,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 .ToDictionary(f => $"{string.Join("_", new Faker().Lorem.Words(4))}.txt", f => f);
 
             var fileService = Substitute.For<ITempFileService>();
-            var binaryLogAnalyzerService = Substitute.For<IBinaryLogAnalyzerService>();
+            var msblocService = Substitute.For<IBinaryLogAnalyzerService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -105,8 +104,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var binaryLogController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
-                binaryLogAnalyzerService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService)
             {
                 ControllerContext = await RequestWithFiles(fileContents),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -114,7 +112,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
             };
 
-            await binaryLogController.Upload();
+            await checkRunController.Upload();
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Any<string>(), Arg.Any<Stream>());
 
@@ -125,10 +123,9 @@ namespace MSBLOC.Web.Tests.Controllers.api
         public async Task UploadBadRequestTest()
         {
             var fileService = Substitute.For<ITempFileService>();
-            var binaryLogAnalyzerService = Substitute.For<IBinaryLogAnalyzerService>();
+            var msblocService = Substitute.For<IBinaryLogAnalyzerService>();
 
-            var binaryLogController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
-                binaryLogAnalyzerService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService)
             {
                 ControllerContext = new ControllerContext
                 {
@@ -139,7 +136,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
             };
 
-            var result = await binaryLogController.Upload() as BadRequestObjectResult;
+            var result = await checkRunController.Upload() as BadRequestObjectResult;
 
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(400);
@@ -154,7 +151,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> { { name, fileContent } };
 
             var fileService = Substitute.For<ITempFileService>();
-            var binaryLogAnalyzerService = Substitute.For<IBinaryLogAnalyzerService>();
+            var msblocService = Substitute.For<IBinaryLogAnalyzerService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -175,8 +172,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 LogFile = string.Empty //Bad Data
             };
 
-            var binaryLogController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
-                binaryLogAnalyzerService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, logUploadData),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -184,7 +180,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
             };
 
-            var result = await binaryLogController.Upload() as BadRequestObjectResult;
+            var result = await checkRunController.Upload() as BadRequestObjectResult;
             result.Should().NotBeNull();
             result.Value.Should().BeOfType<SerializableError>();
         }
@@ -198,7 +194,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> { { name, fileContent } };
 
             var fileService = Substitute.For<ITempFileService>();
-            var binaryLogAnalyzerService = Substitute.For<IBinaryLogAnalyzerService>();
+            var msblocService = Substitute.For<IBinaryLogAnalyzerService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -219,8 +215,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 LogFile = "someOtherFileName.txt" //Bad Data
             };
 
-            var binaryLogController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
-                binaryLogAnalyzerService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, logUploadData),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -228,7 +223,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
             };
 
-            var result = await binaryLogController.Upload() as BadRequestObjectResult;
+            var result = await checkRunController.Upload() as BadRequestObjectResult;
             result.Should().NotBeNull();
             result.Value.Should().BeOfType<SerializableError>();
         }
@@ -242,7 +237,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> {{name, fileContent}};
 
             var fileService = Substitute.For<ITempFileService>();
-            var binaryLogAnalyzerService = Substitute.For<IBinaryLogAnalyzerService>();
+            var msblocService = Substitute.For<IBinaryLogAnalyzerService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -262,7 +257,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 Url = Faker.Internet.Url()
             };
 
-            binaryLogAnalyzerService.SubmitAsync(null, null, null, null, null).ReturnsForAnyArgs(checkRun);
+            msblocService.SubmitAsync(null, null, null, null, null).ReturnsForAnyArgs(checkRun);
 
             var logUploadData = new LogUploadData
             {
@@ -282,8 +277,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 new Claim("urn:msbloc:repositoryOwnerId", faker.Random.Long().ToString())
             };
 
-            var binaryLogController = new BinaryLogControllerStub(TestLogger.Create<BinaryLogController>(_testOutputHelper), fileService,
-                binaryLogAnalyzerService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, logUploadData, claims),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -291,10 +285,10 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 ObjectValidator = Substitute.For<IObjectModelValidator>()
             };
 
-            var result = await binaryLogController.Upload() as JsonResult;
+            var result = await checkRunController.Upload() as JsonResult;
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
-            await binaryLogAnalyzerService.Received(1).SubmitAsync(
+            await msblocService.Received(1).SubmitAsync(
                 repoOwner,
                 repoName,
                 logUploadData.CommitSha,
@@ -351,9 +345,9 @@ namespace MSBLOC.Web.Tests.Controllers.api
             }
         }
 
-        private class BinaryLogControllerStub : BinaryLogController
+        private class CheckRunControllerStub : CheckRunController
         {
-            public BinaryLogControllerStub(ILogger<BinaryLogController> logger, ITempFileService tempFileService, IBinaryLogAnalyzerService binaryLogAnalyzerService) : base(logger, tempFileService, binaryLogAnalyzerService)
+            public CheckRunControllerStub(ILogger<CheckRunController> logger, ITempFileService tempFileService) : base(logger, tempFileService)
             {
 
             }
