@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
+using MoreLinq.Extensions;
 using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Core.Model.LogAnalyzer;
 using Newtonsoft.Json;
 using Octokit;
-using CheckRun = MSBLOC.Core.Model.GitHub.CheckRun;
-using CheckAnnotationLevel = MSBLOC.Core.Model.LogAnalyzer.CheckWarningLevel;
 
 namespace MSBLOC.Core.Services.GitHub
 {
@@ -22,12 +22,59 @@ namespace MSBLOC.Core.Services.GitHub
             _tokenGenerator = tokenGenerator;
         }
 
+        public async Task<Model.GitHub.CheckRun> SubmitCheckRun(string owner,
+            string repository, string headSha, string name,
+            string title, string summary, bool success,
+            Annotation[] annotations, DateTimeOffset startedAt, DateTimeOffset completedAt)
+        {
+            if (string.IsNullOrWhiteSpace(owner))
+            {
+                throw new ArgumentException("Owner is invalid", nameof(owner));
+            }
+
+            if (string.IsNullOrWhiteSpace(repository))
+            {
+                throw new ArgumentException("Name is invalid", nameof(repository));
+            }
+
+            if (string.IsNullOrWhiteSpace(headSha))
+            {
+                throw new ArgumentException("HeadSha is invalid", nameof(headSha));
+            }
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Name is invalid", nameof(name));
+            }
+
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                throw new ArgumentException("Title is invalid", nameof(title));
+            }
+
+            var annotationBatches = annotations?.Batch(50).ToArray();
+
+            var checkRun = await CreateCheckRunAsync(owner, repository, headSha, name,
+                    title, summary, success, annotationBatches?.FirstOrDefault()?.ToArray(), startedAt, completedAt)
+                .ConfigureAwait(false);
+
+            if (annotationBatches != null)
+            {
+                foreach (var annotationBatch in annotationBatches.Skip(1))
+                {
+                    await UpdateCheckRunAsync(checkRun.Id, owner, repository, headSha, title,
+                        summary, annotationBatch.ToArray(), startedAt, completedAt).ConfigureAwait(false);
+                }
+            }
+
+            return checkRun;
+        }
+
         /// <inheritdoc />
-        public async Task<CheckRun> CreateCheckRunAsync(string owner, string repository, string sha,
-            string checkRunName,
-            string checkRunTitle, string checkRunSummary, bool checkRunIsSuccess, Annotation[] annotations,
-            DateTimeOffset? startedAt,
-            DateTimeOffset? completedAt)
+        public async Task<Model.GitHub.CheckRun> CreateCheckRunAsync(string owner, string repository, string sha,
+            string checkRunName, string checkRunTitle, string checkRunSummary,
+            bool checkRunIsSuccess, Annotation[] annotations,
+            DateTimeOffset? startedAt, DateTimeOffset? completedAt)
         {
             try
             {
@@ -63,7 +110,7 @@ namespace MSBLOC.Core.Services.GitHub
 
                 var checkRun = await checkRunsClient.Create(owner, repository, newCheckRun);
 
-                return new CheckRun
+                return new MSBLOC.Core.Model.GitHub.CheckRun
                 {
                     Id = checkRun.Id,
                     Url = checkRun.HtmlUrl,
@@ -121,31 +168,16 @@ namespace MSBLOC.Core.Services.GitHub
             }
         }
 
-        public async Task<LogAnalyzerConfiguration> GetLogAnalyzerConfigurationAsync(string owner, string repository, string reference)
-        {
-            var fileContent = await GetRepositoryFileAsync(owner, repository, "msbloc.json", reference);
-            if (fileContent == null) return null;
-
-            try
-            {
-                return JsonConvert.DeserializeObject<LogAnalyzerConfiguration>(fileContent);
-            }
-            catch (Exception ex)
-            {
-                throw new GitHubAppModelException("Error deserializing LogAnalyzerConfiguration.", ex);
-            }
-        }
-
-        private static Octokit.CheckAnnotationLevel GetCheckWarningLevel(Annotation annotation)
+        private static CheckAnnotationLevel GetCheckWarningLevel(Annotation annotation)
         {
             switch (annotation.CheckWarningLevel)
             {
-                case CheckAnnotationLevel.Notice:
-                    return Octokit.CheckAnnotationLevel.Notice;
-                case CheckAnnotationLevel.Warning:
-                    return Octokit.CheckAnnotationLevel.Warning;
-                case CheckAnnotationLevel.Failure:
-                    return Octokit.CheckAnnotationLevel.Failure;
+                case Model.LogAnalyzer.CheckWarningLevel.Notice:
+                    return CheckAnnotationLevel.Notice;
+                case Model.LogAnalyzer.CheckWarningLevel.Warning:
+                    return CheckAnnotationLevel.Warning;
+                case Model.LogAnalyzer.CheckWarningLevel.Failure:
+                    return CheckAnnotationLevel.Failure;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

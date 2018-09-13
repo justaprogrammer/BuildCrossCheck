@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using MSBLOC.Core.Model.GitHub;
 using MSBLOC.Core.Model.LogAnalyzer;
 
@@ -48,6 +49,9 @@ namespace MSBLOC.Core.Interfaces.GitHub
 
         Task<string> GetRepositoryFileAsync(string owner, string repository, string path, string reference);
 
-        Task<LogAnalyzerConfiguration> GetLogAnalyzerConfigurationAsync(string owner, string repository, string reference);
+        Task<Model.GitHub.CheckRun> SubmitCheckRun([NotNull] string owner,
+            [NotNull] string repository, [NotNull] string headSha, [NotNull] string name,
+            [NotNull] string title, [CanBeNull] string summary, bool success,
+            [CanBeNull] Annotation[] annotations, DateTimeOffset startedAt, DateTimeOffset completedAt);
     }
 }

@@ -257,7 +257,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 Url = Faker.Internet.Url()
             };
 
-            msblocService.SubmitAsync(null, null, null, null, null).ReturnsForAnyArgs(checkRun);
+            msblocService.SubmitAsync(null, null, null, null).ReturnsForAnyArgs(checkRun);
 
             var logUploadData = new LogUploadData
             {
@@ -292,7 +292,6 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 repoOwner,
                 repoName,
                 logUploadData.CommitSha,
-                logUploadData.CloneRoot,
                 string.Empty);
 
             receivedFiles.Should().BeEquivalentTo(fileDictionary);

@@ -9,14 +9,5 @@ namespace MSBLOC.Core.Interfaces.GitHub
     /// </summary>
     public interface IGitHubGraphQLClient
     {
-        /// <summary>
-        /// Gets a list of commits that are contained by a pull request
-        /// </summary>
-        /// <param name="owner">Name of the owner.</param>
-        /// <param name="repository">Name of the repository.</param>
-        /// <param name="pullRequest">Number of the pull request.</param>
-        /// <returns>A readonly list of commit details</returns>
-        Task<IReadOnlyList<CommitDetail>> GetCommitDetailsByPullRequestIdAsync(string owner, string repository,
-            int pullRequest);
     }
 }

@@ -350,47 +350,5 @@ namespace MSBLOC.Core.Tests.Services
             var content = await gitHubAppModelService.GetRepositoryFileAsync(owner, name, path, reference);
             content.Should().Be(expectedContent);
         }
-
-        [Fact]
-        public async Task ShouldGetLogAnalyzerConfiguration()
-        {
-            var owner = Faker.Internet.UserName();
-            var name = Faker.Lorem.Word();
-
-            var path = "msbloc.json";
-
-            var reference = Faker.Random.String();
-
-            var expectedContent = @"{rules:[{code:""Code1"", reportAs: ""warning""}, {code:""Code2"", reportAs: ""error""}]}";
-
-            var encodedExpectedContent = Convert.ToBase64String(Encoding.UTF8.GetBytes(expectedContent));
-
-            var repositoryContentsClient = Substitute.For<IRepositoryContentsClient>();
-            repositoryContentsClient.GetAllContentsByRef(owner, name, path, reference)
-                .Returns(new[]
-                {
-                    new RepositoryContent(null, null, null, 0, ContentType.File, null, null, null, null, null, encodedExpectedContent, null, null)
-                });
-
-            var gitHubAppModelService = CreateTarget(repositoryContentsClient: repositoryContentsClient);
-            var analyzerConfiguration = await gitHubAppModelService.GetLogAnalyzerConfigurationAsync(owner, name, reference);
-            analyzerConfiguration.Should().NotBeNull();
-            analyzerConfiguration.Rules.Should().BeEquivalentTo(
-                new LogAnalyzerRule { Code = "Code1", ReportAs = ReportAs.Warning },
-                new LogAnalyzerRule { Code = "Code2", ReportAs = ReportAs.Error }
-                );
-        }
-
-        [Fact]
-        public async Task ShouldNotGetLogAnalyzerConfigurationIfDoesntExist()
-        {
-            var owner = Faker.Internet.UserName();
-            var name = Faker.Lorem.Word();
-            var reference = Faker.Random.String();
-
-            var gitHubAppModelService = CreateTarget();
-            var content = await gitHubAppModelService.GetLogAnalyzerConfigurationAsync(owner, name, reference);
-            content.Should().BeNull();
-        }
     }
 }
