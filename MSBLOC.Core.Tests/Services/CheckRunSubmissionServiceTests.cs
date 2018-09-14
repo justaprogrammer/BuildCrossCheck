@@ -1,14 +1,11 @@
-﻿using System;
-using System.IO.Abstractions.TestingHelpers;
+﻿using System.IO.Abstractions.TestingHelpers;
 using System.Text;
 using System.Threading.Tasks;
 using Bogus;
 using Microsoft.Extensions.Logging;
-using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Core.Model.CheckRunSubmission;
 using MSBLOC.Core.Model.LogAnalyzer;
-using MSBLOC.Core.Services;
 using MSBLOC.Core.Services.CheckRunSubmission;
 using MSBLOC.Core.Tests.Util;
 using Newtonsoft.Json;
