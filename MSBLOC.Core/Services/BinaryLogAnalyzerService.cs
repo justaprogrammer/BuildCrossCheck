@@ -13,7 +13,7 @@ using MSBLOC.Core.Model.LogAnalyzer;
 namespace MSBLOC.Core.Services
 {
     /// <inheritdoc />
-    public class LogAnalyzerService : ILogAnalyzerService
+    public class BinaryLogAnalyzerService : IBinaryLogAnalyzerService
     {
         private const string CheckRunName = "MSBuildLog Analyzer";
         private const string CheckRunTitle = "MSBuildLog Analysis";
@@ -22,10 +22,10 @@ namespace MSBLOC.Core.Services
         private readonly IGitHubAppModelService _gitHubAppModelService;
         private readonly ILogger _logger;
 
-        public LogAnalyzerService(
+        public BinaryLogAnalyzerService(
             IBinaryLogProcessor binaryLogProcessor,
             IGitHubAppModelService gitHubAppModelService,
-            ILogger<LogAnalyzerService> logger)
+            ILogger<BinaryLogAnalyzerService> logger)
         {
             _logger = logger;
             _binaryLogProcessor = binaryLogProcessor;
@@ -41,18 +41,19 @@ namespace MSBLOC.Core.Services
 
             var startedAt = DateTimeOffset.Now;
 
+            CheckRun checkRun;
+
             try
             {
-
                 var buildDetails = _binaryLogProcessor.ProcessLog(resourcePath, cloneRoot);
 
                 var logAnalyzerConfiguration = await _gitHubAppModelService.GetLogAnalyzerConfigurationAsync(owner, repository, sha);
 
-                var annotations = CreateAnnotations(buildDetails, owner, repository, sha, logAnalyzerConfiguration);
+                var annotations = CreateAnnotations(buildDetails, logAnalyzerConfiguration);
 
                 var success = (annotations?.All(annotation => annotation.CheckWarningLevel != CheckWarningLevel.Failure) ?? true);
 
-                var checkRun = await SubmitCheckRun(annotations,
+                checkRun = await SubmitCheckRun(annotations,
                     owner,
                     repository,
                     sha,
@@ -61,39 +62,36 @@ namespace MSBLOC.Core.Services
                     "",
                     startedAt,
                     DateTimeOffset.Now, success).ConfigureAwait(false);
-
-                _logger.LogInformation($"CheckRun Created - {checkRun.Url}");
-
-                return checkRun;
             }
             catch (Exception ex)
             {
-                var checkRun = await SubmitCheckRun(null,
-                    owner,
-                    repository,
-                    sha,
-                    CheckRunName,
-                    CheckRunTitle,
-                    ex.ToString(),
-                    startedAt,
-                    DateTimeOffset.Now, false)
+                checkRun = await SubmitCheckRun(null,
+                        owner,
+                        repository,
+                        sha,
+                        CheckRunName,
+                        CheckRunTitle,
+                        ex.ToString(),
+                        startedAt,
+                        DateTimeOffset.Now, false)
                     .ConfigureAwait(false);
-
-                return checkRun;
             }
+
+            _logger.LogInformation($"CheckRun Created - {checkRun.Url}");
+
+            return checkRun;
         }
 
-        private Annotation[] CreateAnnotations(BuildDetails buildDetails, string repoOwner, string repoName, string sha, LogAnalyzerConfiguration logAnalyzerConfiguration)
+        private Annotation[] CreateAnnotations(BuildDetails buildDetails, LogAnalyzerConfiguration logAnalyzerConfiguration)
         {
             var lookup = logAnalyzerConfiguration?.Rules?.ToLookup(rule => rule.Code);
             return buildDetails.BuildMessages
-                .Select(buildMessage => CreateAnnotation(buildDetails, repoOwner, repoName, sha, buildMessage, lookup))
+                .Select(buildMessage => CreateAnnotation(buildDetails, buildMessage, lookup))
                 .Where(annotation => annotation != null)
                 .ToArray();
         }
 
-        private static Annotation CreateAnnotation(BuildDetails buildDetails, string repoOwner, string repoName,
-            string sha, BuildMessage buildMessage, ILookup<string, LogAnalyzerRule> lookup)
+        private static Annotation CreateAnnotation(BuildDetails buildDetails, BuildMessage buildMessage, ILookup<string, LogAnalyzerRule> lookup)
         {
             var filename =
                 buildDetails.SolutionDetails.GetProjectItemPath(buildMessage.ProjectFile, buildMessage.File)

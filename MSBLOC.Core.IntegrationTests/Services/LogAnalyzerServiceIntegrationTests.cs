@@ -60,7 +60,7 @@ namespace MSBLOC.Core.IntegrationTests.Services
             var gitHubAppClientFactory = CreateGitHubAppClientFactory();
             var gitHubAppModelService = new GitHubAppModelService(gitHubAppClientFactory, CreateTokenGenerator());
 
-            var msblocService = new LogAnalyzerService(parser, gitHubAppModelService, TestLogger.Create<LogAnalyzerService>(_testOutputHelper));
+            var msblocService = new BinaryLogAnalyzerService(parser, gitHubAppModelService, TestLogger.Create<BinaryLogAnalyzerService>(_testOutputHelper));
             var checkRun = await msblocService.SubmitAsync(TestAppOwner, TestAppRepo, sha, cloneRoot, resourcePath);
 
             checkRun.Should().NotBeNull();

@@ -8,7 +8,6 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Interfaces.GitHub;
-using MSBLOC.Core.Model;
 using MSBLOC.Core.Model.Builds;
 using MSBLOC.Core.Model.GitHub;
 using MSBLOC.Core.Model.LogAnalyzer;
@@ -21,25 +20,25 @@ using Xunit.Abstractions;
 
 namespace MSBLOC.Core.Tests.Services
 {
-    public class LogAnalyzerServiceTests
+    public class BinaryLogAnalyzerServiceTests
     {
-        public LogAnalyzerServiceTests(ITestOutputHelper testOutputHelper)
+        public BinaryLogAnalyzerServiceTests(ITestOutputHelper testOutputHelper)
         {
-            _logger = TestLogger.Create<LogAnalyzerServiceTests>(testOutputHelper);
+            _logger = TestLogger.Create<BinaryLogAnalyzerServiceTests>(testOutputHelper);
             _testOutputHelper = testOutputHelper;
         }
 
-        static LogAnalyzerServiceTests()
+        static BinaryLogAnalyzerServiceTests()
         {
             Faker = new Faker();
         }
 
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly ILogger<LogAnalyzerServiceTests> _logger;
+        private readonly ILogger<BinaryLogAnalyzerServiceTests> _logger;
 
         private static readonly Faker Faker;
 
-        private LogAnalyzerService CreateTarget(
+        private BinaryLogAnalyzerService CreateTarget(
             IBinaryLogProcessor binaryLogProcessor = null,
             IGitHubAppModelService gitHubAppModelService = null)
         {
@@ -47,8 +46,8 @@ namespace MSBLOC.Core.Tests.Services
 
             if (gitHubAppModelService == null) gitHubAppModelService = Substitute.For<IGitHubAppModelService>();
 
-            return new LogAnalyzerService(binaryLogProcessor, gitHubAppModelService,
-                TestLogger.Create<LogAnalyzerService>(_testOutputHelper));
+            return new BinaryLogAnalyzerService(binaryLogProcessor, gitHubAppModelService,
+                TestLogger.Create<BinaryLogAnalyzerService>(_testOutputHelper));
         }
 
         private static IEnumerable<string> GenerateFileNames()

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -28,6 +29,7 @@ using Swashbuckle.AspNetCore.Swagger;
 
 namespace MSBLOC.Web
 {
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -125,7 +127,7 @@ namespace MSBLOC.Web
             });
             services.AddScoped<IAccessTokenService, AccessTokenService>();
 
-            services.AddTransient<ILogAnalyzerService, LogAnalyzerService>();
+            services.AddTransient<IBinaryLogAnalyzerService, BinaryLogAnalyzerService>();
 
             services.AddSwaggerGen(c =>
             {

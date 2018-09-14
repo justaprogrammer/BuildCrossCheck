@@ -99,7 +99,7 @@ function GetUploadUrl() {
     param (
     )
     $BaseUrl = If($env:MSBLOC_POSH_URL) {$env:MSBLOC_POSH_URL} else {'https://msblocweb.azurewebsites.net'}
-    $FullUrl = '{0}/api/log/upload' -f $BaseUrl
+    $FullUrl = '{0}/api/binarylog/upload' -f $BaseUrl
     Write-Verbose "Upload Url: $FullUrl"
     return $FullUrl
 }
