@@ -7,7 +7,7 @@
     <description>Generates input for MSBLOC from binlog files</description>
   </metadata>
   <files>
-    <file src="$publishdir$\net47\**\*" target="tools/net46/" />
+    <file src="$publishdir$\net471\**\*" target="tools/net471/" />
     <file src="$publishdir$\netcoreapp2.1\**\*" target="tools/netcoreapp2.1/" />
   </files>
 </package>
