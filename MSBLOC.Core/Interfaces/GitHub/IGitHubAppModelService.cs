@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using MSBLOC.Core.Model.CheckRunSubmission;
 using MSBLOC.Core.Model.GitHub;
-using MSBLOC.Core.Model.LogAnalyzer;
 
 namespace MSBLOC.Core.Interfaces.GitHub
 {
@@ -27,7 +27,7 @@ namespace MSBLOC.Core.Interfaces.GitHub
         /// <param name="startedAt">The time when processing started</param>
         /// <param name="completedAt">The time when processing finished</param>
         /// <returns></returns>
-        Task<Model.GitHub.CheckRun> SubmitCheckRunAsync([NotNull] string owner,
+        Task<CheckRun> SubmitCheckRunAsync([NotNull] string owner,
             [NotNull] string repository, [NotNull] string headSha, [NotNull] string name,
             [NotNull] string title, [CanBeNull] string summary, bool success,
             [CanBeNull] Annotation[] annotations, DateTimeOffset startedAt, DateTimeOffset completedAt);

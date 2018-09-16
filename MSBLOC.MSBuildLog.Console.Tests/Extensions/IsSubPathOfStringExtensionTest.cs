@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
-using MSBLOC.Core.Extensions;
+using MSBLOC.MSBuildLog.Console.Extensions;
 using Xunit;
 
-namespace MSBLOC.Core.Tests.Extensions
+namespace MSBLOC.MSBuildLog.Console.Tests.Extensions
 {
     // https://stackoverflow.com/a/31941159/104877
     public class IsSubPathOfStringExtensionTest

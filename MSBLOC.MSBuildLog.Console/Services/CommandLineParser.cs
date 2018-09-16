@@ -1,7 +1,8 @@
 ﻿using System;
 using Fclp;
+using MSBLOC.MSBuildLog.Console.Interfaces;
 
-namespace MSBLOC.MSBuildLog.Console
+namespace MSBLOC.MSBuildLog.Console.Services
 {
     public class CommandLineParser: ICommandLineParser
     {
@@ -19,6 +20,11 @@ namespace MSBLOC.MSBuildLog.Console
             _parser.Setup(arg => arg.OutputFile)
                 .As('o', "output")
                 .WithDescription("Output file")
+                .Required();
+
+            _parser.Setup(arg => arg.CloneRoot)
+                .As('c', "cloneRoot")
+                .WithDescription("Clone root")
                 .Required();
 
             _parser.SetupHelp("?", "help")

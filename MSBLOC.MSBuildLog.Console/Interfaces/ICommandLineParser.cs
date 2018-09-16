@@ -1,4 +1,4 @@
-﻿namespace MSBLOC.MSBuildLog.Console
+﻿namespace MSBLOC.MSBuildLog.Console.Interfaces
 {
     public interface ICommandLineParser
     {

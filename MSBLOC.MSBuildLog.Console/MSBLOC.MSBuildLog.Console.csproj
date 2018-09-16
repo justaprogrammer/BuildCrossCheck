@@ -2,14 +2,25 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp2.1;net46</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;net47</TargetFrameworks>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentCommandLineParser" Version="1.4.3" Condition="'$(TargetFramework)' == 'net46'" />
+    <PackageReference Include="FluentCommandLineParser" Version="1.4.3" Condition="'$(TargetFramework)' == 'net47'" />
     <PackageReference Include="FluentCommandLineParser-netstandard" Version="1.4.3.13" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
+    <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="System.IO.Abstractions" Version="2.1.0.230" />
+    <PackageReference Include="Microsoft.Build" Version="15.7.179" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.7.179" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.7.179" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.7.179" />
+    <PackageReference Include="morelinq" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MSBLOC.Core\MSBLOC.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,6 +28,20 @@
       <HintPath>System</HintPath>
     </Reference>
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="StructuredLogger">
+      <HintPath>..\lib\StructuredLogger.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="CreateAliasForStructuredLogger" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
+    <ItemGroup>
+      <ReferencePath Condition="'%(FileName)' == 'StructuredLogger'">
+        <Aliases>StructuredLogger</Aliases>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
 
   <!-- Pack settings -->
   <PropertyGroup>

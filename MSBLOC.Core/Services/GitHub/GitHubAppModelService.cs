@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using MoreLinq.Extensions;
 using MSBLOC.Core.Interfaces.GitHub;
+using MSBLOC.Core.Model.CheckRunSubmission;
 using MSBLOC.Core.Model.LogAnalyzer;
 using Newtonsoft.Json;
 using Octokit;

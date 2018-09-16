@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Core.Model;
+using MSBLOC.Core.Model.CheckRunSubmission;
 using MSBLOC.Core.Model.LogAnalyzer;
 using MSBLOC.Core.Services;
 using MSBLOC.Core.Services.GitHub;

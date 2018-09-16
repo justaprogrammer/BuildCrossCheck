@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using MSBLOC.MSBuildLog.Console.Interfaces;
 using MSBLOC.MSBuildLog.Console.Services;
 
@@ -12,7 +13,9 @@ namespace MSBLOC.MSBuildLog.Console
         [ExcludeFromCodeCoverage]
         static int Main(string[] args)
         {
-            var buildLogProcessor = new BuildLogProcessor();
+            var fileSystem = new FileSystem();
+            var binaryLogProcessor = new BinaryLogProcessor();
+            var buildLogProcessor = new BuildLogProcessor(fileSystem, binaryLogProcessor);
             var commandLineParser = new CommandLineParser(System.Console.WriteLine);
             var program = new Program(commandLineParser, buildLogProcessor);
             return 0;
@@ -29,7 +32,7 @@ namespace MSBLOC.MSBuildLog.Console
             var result = _commandLineParser.Parse(args);
             if (result != null)
             {
-                _buildLogProcessor.Proces(result.InputFile, result.OutputFile);
+                _buildLogProcessor.Proces(result.InputFile, result.OutputFile, result.CloneRoot);
                 return true;
             }
 

@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj" />
     <ProjectReference Include="..\MSBLOC.MSBuildLog.Console\MSBLOC.MSBuildLog.Console.csproj" />
   </ItemGroup>
 
@@ -26,6 +27,27 @@
     <Reference Include="NSubstitute">
       <HintPath>..\..\..\.nuget\packages\nsubstitute\3.1.0\lib\net46\NSubstitute.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resources\dbatools.binlog">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\msbloc.binlog">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\octokit.graphql.binlog">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\testconsoleapp1-1error.binlog">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\testconsoleapp1-1warning.binlog">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\testconsoleapp1-codeanalysis.binlog">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -24,7 +24,7 @@ namespace MSBLOC.MSBuildLog.Console.Tests
 
             program.Run(new string[0]);
             commandLineParser.Received(1).Parse(Arg.Any<string[]>());
-            buildLogProcessor.DidNotReceive().Proces(Arg.Any<string>(), Arg.Any<string>());
+            buildLogProcessor.DidNotReceive().Proces(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace MSBLOC.MSBuildLog.Console.Tests
             var program = new Program(commandLineParser, buildLogProcessor);
 
             program.Run(new string[0]);
-            buildLogProcessor.Received(1).Proces(applicationArguments.InputFile, applicationArguments.OutputFile);
+            buildLogProcessor.Received(1).Proces(applicationArguments.InputFile, applicationArguments.OutputFile, Arg.Any<string>());
         }
     }
 }
