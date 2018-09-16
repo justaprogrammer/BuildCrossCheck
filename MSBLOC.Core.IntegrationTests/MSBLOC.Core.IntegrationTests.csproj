@@ -37,15 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Resources\testconsoleapp1-1error.binlog">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\testconsoleapp1-1warning.binlog">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\testconsoleapp1-codeanalysis.binlog">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Folder Include="Resources\" />
   </ItemGroup>
 
 </Project>

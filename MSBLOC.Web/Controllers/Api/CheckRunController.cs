@@ -1,18 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
+﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
-using MSBLOC.Core.Interfaces;
 using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Extensions;
-using MSBLOC.Web.Helpers;
 using MSBLOC.Web.Interfaces;
 using MSBLOC.Web.Models;
 
@@ -20,14 +12,11 @@ namespace MSBLOC.Web.Controllers.Api
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class BinaryLogController : MultiPartFormControllerBase<BinaryLogController>
+    public class CheckRunController : MultiPartFormControllerBase<CheckRunController>
     {
-        private readonly IBinaryLogAnalyzerService _binaryLogAnalyzerService;
-
-        public BinaryLogController(ILogger<BinaryLogController> logger, ITempFileService tempFileService, IBinaryLogAnalyzerService binaryLogAnalyzerService)
+        public CheckRunController(ILogger<CheckRunController> logger, ITempFileService tempFileService)
             : base(logger, tempFileService)
         {
-            _binaryLogAnalyzerService = binaryLogAnalyzerService;
         }
 
         [HttpPost]
@@ -51,14 +40,17 @@ namespace MSBLOC.Web.Controllers.Api
             }
 
             var resourcePath = TempFileService.GetFilePath(logUploadData.LogFile);
-            var checkRun = await _binaryLogAnalyzerService.SubmitAsync(
-                RepositoryOwner,
-                RepositoryName,
-                logUploadData.CommitSha,
-                logUploadData.CloneRoot,
-                resourcePath);
 
-            return Json(checkRun);
+            throw new NotImplementedException();
+
+//            var checkRun = await _binaryLogAnalyzerService.SubmitAsync(
+//                RepositoryOwner,
+//                RepositoryName,
+//                logUploadData.CommitSha,
+//                logUploadData.CloneRoot,
+//                resourcePath);
+
+//            return Json(checkRun);
         }
     }
 }

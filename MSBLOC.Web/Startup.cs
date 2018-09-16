@@ -18,6 +18,7 @@ using Microsoft.Extensions.Options;
 using MSBLOC.Core.Interfaces;
 using MSBLOC.Core.Interfaces.GitHub;
 using MSBLOC.Core.Services;
+using MSBLOC.Core.Services.CheckRunSubmission;
 using MSBLOC.Core.Services.GitHub;
 using MSBLOC.Infrastructure.Extensions;
 using MSBLOC.Web.Attributes;
@@ -106,7 +107,6 @@ namespace MSBLOC.Web
             services.AddSingleton<IProxyGenerator, ProxyGenerator>();
             
             services.AddScoped<ITempFileService, LocalTempFileService>();
-            services.AddScoped<IBinaryLogProcessor, BinaryLogProcessor>();
             services.AddScoped<ITokenGenerator>(s =>
             {
                 var gitHubAppId = s.GetService<IOptions<GitHubAppOptions>>().Value.Id;
@@ -127,7 +127,7 @@ namespace MSBLOC.Web
             });
             services.AddScoped<IAccessTokenService, AccessTokenService>();
 
-            services.AddTransient<IBinaryLogAnalyzerService, BinaryLogAnalyzerService>();
+            services.AddTransient<ICheckRunSubmissionService, CheckRunSubmissionService>();
 
             services.AddSwaggerGen(c =>
             {
