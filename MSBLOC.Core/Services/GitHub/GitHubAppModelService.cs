@@ -22,7 +22,7 @@ namespace MSBLOC.Core.Services.GitHub
             _tokenGenerator = tokenGenerator;
         }
 
-        public async Task<Model.GitHub.CheckRun> SubmitCheckRun(string owner,
+        public async Task<Model.GitHub.CheckRun> SubmitCheckRunAsync(string owner,
             string repository, string headSha, string name,
             string title, string summary, bool success,
             Annotation[] annotations, DateTimeOffset startedAt, DateTimeOffset completedAt)

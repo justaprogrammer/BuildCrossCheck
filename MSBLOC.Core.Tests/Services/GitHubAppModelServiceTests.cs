@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Bogus;
@@ -93,6 +94,70 @@ namespace MSBLOC.Core.Tests.Services
             return new GitHubAppModelService(gitHubAppClientFactory, tokenGenerator);
         }
 
+        public static IEnumerable<object[]> ShouldSubmitCheckRunData =>
+            new List<object[]>
+            {
+                new object[] { 1, new int[0] },
+                new object[] { 51, new[]{1} },
+                new object[] { 100, new[]{50} },
+                new object[] { 125, new[]{50, 25} },
+            };
+
+        [Theory]
+        [MemberData(nameof(ShouldSubmitCheckRunData))]
+        public async Task ShouldSubmitCheckRun(int annotationCount, int[] updateCounts)
+        {
+            var checkRunsClient = Substitute.For<ICheckRunsClient>();
+
+            var id = Faker.Random.Long();
+            var htmlUrl = Faker.Internet.Url();
+
+            checkRunsClient.Create(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<NewCheckRun>())
+                .Returns(new CheckRun(
+                    id,
+                    Faker.Random.String(),
+                    Faker.Random.String(),
+                    Faker.Internet.Url(),
+                    htmlUrl,
+                    Faker.PickRandom<CheckStatus>(),
+                    Faker.Random.Bool() ? (CheckConclusion?)null : Faker.PickRandom<CheckConclusion>(),
+                    Faker.Date.RecentOffset(2),
+                    Faker.Date.RecentOffset(1),
+                    null,
+                    Faker.Lorem.Word(),
+                    null,
+                    null,
+                    null));
+
+            var gitHubAppModelService = CreateTarget(checkRunsClient: checkRunsClient);
+
+            var owner = Faker.Internet.UserName();
+            var name = Faker.Lorem.Word();
+
+            var checkRun = await gitHubAppModelService.SubmitCheckRunAsync(
+                owner,
+                name,
+                Faker.Random.String(),
+                Faker.Lorem.Word(),
+                Faker.Lorem.Sentence(),
+                Faker.Lorem.Paragraph(),
+                Faker.Random.Bool(),
+                FakeAnnotation.Generate(annotationCount).ToArray(),
+                Faker.Date.RecentOffset(2),
+                Faker.Date.RecentOffset(1));
+
+            await checkRunsClient.Received(1).Create(owner, name, Arg.Any<NewCheckRun>());
+            await checkRunsClient.Received(updateCounts.Length).Update(owner, name, Arg.Any<long>(), Arg.Any<CheckRunUpdate>());
+            foreach (var updateCount in updateCounts)
+            {
+                await checkRunsClient.Received(1).Update(owner, name, Arg.Any<long>(), Arg.Is<CheckRunUpdate>(update => update.Output.Annotations.Count == updateCount));
+            }
+
+            checkRun.Id.Should().Be(id);
+            checkRun.Url.Should().Be(htmlUrl);
+        }
+
+
         [Fact]
         public async Task ShouldCreateCheckRun()
         {
@@ -109,7 +174,7 @@ namespace MSBLOC.Core.Tests.Services
                     Faker.Internet.Url(),
                     htmlUrl,
                     Faker.PickRandom<CheckStatus>(),
-                    Faker.Random.Bool() ? (CheckConclusion?) null : Faker.PickRandom<CheckConclusion>(),
+                    Faker.Random.Bool() ? (CheckConclusion?)null : Faker.PickRandom<CheckConclusion>(),
                     Faker.Date.RecentOffset(2),
                     Faker.Date.RecentOffset(1),
                     null,
@@ -129,10 +194,10 @@ namespace MSBLOC.Core.Tests.Services
                 Faker.Random.String(),
                 Faker.Lorem.Word(),
                 Faker.Lorem.Sentence(),
-                Faker.Lorem.Paragraph(), 
+                Faker.Lorem.Paragraph(),
                 Faker.Random.Bool(),
                 FakeAnnotation.Generate(1).ToArray(),
-                Faker.Date.RecentOffset(2), 
+                Faker.Date.RecentOffset(2),
                 Faker.Date.RecentOffset(1));
 
             checkRunsClient.Received(1).Create(owner, name, Arg.Any<NewCheckRun>());
@@ -157,7 +222,7 @@ namespace MSBLOC.Core.Tests.Services
                     Faker.Internet.Url(),
                     htmlUrl,
                     Faker.PickRandom<CheckStatus>(),
-                    Faker.Random.Bool() ? (CheckConclusion?) null : Faker.PickRandom<CheckConclusion>(),
+                    Faker.Random.Bool() ? (CheckConclusion?)null : Faker.PickRandom<CheckConclusion>(),
                     Faker.Date.RecentOffset(2),
                     Faker.Date.RecentOffset(1),
                     null,
@@ -177,10 +242,10 @@ namespace MSBLOC.Core.Tests.Services
                 Faker.Random.String(),
                 Faker.Lorem.Word(),
                 Faker.Lorem.Sentence(),
-                Faker.Lorem.Paragraph(), 
+                Faker.Lorem.Paragraph(),
                 Faker.Random.Bool(),
                 null,
-                Faker.Date.RecentOffset(2), 
+                Faker.Date.RecentOffset(2),
                 Faker.Date.RecentOffset(1));
 
             checkRunsClient.Received(1).Create(owner, name, Arg.Any<NewCheckRun>());
@@ -202,12 +267,12 @@ namespace MSBLOC.Core.Tests.Services
                         Faker.Internet.UserName(),
                         Faker.Lorem.Word(),
                         Faker.Random.String(),
-                        Faker.Lorem.Word(), 
-                        Faker.Lorem.Sentence(), 
-                        Faker.Lorem.Paragraph(), 
+                        Faker.Lorem.Word(),
+                        Faker.Lorem.Sentence(),
+                        Faker.Lorem.Paragraph(),
                         false,
-                        annotations, 
-                        Faker.Date.RecentOffset(2), 
+                        annotations,
+                        Faker.Date.RecentOffset(2),
                         Faker.Date.RecentOffset(1));
 
                 }).Should()
@@ -248,7 +313,7 @@ namespace MSBLOC.Core.Tests.Services
         public void ShouldThrowOnCreateCheckRunWithoutCheckRunClient()
         {
             var checkClient = Substitute.For<IChecksClient>();
-            checkClient.Run.Returns((ICheckRunsClient) null);
+            checkClient.Run.Returns((ICheckRunsClient)null);
 
             var gitHubAppModelService = CreateTarget(checkClient: checkClient);
 
@@ -260,12 +325,12 @@ namespace MSBLOC.Core.Tests.Services
                     Faker.Internet.UserName(),
                     Faker.Lorem.Word(),
                     Faker.Random.String(),
-                    Faker.Lorem.Word(), 
+                    Faker.Lorem.Word(),
                     Faker.Lorem.Sentence(),
                     Faker.Lorem.Paragraph(),
                     false,
                     annotations,
-                    Faker.Date.RecentOffset(2), 
+                    Faker.Date.RecentOffset(2),
                     Faker.Date.RecentOffset(1));
 
             }).Should().Throw<GitHubAppModelException>();
@@ -280,7 +345,7 @@ namespace MSBLOC.Core.Tests.Services
         public void ShouldThrowOnUpdateCheckRunWithoutCheckRunClient()
         {
             var checkClient = Substitute.For<IChecksClient>();
-            checkClient.Run.Returns((ICheckRunsClient) null);
+            checkClient.Run.Returns((ICheckRunsClient)null);
             var gitHubAppModelService = CreateTarget(checkClient: checkClient);
 
             gitHubAppModelService.Awaiting(async s =>

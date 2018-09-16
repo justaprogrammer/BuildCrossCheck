@@ -56,7 +56,7 @@ namespace MSBLOC.Core.Services.CheckRunSubmission
 
             var createCheckRun = JsonConvert.DeserializeObject<CreateCheckRun>(readAllText);
 
-            return _gitHubAppModelService.SubmitCheckRun(owner, repository, sha, createCheckRun.Name, createCheckRun.Title,
+            return _gitHubAppModelService.SubmitCheckRunAsync(owner, repository, sha, createCheckRun.Name, createCheckRun.Title,
                 createCheckRun.Summary, createCheckRun.Success, createCheckRun.Annotations,
                 createCheckRun.StartedAt, createCheckRun.CompletedAt);
         }

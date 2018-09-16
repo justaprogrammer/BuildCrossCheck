@@ -78,7 +78,7 @@ namespace MSBLOC.Core.Tests.Services
             await checkRunSubmissionService.SubmitAsync(owner, repository, sha, resourcePath);
 
             await gitHubAppModelService.Received(1)
-                .SubmitCheckRun(owner, repository, sha,
+                .SubmitCheckRunAsync(owner, repository, sha,
                 createCheckRun.Name, createCheckRun.Title, createCheckRun.Summary,
                 createCheckRun.Success, Arg.Any<Annotation[]>(),
                 createCheckRun.StartedAt, createCheckRun.CompletedAt);
