@@ -13,7 +13,8 @@ build_script:
 - ps: >-
     msbuild MSBuildLogOctokitChecker.sln --% /p:Configuration=Release /bl:output.binlog /verbosity:minimal
 after_build:
-    - cmd: dotnet publish MSBLOC.Web  --configuration Release --output %appveyor_build_folder%\dist
+    - cmd: dotnet publish MSBLOC.Web --configuration Release --output %appveyor_build_folder%\dist
+    - cmd: dotnet pack -c Release .\MSBLOC.MSBuildLog.Console\MSBLOC.MSBuildLog.Console.csproj -o ..\
 after_test:
 - ps: |  
     dotnet tool install --global coverlet.console
@@ -32,6 +33,9 @@ artifacts:
     - path: dist
       name: dist.web
       type: WebDeployPackage
+    - path: '*.nupkg'
+    - path: MSBLOC.Web.Tests.coverage.xml
+      type: File
 on_finish:
 - ps: >-
     if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
