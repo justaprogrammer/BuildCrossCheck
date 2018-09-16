@@ -74,16 +74,15 @@ namespace MSBLOC.MSBuildLog.Console.Services
             var filePath = Path.Combine(Path.GetDirectoryName(projectFile), file);
             if (!filePath.IsSubPathOf(cloneRoot))
             {
-                throw new Exception();
+                throw new InvalidOperationException($"FilePath `{filePath}` is not a child of `{cloneRoot}`");
             }
 
             var relativePath = GetRelativePath(filePath, cloneRoot);
 
-            var annotation = new Annotation(relativePath, checkWarningLevel,
+            return new Annotation(relativePath, checkWarningLevel,
                 title, message,
                 lineNumber,
                 endLineNumber == 0 ? lineNumber : endLineNumber);
-            return annotation;
         }
 
         private string GetRelativePath(string filespec, string folder)

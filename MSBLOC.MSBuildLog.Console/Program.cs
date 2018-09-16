@@ -29,14 +29,22 @@ namespace MSBLOC.MSBuildLog.Console
 
         public bool Run(string[] args)
         {
-            var result = _commandLineParser.Parse(args);
-            if (result != null)
+            try
             {
-                _buildLogProcessor.Proces(result.InputFile, result.OutputFile, result.CloneRoot);
-                return true;
-            }
+                var result = _commandLineParser.Parse(args);
+                if (result != null)
+                {
+                    _buildLogProcessor.Proces(result.InputFile, result.OutputFile, result.CloneRoot);
+                    return true;
+                }
 
-            return false;
+                return false;
+            }
+            catch (System.Exception ex)
+            {
+                System.Console.WriteLine(ex.ToString());
+                return false;
+            }
         }
     }
 }

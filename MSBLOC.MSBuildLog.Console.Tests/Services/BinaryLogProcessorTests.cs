@@ -135,15 +135,18 @@ namespace MSBLOC.MSBuildLog.Console.Tests.Services
         [Fact]
         public void ShouldThrowWhenBuildPathOutisdeCloneRoot()
         {
-            Assert.Throws<Exception>(() =>
+            var invalidOperationException = Assert.Throws<InvalidOperationException>(() =>
             {
                 ProcessLog("testconsoleapp1-1warning.binlog", @"C:\projects\testconsoleapp2\");
             });
 
-            Assert.Throws<Exception>(() =>
+            invalidOperationException.Message.Should().Be(@"FilePath `C:\projects\testconsoleapp1\TestConsoleApp1\Program.cs` is not a child of `C:\projects\testconsoleapp2\`");
+
+            invalidOperationException = Assert.Throws<InvalidOperationException>(() =>
             {
                 ProcessLog("testconsoleapp1-1error.binlog", @"C:\projects\testconsoleapp2\");
             });
+            invalidOperationException.Message.Should().Be(@"FilePath `C:\projects\testconsoleapp1\TestConsoleApp1\Program.cs` is not a child of `C:\projects\testconsoleapp2\`");
         }
 
         private Annotation[] ProcessLog(string resourceName, string cloneRoot)
