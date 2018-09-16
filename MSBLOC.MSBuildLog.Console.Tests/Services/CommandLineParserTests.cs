@@ -32,8 +32,15 @@ namespace MSBLOC.MSBuildLog.Console.Tests.Services
 
             var inputPath = Faker.System.FilePath();
             var outputPath = Faker.System.FilePath();
-            var applicationArguments = commandLineParser.Parse(new[]{"-i", $@"""{inputPath}""", "-o", $@"""{outputPath}"""
-            });
+            var applicationArguments = commandLineParser.Parse(new[]{"-i", $@"""{inputPath}""", "-o", $@"""{outputPath}"""});
+
+            listener.DidNotReceive().Callback(Arg.Any<string>());
+
+            applicationArguments.Should().NotBeNull();
+            applicationArguments.InputFile.Should().Be(inputPath);
+            applicationArguments.OutputFile.Should().Be(outputPath);
+
+            applicationArguments = commandLineParser.Parse(new[]{"--input", $@"""{inputPath}""", "--output", $@"""{outputPath}"""});
 
             listener.DidNotReceive().Callback(Arg.Any<string>());
 
