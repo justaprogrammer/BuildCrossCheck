@@ -18,7 +18,7 @@ namespace MSBLOC.Core.Interfaces.GitHub
         /// </summary>
         /// <param name="owner">The name of the repository owner.</param>
         /// <param name="repository">The name of the repository.</param>
-        /// <param name="headSha">The sha we are creating this CheckRun for.</param>
+        /// <param name="sha">The sha we are creating this CheckRun for.</param>
         /// <param name="name">The name of the CheckRun.</param>
         /// <param name="title">The title of the CheckRun.</param>
         /// <param name="summary">The summary of the CheckRun.</param>
@@ -28,7 +28,7 @@ namespace MSBLOC.Core.Interfaces.GitHub
         /// <param name="completedAt">The time when processing finished</param>
         /// <returns></returns>
         Task<Model.GitHub.CheckRun> SubmitCheckRunAsync([NotNull] string owner,
-            [NotNull] string repository, [NotNull] string headSha, [NotNull] string name,
+            [NotNull] string repository, [NotNull] string sha, [NotNull] string name,
             [NotNull] string title, [CanBeNull] string summary, bool success,
             [CanBeNull] Annotation[] annotations, DateTimeOffset startedAt, DateTimeOffset completedAt);
     }

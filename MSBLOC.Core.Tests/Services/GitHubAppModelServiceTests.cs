@@ -295,12 +295,9 @@ namespace MSBLOC.Core.Tests.Services
                         Faker.Random.Long(),
                         Faker.Internet.UserName(),
                         Faker.Lorem.Word(),
-                        Faker.Random.String(),
                         Faker.Lorem.Sentence(),
                         Faker.Lorem.Paragraph(),
-                        annotations1,
-                        Faker.Date.RecentOffset(2),
-                        Faker.Date.RecentOffset(1));
+                        annotations1);
 
                 }).Should()
                 .Throw<GitHubAppModelException>()
@@ -356,12 +353,9 @@ namespace MSBLOC.Core.Tests.Services
                         Faker.Random.Long(),
                         Faker.Internet.UserName(),
                         Faker.Lorem.Word(),
-                        Faker.Random.String(),
                         Faker.Lorem.Sentence(),
                         Faker.Lorem.Paragraph(),
-                        annotations1,
-                        Faker.Date.RecentOffset(2),
-                        Faker.Date.RecentOffset(1));
+                        annotations1);
 
                 }).Should().Throw<GitHubAppModelException>()
                 .WithMessage("Error updating CheckRun.")
@@ -384,12 +378,9 @@ namespace MSBLOC.Core.Tests.Services
                 checkRunId,
                 owner,
                 name,
-                Faker.Random.String(),
                 Faker.Lorem.Sentence(),
                 Faker.Lorem.Paragraph(),
-                annotations,
-                Faker.Date.RecentOffset(2),
-                Faker.Date.RecentOffset(1));
+                annotations);
 
             await checkRunsClient.Received(1).Update(owner, name, checkRunId, Arg.Any<CheckRunUpdate>());
         }

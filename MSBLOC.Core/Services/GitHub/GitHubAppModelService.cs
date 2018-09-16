@@ -22,8 +22,9 @@ namespace MSBLOC.Core.Services.GitHub
             _tokenGenerator = tokenGenerator;
         }
 
+        /// <inheritdoc />
         public async Task<Model.GitHub.CheckRun> SubmitCheckRunAsync(string owner,
-            string repository, string headSha, string name,
+            string repository, string sha, string name,
             string title, string summary, bool success,
             Annotation[] annotations, DateTimeOffset startedAt, DateTimeOffset completedAt)
         {
@@ -37,9 +38,9 @@ namespace MSBLOC.Core.Services.GitHub
                 throw new ArgumentException("Name is invalid", nameof(repository));
             }
 
-            if (string.IsNullOrWhiteSpace(headSha))
+            if (string.IsNullOrWhiteSpace(sha))
             {
-                throw new ArgumentException("HeadSha is invalid", nameof(headSha));
+                throw new ArgumentException("HeadSha is invalid", nameof(sha));
             }
 
             if (string.IsNullOrWhiteSpace(name))
@@ -54,7 +55,7 @@ namespace MSBLOC.Core.Services.GitHub
 
             var annotationBatches = annotations?.Batch(50).ToArray();
 
-            var checkRun = await CreateCheckRunAsync(owner, repository, headSha, name,
+            var checkRun = await CreateCheckRunAsync(owner, repository, sha, name,
                     title, summary, success, annotationBatches?.FirstOrDefault()?.ToArray(), startedAt, completedAt)
                 .ConfigureAwait(false);
 
@@ -62,18 +63,31 @@ namespace MSBLOC.Core.Services.GitHub
             {
                 foreach (var annotationBatch in annotationBatches.Skip(1))
                 {
-                    await UpdateCheckRunAsync(checkRun.Id, owner, repository, headSha, title,
-                        summary, annotationBatch.ToArray(), startedAt, completedAt).ConfigureAwait(false);
+                    await UpdateCheckRunAsync(checkRun.Id, owner, repository, title,
+                        summary, annotationBatch.ToArray()).ConfigureAwait(false);
                 }
             }
 
             return checkRun;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Creates a CheckRun in the GitHub Api.
+        /// </summary>
+        /// <param name="owner">The name of the repository owner.</param>
+        /// <param name="repository">The name of the repository.</param>
+        /// <param name="sha">The sha we are creating this CheckRun for.</param>
+        /// <param name="name">The name of the CheckRun.</param>
+        /// <param name="title">The title of the CheckRun.</param>
+        /// <param name="summary">The summary of the CheckRun.</param>
+        /// <param name="success">If the CheckRun is a success.</param>
+        /// <param name="annotations">Array of Annotations for the CheckRun.</param>
+        /// <param name="startedAt">The time when processing started</param>
+        /// <param name="completedAt">The time when processing finished</param>
+        /// <returns></returns>
         public async Task<Model.GitHub.CheckRun> CreateCheckRunAsync(string owner, string repository, string sha,
-            string checkRunName, string checkRunTitle, string checkRunSummary,
-            bool checkRunIsSuccess, Annotation[] annotations,
+            string name, string title, string summary,
+            bool success, Annotation[] annotations,
             DateTimeOffset? startedAt, DateTimeOffset? completedAt)
         {
             try
@@ -81,8 +95,8 @@ namespace MSBLOC.Core.Services.GitHub
                 if (owner == null) throw new ArgumentNullException(nameof(owner));
                 if (repository == null) throw new ArgumentNullException(nameof(repository));
                 if (sha == null) throw new ArgumentNullException(nameof(sha));
-                if (checkRunTitle == null) throw new ArgumentNullException(nameof(checkRunTitle));
-                if (checkRunSummary == null) throw new ArgumentNullException(nameof(checkRunSummary));
+                if (title == null) throw new ArgumentNullException(nameof(title));
+                if (summary == null) throw new ArgumentNullException(nameof(summary));
 
                 if ((annotations?.Length ?? 0) > 50)
                     throw new ArgumentException("Cannot create more than 50 annotations at a time");
@@ -92,9 +106,9 @@ namespace MSBLOC.Core.Services.GitHub
 
                 if (checkRunsClient == null) throw new InvalidOperationException("ICheckRunsClient is null");
 
-                var newCheckRun = new NewCheckRun(checkRunName, sha)
+                var newCheckRun = new NewCheckRun(name, sha)
                 {
-                    Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
+                    Output = new NewCheckRunOutput(title, summary)
                     {
                         Annotations = annotations?
                             .Select(annotation => new NewCheckRunAnnotation(annotation.Filename,
@@ -105,7 +119,7 @@ namespace MSBLOC.Core.Services.GitHub
                     Status = CheckStatus.Completed,
                     StartedAt = startedAt,
                     CompletedAt = completedAt,
-                    Conclusion = checkRunIsSuccess ? CheckConclusion.Success : CheckConclusion.Failure
+                    Conclusion = success ? CheckConclusion.Success : CheckConclusion.Failure
                 };
 
                 var checkRun = await checkRunsClient.Create(owner, repository, newCheckRun);
@@ -122,10 +136,18 @@ namespace MSBLOC.Core.Services.GitHub
             }
         }
 
-        /// <inheritdoc />
-        public async Task UpdateCheckRunAsync(long checkRunId, string owner, string repository,
-            string sha, string checkRunTitle, string checkRunSummary, Annotation[] annotations,
-            DateTimeOffset? startedAt, DateTimeOffset? completedAt)
+        /// <summary>
+        /// Updates a CheckRun in the GitHub Api.
+        /// </summary>
+        /// <param name="checkRunId">The id of the CheckRun being updated.</param>
+        /// <param name="owner">The name of the repository owner.</param>
+        /// <param name="repository">The name of the repository</param>
+        /// <param name="title">The title of the CheckRun.</param>
+        /// <param name="summary">The summary of the CheckRun.</param>
+        /// <param name="annotations">Array of Annotations for the CheckRun.</param>
+        /// <returns></returns>
+        public async Task UpdateCheckRunAsync(long checkRunId, string owner, string repository, 
+            string title, string summary, Annotation[] annotations)
         {
             try
             {
@@ -139,7 +161,7 @@ namespace MSBLOC.Core.Services.GitHub
 
                 await checkRunsClient.Update(owner, repository, checkRunId, new CheckRunUpdate()
                 {
-                    Output = new NewCheckRunOutput(checkRunTitle, checkRunSummary)
+                    Output = new NewCheckRunOutput(title, summary)
                     {
                         Annotations = annotations
                             .Select(annotation => new NewCheckRunAnnotation(annotation.Filename,
