@@ -20,7 +20,21 @@ namespace MSBLOC.MSBuildLog.Console.Tests.Services
         {
             var listener = Substitute.For<ICommandLineParserCallBackListener>();
             var commandLineParser = new CommandLineParser(listener.Callback);
-            commandLineParser.Parse(new string[0]);
+            var applicationArguments = commandLineParser.Parse(new string[0]);
+
+            applicationArguments.Should().BeNull();
+
+            listener.Received(1).Callback(Arg.Any<string>());
+        }
+
+        [Fact]
+        public void ShouldParseForHelpIfNothingSent()
+        {
+            var listener = Substitute.For<ICommandLineParserCallBackListener>();
+            var commandLineParser = new CommandLineParser(listener.Callback);
+            var applicationArguments = commandLineParser.Parse(new []{"-?"});
+
+            applicationArguments.Should().BeNull();
 
             listener.Received(1).Callback(Arg.Any<string>());
         }

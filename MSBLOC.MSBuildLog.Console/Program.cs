@@ -18,7 +18,7 @@ namespace MSBLOC.MSBuildLog.Console
             var buildLogProcessor = new BuildLogProcessor(fileSystem, binaryLogProcessor);
             var commandLineParser = new CommandLineParser(System.Console.WriteLine);
             var program = new Program(commandLineParser, buildLogProcessor);
-            return 0;
+            return program.Run(args) ? 0 : 1;
         }
 
         public Program(ICommandLineParser commandLineParser, IBuildLogProcessor buildLogProcessor)

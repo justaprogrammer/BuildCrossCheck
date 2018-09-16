@@ -35,6 +35,11 @@ namespace MSBLOC.MSBuildLog.Console.Services
         public ApplicationArguments Parse(string[] args)
         {
             var commandLineParserResult = _parser.Parse(args);
+            if (commandLineParserResult.HelpCalled)
+            {
+                return null;
+            }
+
             if (commandLineParserResult.EmptyArgs || commandLineParserResult.HasErrors)
             {
                 _parser.HelpOption.ShowHelp(_parser.Options);
