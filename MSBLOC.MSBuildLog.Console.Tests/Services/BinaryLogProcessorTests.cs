@@ -39,7 +39,11 @@ namespace MSBLOC.MSBuildLog.Console.Tests.Services
             var annotations = ProcessLog("testconsoleapp1-1warning.binlog", cloneRoot);
 
             annotations.Should().AllBeEquivalentTo(
-                new Annotation("TestConsoleApp1\\Program.cs", CheckWarningLevel.Warning, "CS0219", "The variable 'hello' is assigned but its value is never used", 13, 13)
+                new Annotation(
+                    "TestConsoleApp1\\Program.cs", 
+                    CheckWarningLevel.Warning, "CS0219", 
+                    "The variable 'hello' is assigned but its value is never used", 
+                    13, 13)
             );
         }
 
@@ -50,7 +54,11 @@ namespace MSBLOC.MSBuildLog.Console.Tests.Services
             var annotations = ProcessLog("testconsoleapp1-1error.binlog", cloneRoot);
 
             annotations.Should().AllBeEquivalentTo(
-                new Annotation("TestConsoleApp1\\Program.cs", CheckWarningLevel.Failure, "CS1002", "; expected", 13, 13)
+                new Annotation(
+                    "TestConsoleApp1\\Program.cs",
+                    CheckWarningLevel.Failure, "CS1002", 
+                    "; expected", 
+                    13, 13)
             );
         }
 
@@ -61,9 +69,9 @@ namespace MSBLOC.MSBuildLog.Console.Tests.Services
             var annotations = ProcessLog("testconsoleapp1-codeanalysis.binlog", cloneRoot);
 
             annotations.Should().AllBeEquivalentTo(
-                new Annotation("TestConsoleApp1\\Program.cs",
-                    CheckWarningLevel.Warning, 
-                    "CA2213",
+                new Annotation(
+                    "TestConsoleApp1\\Program.cs",
+                    CheckWarningLevel.Warning, "CA2213",
                     "Microsoft.Usage : 'Program.MyClass' contains field 'Program.MyClass._inner' that is of IDisposable type: 'Program.MyOTherClass'. Change the Dispose method on 'Program.MyClass' to call Dispose or Close on this field.", 
                     20, 20)
             );
@@ -77,19 +85,19 @@ namespace MSBLOC.MSBuildLog.Console.Tests.Services
 
             annotations.Length.Should().Be(10);
 
-            annotations[0].Should().BeEquivalentTo(new Annotation(
-                "MSBLOC.Core.Tests\\Services\\BinaryLogProcessorTests.cs", 
-                CheckWarningLevel.Warning,
-                "CS0219",
-                "The variable 'filename' is assigned but its value is never used",
-                56, 56));
+            annotations[0].Should().BeEquivalentTo(
+                new Annotation(
+                    "MSBLOC.Core.Tests\\Services\\BinaryLogProcessorTests.cs", 
+                    CheckWarningLevel.Warning,"CS0219",
+                    "The variable 'filename' is assigned but its value is never used",
+                    56, 56));
 
-            annotations[1].Should().BeEquivalentTo(new Annotation(
-                "MSBLOC.Core.Tests\\Services\\BinaryLogProcessorTests.cs", 
-                CheckWarningLevel.Warning,
-                "CS0219",
-                "The variable 'filename' is assigned but its value is never used",
-                83, 83));
+            annotations[1].Should().BeEquivalentTo(
+                new Annotation(
+                    "MSBLOC.Core.Tests\\Services\\BinaryLogProcessorTests.cs", 
+                    CheckWarningLevel.Warning,"CS0219",
+                    "The variable 'filename' is assigned but its value is never used",
+                    83, 83));
         }
 
         [Fact]
@@ -100,19 +108,19 @@ namespace MSBLOC.MSBuildLog.Console.Tests.Services
 
             annotations.Length.Should().Be(803);
 
-            annotations[0].Should().BeEquivalentTo(new Annotation(
-                "Octokit.GraphQL.Core\\Connection.cs",
-                CheckWarningLevel.Warning,
-                "CS1591",
-                "Missing XML comment for publicly visible type or member 'Connection.Uri'",
-                43, 43));
+            annotations[0].Should().BeEquivalentTo(
+                new Annotation(
+                    "Octokit.GraphQL.Core\\Connection.cs",
+                    CheckWarningLevel.Warning,"CS1591",
+                    "Missing XML comment for publicly visible type or member 'Connection.Uri'",
+                    43, 43));
 
-            annotations[1].Should().BeEquivalentTo(new Annotation(
-                "Octokit.GraphQL.Core\\Connection.cs",
-                CheckWarningLevel.Warning,
-                "CS1591",
-                "Missing XML comment for publicly visible type or member 'Connection.CredentialStore'",
-                44, 44));
+            annotations[1].Should().BeEquivalentTo(
+                new Annotation(
+                    "Octokit.GraphQL.Core\\Connection.cs",
+                    CheckWarningLevel.Warning,"CS1591",
+                    "Missing XML comment for publicly visible type or member 'Connection.CredentialStore'",
+                    44, 44));
         }
 
         [Fact]
