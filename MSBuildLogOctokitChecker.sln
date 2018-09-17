@@ -50,6 +50,10 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "docs", "docs\", "{88913F3F-
 		SlnRelativePath = "docs\"
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBLOC.MSBuildLog.Console", "MSBLOC.MSBuildLog.Console\MSBLOC.MSBuildLog.Console.csproj", "{0F91B1F4-D2E7-45D2-A106-E733D0720D5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBLOC.MSBuildLog.Console.Tests", "MSBLOC.MSBuildLog.Console.Tests\MSBLOC.MSBuildLog.Console.Tests.csproj", "{8BE2296B-CFC5-41E3-B91E-D9091CA4306F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,6 +88,14 @@ Global
 		{88913F3F-7D89-4CC4-A7C6-89C79286220B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88913F3F-7D89-4CC4-A7C6-89C79286220B}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{88913F3F-7D89-4CC4-A7C6-89C79286220B}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{0F91B1F4-D2E7-45D2-A106-E733D0720D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F91B1F4-D2E7-45D2-A106-E733D0720D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F91B1F4-D2E7-45D2-A106-E733D0720D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F91B1F4-D2E7-45D2-A106-E733D0720D5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BE2296B-CFC5-41E3-B91E-D9091CA4306F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BE2296B-CFC5-41E3-B91E-D9091CA4306F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BE2296B-CFC5-41E3-B91E-D9091CA4306F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BE2296B-CFC5-41E3-B91E-D9091CA4306F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

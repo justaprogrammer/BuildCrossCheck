@@ -9,7 +9,7 @@ namespace MSBLOC.Core.Tests.Util
     {
         public static string GetResourcePath(string file)
         {
-            var codeBaseUrl = new Uri(Assembly.GetExecutingAssembly().CodeBase);
+            var codeBaseUrl = new Uri(Assembly.GetCallingAssembly().CodeBase);
             var codeBasePath = Uri.UnescapeDataString(codeBaseUrl.AbsolutePath);
             var dirPath = Path.GetDirectoryName(codeBasePath);
             dirPath.Should().NotBeNull();
