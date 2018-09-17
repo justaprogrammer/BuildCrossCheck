@@ -22,14 +22,12 @@ after_test:
     coverlet .\MSBLOC.Web.Tests\bin\Release\netcoreapp2.1\MSBLOC.Web.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.Web.Tests\MSBLOC.Web.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Web.Tests-netcoreapp2.1.coverage.xml"
     coverlet .\MSBLOC.MSBuildLog.Console.Tests\bin\Release\netcoreapp2.1\MSBLOC.MSBuildLog.Console.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.MSBuildLog.Console.Tests\MSBLOC.MSBuildLog.Console.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.MSBuildLog.Console.Tests-netcoreapp2.1.coverage.xml"
     coverlet .\MSBLOC.Core.Tests\bin\Release\net471\MSBLOC.Core.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Core.Tests-net471.coverage.xml"
-    coverlet .\MSBLOC.Web.Tests\bin\Release\net471\MSBLOC.Web.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.Web.Tests\MSBLOC.Web.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Web.Tests-net471.coverage.xml"
     coverlet .\MSBLOC.MSBuildLog.Console.Tests\bin\Release\net471\MSBLOC.MSBuildLog.Console.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.MSBuildLog.Console.Tests\MSBLOC.MSBuildLog.Console.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.MSBuildLog.Console.Tests-net471.coverage.xml"
     choco install --no-progress codecov
     codecov -f ".\MSBLOC.Core.Tests-netcoreapp2.1.coverage.xml"
     codecov -f ".\MSBLOC.Web.Tests-netcoreapp2.1.coverage.xml"
     codecov -f ".\MSBLOC.MSBuildLog.Console.Tests-netcoreapp2.1.coverage.xml"
     codecov -f ".\MSBLOC.Core.Tests-net471.coverage.xml"
-    codecov -f ".\MSBLOC.Web.Tests-net471.coverage.xml"
     codecov -f ".\MSBLOC.MSBuildLog.Console.Tests-net471.coverage.xml"
 artifacts:
     - path: '*.coverage.xml'
