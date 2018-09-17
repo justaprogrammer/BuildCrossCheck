@@ -24,7 +24,7 @@ namespace MSBLOC.Submission.Console.Tests
 
             program.Run(new string[0]);
             commandLineParser.Received(1).Parse(Arg.Any<string[]>());
-            buildLogProcessor.DidNotReceive().Submit(Arg.Any<string>(), Arg.Any<string>());
+            buildLogProcessor.DidNotReceive().Submit(Arg.Any<string>(), Arg.Any<string>(), "asdf");
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace MSBLOC.Submission.Console.Tests
             var program = new Program(commandLineParser, buildLogProcessor);
 
             program.Run(new string[0]);
-            buildLogProcessor.Received(1).Submit(Arg.Any<string>(), Arg.Any<string>());
+            buildLogProcessor.Received(1).Submit(Arg.Any<string>(), Arg.Any<string>(), "asdf");
         }
     }
 }

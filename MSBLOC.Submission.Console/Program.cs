@@ -2,6 +2,7 @@
 using System.IO.Abstractions;
 using MSBLOC.Submission.Console.Interfaces;
 using MSBLOC.Submission.Console.Services;
+using RestSharp;
 
 namespace MSBLOC.Submission.Console
 {
@@ -15,7 +16,7 @@ namespace MSBLOC.Submission.Console
         {
             var fileSystem = new FileSystem();
             var commandLineParser = new CommandLineParser(System.Console.WriteLine);
-            var submissionService = new SubmissionService(fileSystem);
+            var submissionService = new SubmissionService(fileSystem, new RestClient());
             var program = new Program(commandLineParser, submissionService);
             return program.Run(args) ? 0 : 1;
         }
@@ -33,7 +34,7 @@ namespace MSBLOC.Submission.Console
                 var result = _commandLineParser.Parse(args);
                 if (result != null)
                 {
-                    _submissionService.Submit(result.InputFile, result.Token);
+                    _submissionService.Submit(result.InputFile, result.Token, "asdf");
                     return true;
                 }
 

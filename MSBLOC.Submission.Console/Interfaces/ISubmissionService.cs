@@ -1,7 +1,9 @@
-﻿namespace MSBLOC.Submission.Console.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace MSBLOC.Submission.Console.Interfaces
 {
     public interface ISubmissionService
     {
-        void Submit(string inputFile, string token);
+        Task Submit(string inputFile, string token, string headSha);
     }
 }
