@@ -26,16 +26,12 @@ after_test:
     codecov -f ".\MSBLOC.Web.Tests.coverage.xml"
     codecov -f ".\MSBLOC.MSBuildLog.Console.Tests.coverage.xml"
 artifacts:
-    - path: MSBLOC.Core.Tests.coverage.xml
-      type: File
-    - path: MSBLOC.Web.Tests.coverage.xml
+    - path: '*.coverage.xml'
       type: File
     - path: dist
       name: dist.web
       type: WebDeployPackage
     - path: '*.nupkg'
-    - path: MSBLOC.Web.Tests.coverage.xml
-      type: File
 on_finish:
 - ps: >-
     if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
