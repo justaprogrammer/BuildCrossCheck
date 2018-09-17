@@ -31,7 +31,7 @@ namespace MSBLOC.Submission.Console.Tests.Services
             Faker = new Faker();
         }
 
-        [Fact(Skip = "Needs Fixing")]
+        [Fact]
         public async Task ShouldSubmit()
         {
             var token = Faker.Random.String();
@@ -47,7 +47,7 @@ namespace MSBLOC.Submission.Console.Tests.Services
 
             var submissionService = new SubmissionService(mockFileSystem, restClient);
 
-            await submissionService.Submit(inputFile, token, headSha);
+            await submissionService.SubmitAsync(inputFile, token, headSha);
 
             await restClient.Received(1).ExecutePostTaskAsync(Arg.Any<IRestRequest>());
             var objects = restClient.ReceivedCalls().First().GetArguments();
@@ -68,7 +68,11 @@ namespace MSBLOC.Submission.Console.Tests.Services
                     }
                 );
 
-            restRequest.Files.Should().BeEquivalentTo(new FileParameter(){ContentLength = mockFileData.Contents.Length });
+            var restRequestFile = restRequest.Files[0];
+            restRequestFile.Name.Should().Be("LogFile");
+            restRequestFile.FileName.Should().Be("file.txt");
+            restRequestFile.ContentType.Should().BeNull();
+            restRequestFile.ContentLength.Should().Be(mockFileData.Contents.Length);
         }
     }
 }

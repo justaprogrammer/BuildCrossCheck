@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -105,6 +106,7 @@ namespace MSBLOC.Web
 
             services.AddSingleton<IPrivateKeySource, GitHubAppOptionsPrivateKeySource>();
             services.AddSingleton<IProxyGenerator, ProxyGenerator>();
+            services.AddSingleton<IFileSystem, FileSystem>();
             
             services.AddScoped<ITempFileService, LocalTempFileService>();
             services.AddScoped<ITokenGenerator>(s =>

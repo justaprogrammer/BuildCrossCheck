@@ -4,6 +4,6 @@ namespace MSBLOC.Submission.Console.Interfaces
 {
     public interface ISubmissionService
     {
-        Task Submit(string inputFile, string token, string headSha);
+        Task<bool> SubmitAsync(string inputFile, string token, string headSha);
     }
 }

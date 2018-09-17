@@ -9,9 +9,6 @@ namespace MSBLOC.Web.Models
         public string CommitSha { get; set; }
 
         [Required]
-        public string CloneRoot { get; set; }
-
-        [Required]
         [FormFile]
         public string LogFile { get; set; }
     }

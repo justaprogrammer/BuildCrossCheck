@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
+using System.Net;
 using System.Threading.Tasks;
 using MSBLOC.Submission.Console.Interfaces;
 using RestSharp;
@@ -17,9 +18,15 @@ namespace MSBLOC.Submission.Console.Services
             _fileSystem = fileSystem;
         }
 
-        public async Task Submit(string inputFile, string token, string headSha)
+        public async Task<bool> SubmitAsync(string inputFile, string token, string headSha)
         {
-            var request = new RestRequest()
+            var exists = _fileSystem.File.Exists(inputFile);
+            if (!exists)
+            {
+                throw new InvalidOperationException($"File `{inputFile}` does not exist.");
+            }
+
+            var request = new RestRequest("api/checkrun/upload")
             {
                 AlwaysMultipartFormData = true,
                 RequestFormat = DataFormat.Json,
@@ -29,8 +36,10 @@ namespace MSBLOC.Submission.Console.Services
             request.AddParameter("CommitSha", headSha, ParameterType.RequestBody);
             request.AddFile("LogFile", _fileSystem.File.ReadAllBytes(inputFile), "file.txt");
 
-            await _restClient.ExecutePostTaskAsync(request)
+            var restResponse = await _restClient.ExecutePostTaskAsync(request)
                 .ConfigureAwait(false);
+
+            return restResponse.StatusCode == HttpStatusCode.Accepted;
         }
     }
 }

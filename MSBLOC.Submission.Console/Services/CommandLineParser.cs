@@ -19,7 +19,12 @@ namespace MSBLOC.Submission.Console.Services
 
             _parser.Setup(arg => arg.Token)
                 .As('t', "token")
-                .WithDescription("Output file")
+                .WithDescription("Token")
+                .Required();
+
+            _parser.Setup(arg => arg.HeadSha)
+                .As('h', "headSha")
+                .WithDescription("Head Sha")
                 .Required();
 
             _parser.SetupHelp("?", "help")

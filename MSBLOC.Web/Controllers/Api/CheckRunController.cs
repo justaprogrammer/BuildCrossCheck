@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MSBLOC.Core.Interfaces;
 using MSBLOC.Web.Attributes;
 using MSBLOC.Web.Extensions;
 using MSBLOC.Web.Interfaces;
@@ -14,9 +15,12 @@ namespace MSBLOC.Web.Controllers.Api
     [Route("api/[controller]")]
     public class CheckRunController : MultiPartFormControllerBase<CheckRunController>
     {
-        public CheckRunController(ILogger<CheckRunController> logger, ITempFileService tempFileService)
+        private readonly ICheckRunSubmissionService _checkRunSubmissionService;
+
+        public CheckRunController(ILogger<CheckRunController> logger, ITempFileService tempFileService, ICheckRunSubmissionService checkRunSubmissionService)
             : base(logger, tempFileService)
         {
+            _checkRunSubmissionService = checkRunSubmissionService;
         }
 
         [HttpPost]
@@ -41,16 +45,13 @@ namespace MSBLOC.Web.Controllers.Api
 
             var resourcePath = TempFileService.GetFilePath(logUploadData.LogFile);
 
-            throw new NotImplementedException();
+            var checkRun = await _checkRunSubmissionService.SubmitAsync(
+                RepositoryOwner,
+                RepositoryName,
+                logUploadData.CommitSha,
+                resourcePath);
 
-//            var checkRun = await _binaryLogAnalyzerService.SubmitAsync(
-//                RepositoryOwner,
-//                RepositoryName,
-//                logUploadData.CommitSha,
-//                logUploadData.CloneRoot,
-//                resourcePath);
-
-//            return Json(checkRun);
+            return Json(checkRun);
         }
     }
 }

@@ -47,21 +47,24 @@ namespace MSBLOC.Submission.Console.Tests.Services
 
             var inputPath = Faker.System.FilePath();
             var token = Faker.Random.String();
-            var applicationArguments = commandLineParser.Parse(new[]{"-i", $@"""{inputPath}""", "-t", $@"""{token}"""});
+            var headSha = Faker.Random.String();
+            var applicationArguments = commandLineParser.Parse(new[]{"-i", $@"""{inputPath}""", "-t", $@"""{token}""", "-h", $@"""{headSha}"""});
 
             listener.DidNotReceive().Callback(Arg.Any<string>());
 
             applicationArguments.Should().NotBeNull();
             applicationArguments.InputFile.Should().Be(inputPath);
             applicationArguments.Token.Should().Be(token);
+            applicationArguments.HeadSha.Should().Be(headSha);
 
-            applicationArguments = commandLineParser.Parse(new[]{"--input", $@"""{inputPath}""", "--token", $@"""{token}"""});
+            applicationArguments = commandLineParser.Parse(new[]{"--input", $@"""{inputPath}""", "--token", $@"""{token}""", "--headSha", $@"""{headSha}""" });
 
             listener.DidNotReceive().Callback(Arg.Any<string>());
 
             applicationArguments.Should().NotBeNull();
             applicationArguments.InputFile.Should().Be(inputPath);
             applicationArguments.Token.Should().Be(token);
+            applicationArguments.HeadSha.Should().Be(headSha);
         }
 
         public interface ICommandLineParserCallBackListener

@@ -1,5 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
+using System.Net;
 using MSBLOC.Submission.Console.Interfaces;
 using MSBLOC.Submission.Console.Services;
 using RestSharp;
@@ -14,11 +16,13 @@ namespace MSBLOC.Submission.Console
         [ExcludeFromCodeCoverage]
         static int Main(string[] args)
         {
-            var fileSystem = new FileSystem();
             var commandLineParser = new CommandLineParser(System.Console.WriteLine);
-            var submissionService = new SubmissionService(fileSystem, new RestClient());
+            var fileSystem = new FileSystem();
+            var baseUrl = Environment.GetEnvironmentVariable("MSBLOC_URL") ?? "https://msblocweb.azurewebsites.net";
+            var restClient = new RestClient(baseUrl);
+            var submissionService = new SubmissionService(fileSystem, restClient);
             var program = new Program(commandLineParser, submissionService);
-            return program.Run(args) ? 0 : 1;
+            return program.Run(args) ? 0 : -1;
         }
 
         public Program(ICommandLineParser commandLineParser, ISubmissionService submissionService)
@@ -34,8 +38,7 @@ namespace MSBLOC.Submission.Console
                 var result = _commandLineParser.Parse(args);
                 if (result != null)
                 {
-                    _submissionService.Submit(result.InputFile, result.Token, "asdf");
-                    return true;
+                    return _submissionService.SubmitAsync(result.InputFile, result.Token, result.HeadSha).Result;
                 }
 
                 return false;
