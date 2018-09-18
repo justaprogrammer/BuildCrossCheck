@@ -56,7 +56,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> {{name, fileContent}};
 
             var fileService = Substitute.For<ITempFileService>();
-            var msblocService = Substitute.For<ICheckRunSubmissionService>();
+            var checkRunSubmissionService = Substitute.For<ICheckRunSubmissionService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -69,7 +69,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -91,7 +91,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 .ToDictionary(f => $"{string.Join("_", new Faker().Lorem.Words(4))}.txt", f => f);
 
             var fileService = Substitute.For<ITempFileService>();
-            var msblocService = Substitute.For<ICheckRunSubmissionService>();
+            var checkRunSubmissionService = Substitute.For<ICheckRunSubmissionService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -104,7 +104,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)
             {
                 ControllerContext = await RequestWithFiles(fileContents),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -123,9 +123,9 @@ namespace MSBLOC.Web.Tests.Controllers.api
         public async Task UploadBadRequestTest()
         {
             var fileService = Substitute.For<ITempFileService>();
-            var msblocService = Substitute.For<ICheckRunSubmissionService>();
+            var checkRunSubmissionService = Substitute.For<ICheckRunSubmissionService>();
 
-            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)
             {
                 ControllerContext = new ControllerContext
                 {
@@ -151,7 +151,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> { { name, fileContent } };
 
             var fileService = Substitute.For<ITempFileService>();
-            var msblocService = Substitute.For<ICheckRunSubmissionService>();
+            var checkRunSubmissionService = Substitute.For<ICheckRunSubmissionService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -168,11 +168,10 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var logUploadData = new LogUploadData
             {
                 CommitSha = "12345",
-                CloneRoot = "c:/cloneRoot",
                 LogFile = string.Empty //Bad Data
             };
 
-            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, logUploadData),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -194,7 +193,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> { { name, fileContent } };
 
             var fileService = Substitute.For<ITempFileService>();
-            var msblocService = Substitute.For<ICheckRunSubmissionService>();
+            var checkRunSubmissionService = Substitute.For<ICheckRunSubmissionService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -211,11 +210,10 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var logUploadData = new LogUploadData
             {
                 CommitSha = "12345",
-                CloneRoot = "c:/cloneRoot",
                 LogFile = "someOtherFileName.txt" //Bad Data
             };
 
-            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, logUploadData),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -237,7 +235,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> {{name, fileContent}};
 
             var fileService = Substitute.For<ITempFileService>();
-            var msblocService = Substitute.For<ICheckRunSubmissionService>();
+            var checkRunSubmissionService = Substitute.For<ICheckRunSubmissionService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -257,12 +255,11 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 Url = Faker.Internet.Url()
             };
 
-            msblocService.SubmitAsync(null, null, null, null).ReturnsForAnyArgs(checkRun);
+            checkRunSubmissionService.SubmitAsync(null, null, null, null).ReturnsForAnyArgs(checkRun);
 
             var logUploadData = new LogUploadData
             {
                 CommitSha = "12345",
-                CloneRoot = "c:/cloneRoot"
             };
 
             var faker = new Faker();
@@ -277,7 +274,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
                 new Claim("urn:msbloc:repositoryOwnerId", faker.Random.Long().ToString())
             };
 
-            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, logUploadData, claims),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -288,7 +285,7 @@ namespace MSBLOC.Web.Tests.Controllers.api
             var result = await checkRunController.Upload() as JsonResult;
 
             await fileService.Received(1).CreateFromStreamAsync(Arg.Is(name), Arg.Any<Stream>());
-            await msblocService.Received(1).SubmitAsync(
+            await checkRunSubmissionService.Received(1).SubmitAsync(
                 repoOwner,
                 repoName,
                 logUploadData.CommitSha,
@@ -346,7 +343,8 @@ namespace MSBLOC.Web.Tests.Controllers.api
 
         private class CheckRunControllerStub : CheckRunController
         {
-            public CheckRunControllerStub(ILogger<CheckRunController> logger, ITempFileService tempFileService) : base(logger, tempFileService)
+            public CheckRunControllerStub(ILogger<CheckRunController> logger, ITempFileService tempFileService,
+                ICheckRunSubmissionService checkRunSubmissionService) : base(logger, tempFileService, checkRunSubmissionService)
             {
 
             }
