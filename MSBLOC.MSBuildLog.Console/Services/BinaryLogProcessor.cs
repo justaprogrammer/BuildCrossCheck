@@ -1,33 +1,31 @@
 ﻿extern alias StructuredLogger;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using MoreLinq;
 using MSBLOC.Core.Model.CheckRunSubmission;
 using MSBLOC.Core.Model.LogAnalyzer;
 using MSBLOC.MSBuildLog.Console.Extensions;
 using MSBLOC.MSBuildLog.Console.Interfaces;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace MSBLOC.MSBuildLog.Console.Services
 {
     public class BinaryLogProcessor : IBinaryLogProcessor
     {
-        private ILogger<BinaryLogProcessor> Logger { get; }
+        private readonly ILogger _logger;
 
-        public BinaryLogProcessor(ILogger<BinaryLogProcessor> logger = null)
+        public BinaryLogProcessor(ILogger logger = null)
         {
-            Logger = logger ?? new NullLogger<BinaryLogProcessor>();
+            _logger = logger ?? NullLogger.Instance;
         }
 
         /// <inheritdoc />
         public IReadOnlyCollection<Annotation> ProcessLog(string binLogPath, string cloneRoot)
         {
-            Logger.LogInformation("ProcessLog binLogPath:{0} cloneRoot:{1}", binLogPath, cloneRoot);
+            _logger.LogInformation("ProcessLog binLogPath:{0} cloneRoot:{1}", binLogPath, cloneRoot);
 
             var binLogReader = new StructuredLogger::Microsoft.Build.Logging.BinaryLogReplayEventSource();
 
