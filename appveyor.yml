@@ -17,9 +17,9 @@ after_build:
     - cmd: dotnet pack -c Release .\MSBLOC.MSBuildLog.Console\MSBLOC.MSBuildLog.Console.csproj -o ..\
     - cmd: dotnet pack -c Release .\MSBLOC.Submission.Console\MSBLOC.Submission.Console.csproj -o ..\
 test_script:
-    - cmd: %xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\MSBLOC.Core.Tests\bin\Release\net471\MSBLOC.Core.Tests.dll" -appveyor
-    - cmd: %xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\MSBLOC.MSBuildLog.Console.Tests\bin\Release\net471\MSBLOC.MSBuildLog.Console.Tests.dll" -appveyor
-    - cmd: %xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\MSBLOC.Submission.Console.Tests\bin\Release\net471\MSBLOC.Submission.Console.Tests.dll" -appveyor
+    - cmd: '%xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\MSBLOC.Core.Tests\bin\Release\net471\MSBLOC.Core.Tests.dll" -appveyor'
+    - cmd: '%xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\MSBLOC.MSBuildLog.Console.Tests\bin\Release\net471\MSBLOC.MSBuildLog.Console.Tests.dll" -appveyor'
+    - cmd: '%xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\MSBLOC.Submission.Console.Tests\bin\Release\net471\MSBLOC.Submission.Console.Tests.dll" -appveyor'
     - cmd: dotnet test -c Release MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj --logger:Appveyor
     - cmd: dotnet test -c Release MSBLOC.MSBuildLog.Console.Tests\MSBLOC.MSBuildLog.Console.Tests.csproj --logger:Appveyor
     - cmd: dotnet test -c Release MSBLOC.Submission.Console.Tests\MSBLOC.Submission.Console.Tests.csproj --logger:Appveyor
