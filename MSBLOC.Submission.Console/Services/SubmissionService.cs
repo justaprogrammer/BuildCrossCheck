@@ -2,6 +2,8 @@
 using System.IO.Abstractions;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using MSBLOC.Submission.Console.Interfaces;
 using RestSharp;
 
@@ -11,15 +13,19 @@ namespace MSBLOC.Submission.Console.Services
     {
         private readonly IFileSystem _fileSystem;
         private readonly IRestClient _restClient;
+        private readonly ILogger _logger;
 
-        public SubmissionService(IFileSystem fileSystem, IRestClient restClient)
+        public SubmissionService(IFileSystem fileSystem, IRestClient restClient, ILogger logger = null)
         {
             _restClient = restClient;
+            _logger = logger ?? NullLogger.Instance;
             _fileSystem = fileSystem;
         }
 
         public async Task<bool> SubmitAsync(string inputFile, string token, string headSha)
         {
+            _logger.LogInformation("Submitting inputFile:{0} headSha:{1}", inputFile, headSha);
+
             var exists = _fileSystem.File.Exists(inputFile);
             if (!exists)
             {
@@ -38,6 +44,8 @@ namespace MSBLOC.Submission.Console.Services
 
             var restResponse = await _restClient.ExecutePostTaskAsync(request)
                 .ConfigureAwait(false);
+
+            _logger.LogDebug("Rest Response: {0}", restResponse.StatusCode);
 
             return restResponse.StatusCode == HttpStatusCode.Accepted;
         }

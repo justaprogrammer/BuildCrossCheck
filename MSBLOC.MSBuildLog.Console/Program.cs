@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using MSBLOC.MSBuildLog.Console.Interfaces;
 using MSBLOC.MSBuildLog.Console.Services;
 
@@ -13,8 +15,10 @@ namespace MSBLOC.MSBuildLog.Console
         [ExcludeFromCodeCoverage]
         static int Main(string[] args)
         {
+            var consoleLogger = new ConsoleLogger("Program", (s, level) => level >= LogLevel.Debug, false);
+            
             var fileSystem = new FileSystem();
-            var binaryLogProcessor = new BinaryLogProcessor();
+            var binaryLogProcessor = new BinaryLogProcessor(consoleLogger);
             var buildLogProcessor = new BuildLogProcessor(fileSystem, binaryLogProcessor);
             var commandLineParser = new CommandLineParser(System.Console.WriteLine);
             var program = new Program(commandLineParser, buildLogProcessor);
