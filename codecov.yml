@@ -27,3 +27,6 @@ comment:
   
 fixes:
   - "/C/projects/msbuildlogoctokitchecker/::"
+
+ignore:
+  - "*Tests/"
