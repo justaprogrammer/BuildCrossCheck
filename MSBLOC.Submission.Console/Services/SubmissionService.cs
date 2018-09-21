@@ -39,7 +39,7 @@ namespace MSBLOC.Submission.Console.Services
             var restResponse = await _restClient.ExecutePostTaskAsync(request)
                 .ConfigureAwait(false);
 
-            return restResponse.StatusCode == HttpStatusCode.Accepted;
+            return restResponse.StatusCode == HttpStatusCode.OK;
         }
     }
 }
