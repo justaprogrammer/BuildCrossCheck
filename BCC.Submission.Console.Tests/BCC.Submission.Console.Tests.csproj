@@ -20,8 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\.Core.Tests\.Core.Tests.csproj" />
-    <ProjectReference Include="..\.Submission.Console\.Submission.Console.csproj" />
+    <ProjectReference Include="..\BCC.Core.Tests\BCC.Core.Tests.csproj" />
+    <ProjectReference Include="..\BCC.Submission.Console\BCC.Submission.Console.csproj" />
   </ItemGroup>
 
 </Project>

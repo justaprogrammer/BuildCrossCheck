@@ -1,4 +1,6 @@
-﻿using BCC.MSBuildLog.Console.Interfaces;
+﻿using System;
+using BCC.MSBuildLog.Console.Interfaces;
+using Fclp;
 
 namespace BCC.MSBuildLog.Console.Services
 {

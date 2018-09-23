@@ -1,4 +1,11 @@
-﻿using BCC.MSBuildLog.Console.Interfaces;
+﻿using System;
+using System.IO.Abstractions;
+using System.Linq;
+using BCC.Core.Model.CheckRunSubmission;
+using BCC.MSBuildLog.Console.Interfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Newtonsoft.Json;
 
 namespace BCC.MSBuildLog.Console.Services
 {

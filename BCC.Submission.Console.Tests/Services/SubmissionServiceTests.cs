@@ -1,4 +1,17 @@
-﻿namespace BCC.Submission.Console.Tests.Services
+﻿using System.IO.Abstractions.TestingHelpers;
+using System.Linq;
+using System.Threading.Tasks;
+using BCC.Core.Tests.Util;
+using BCC.Submission.Console.Services;
+using Bogus;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+using RestSharp;
+using Xunit;
+using Xunit.Abstractions;
+
+namespace BCC.Submission.Console.Tests.Services
 {
     public class SubmissionServiceTests
     {

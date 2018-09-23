@@ -1,4 +1,9 @@
-﻿using BCC.Core.Tests.Util;
+﻿using BCC.Core.Services.GitHub;
+using BCC.Core.Tests.Util;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace BCC.Core.Tests.Services
 {

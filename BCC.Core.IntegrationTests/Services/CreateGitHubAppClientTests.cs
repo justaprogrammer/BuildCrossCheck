@@ -1,4 +1,9 @@
-﻿namespace BCC.Core.IntegrationTests.Services
+﻿using System.Linq;
+using System.Threading.Tasks;
+using BCC.Core.IntegrationTests.Utilities;
+using FluentAssertions;
+
+namespace BCC.Core.IntegrationTests.Services
 {
     public class CreateGitHubAppClientTests : IntegrationTestsBase
     {

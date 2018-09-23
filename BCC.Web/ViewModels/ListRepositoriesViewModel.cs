@@ -1,4 +1,8 @@
-﻿namespace BCC.Web.ViewModels
+﻿using System.Linq;
+using BCC.Core.Model.GitHub;
+using BCC.Infrastructure.Models;
+
+namespace BCC.Web.ViewModels
 {
     public class ListRepositoriesViewModel: ViewModelBase
     {

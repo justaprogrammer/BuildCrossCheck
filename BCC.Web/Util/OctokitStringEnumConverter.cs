@@ -1,4 +1,8 @@
-﻿namespace BCC.Web.Util
+﻿using System;
+using Newtonsoft.Json;
+using Octokit;
+
+namespace BCC.Web.Util
 {
     public class OctokitStringEnumConverter : JsonConverter
     {

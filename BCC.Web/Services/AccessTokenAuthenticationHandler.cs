@@ -1,4 +1,12 @@
-﻿using BCC.Web.Interfaces;
+﻿using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+using BCC.Web.Interfaces;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace BCC.Web.Services
 {

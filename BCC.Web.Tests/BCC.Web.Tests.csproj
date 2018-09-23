@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\.Web\.Web.csproj" />
+    <ProjectReference Include="..\BCC.Web\BCC.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>

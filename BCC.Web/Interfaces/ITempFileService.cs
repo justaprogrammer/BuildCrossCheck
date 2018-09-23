@@ -1,4 +1,9 @@
-﻿namespace BCC.Web.Interfaces
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+
+namespace BCC.Web.Interfaces
 {
     public interface ITempFileService : IDisposable
     {

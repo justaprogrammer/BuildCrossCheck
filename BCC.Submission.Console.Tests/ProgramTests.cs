@@ -1,3 +1,8 @@
+using BCC.Submission.Console.Interfaces;
+using Bogus;
+using NSubstitute;
+using Xunit;
+
 namespace BCC.Submission.Console.Tests
 {
     public class ProgramTests

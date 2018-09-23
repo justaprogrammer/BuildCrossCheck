@@ -1,5 +1,13 @@
 ﻿extern alias StructuredLogger;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using BCC.Core.Model.CheckRunSubmission;
+using BCC.MSBuildLog.Console.Extensions;
 using BCC.MSBuildLog.Console.Interfaces;
+using Microsoft.Build.Framework;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BCC.MSBuildLog.Console.Services
 {

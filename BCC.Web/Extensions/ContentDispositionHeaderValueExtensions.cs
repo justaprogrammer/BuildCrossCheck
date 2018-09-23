@@ -1,3 +1,6 @@
+using System;
+using Microsoft.Net.Http.Headers;
+
 namespace BCC.Web.Extensions
 {
     public static class ContentDispositionHeaderValueExtensions

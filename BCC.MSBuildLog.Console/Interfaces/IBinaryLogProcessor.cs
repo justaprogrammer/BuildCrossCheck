@@ -1,4 +1,8 @@
-﻿namespace BCC.MSBuildLog.Console.Interfaces
+﻿using System.Collections.Generic;
+using BCC.Core.Model.CheckRunSubmission;
+using JetBrains.Annotations;
+
+namespace BCC.MSBuildLog.Console.Interfaces
 {
     /// <summary>
     /// This service reads a binary log file and outputs captured information.

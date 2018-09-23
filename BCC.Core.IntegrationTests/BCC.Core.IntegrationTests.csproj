@@ -32,8 +32,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\.Core.Tests\.Core.Tests.csproj" />
-    <ProjectReference Include="..\.Core\.Core.csproj" />
+    <ProjectReference Include="..\BCC.Core.Tests\BCC.Core.Tests.csproj" />
+    <ProjectReference Include="..\BCC.Core\BCC.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

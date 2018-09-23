@@ -1,4 +1,6 @@
-﻿using BCC.MSBuildLog.Console.Interfaces;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
+using BCC.MSBuildLog.Console.Interfaces;
 using BCC.MSBuildLog.Console.Services;
 
 namespace BCC.MSBuildLog.Console

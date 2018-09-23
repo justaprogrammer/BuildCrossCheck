@@ -1,4 +1,7 @@
-﻿namespace BCC.Web.Controllers.Api
+﻿using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BCC.Web.Controllers.Api
 {
     public class ApiControllerBase : Controller
     {

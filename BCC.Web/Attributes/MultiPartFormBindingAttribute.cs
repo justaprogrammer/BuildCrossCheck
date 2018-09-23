@@ -1,4 +1,10 @@
-﻿namespace BCC.Web.Attributes
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
+
+namespace BCC.Web.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class MultiPartFormBindingAttribute : Attribute

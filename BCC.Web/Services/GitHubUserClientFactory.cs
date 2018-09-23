@@ -1,4 +1,10 @@
-﻿namespace BCC.Web.Services
+﻿using System.Threading.Tasks;
+using BCC.Core.Interfaces.GitHub;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Octokit;
+
+namespace BCC.Web.Services
 {
     /// <inheritdoc />
     public class GitHubUserClientFactory: IGitHubUserClientFactory

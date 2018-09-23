@@ -1,3 +1,9 @@
+using BCC.MSBuildLog.Console.Services;
+using Bogus;
+using FluentAssertions;
+using NSubstitute;
+using Xunit;
+
 namespace BCC.MSBuildLog.Console.Tests.Services
 {
     public class CommandLineParserTests

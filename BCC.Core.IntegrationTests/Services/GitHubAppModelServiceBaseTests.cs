@@ -1,4 +1,11 @@
-﻿namespace BCC.Core.IntegrationTests.Services
+﻿using System.Threading.Tasks;
+using BCC.Core.IntegrationTests.Utilities;
+using BCC.Core.Interfaces.GitHub;
+using BCC.Core.Services.GitHub;
+using FluentAssertions;
+using Octokit;
+
+namespace BCC.Core.IntegrationTests.Services
 {
     public class GitHubAppModelServiceBaseTests : IntegrationTestsBase
     {

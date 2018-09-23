@@ -1,4 +1,9 @@
-﻿namespace BCC.Web.Controllers.Api
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BCC.Web.Controllers.Api
 {
     [Authorize]
     [Route("api/[controller]")]

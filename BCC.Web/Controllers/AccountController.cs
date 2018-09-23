@@ -1,5 +1,12 @@
-﻿using BCC.Web.Interfaces;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using BCC.Core.Interfaces.GitHub;
+using BCC.Web.Interfaces;
 using BCC.Web.ViewModels;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BCC.Web.Controllers
 {

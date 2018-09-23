@@ -1,4 +1,8 @@
-﻿namespace BCC.MSBuildLog.Console.Tests.Extensions
+﻿using BCC.MSBuildLog.Console.Extensions;
+using FluentAssertions;
+using Xunit;
+
+namespace BCC.MSBuildLog.Console.Tests.Extensions
 {
     // https://stackoverflow.com/a/31941159/104877
     public class IsSubPathOfStringExtensionTest

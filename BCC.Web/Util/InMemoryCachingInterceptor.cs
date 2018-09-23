@@ -1,4 +1,8 @@
-﻿namespace BCC.Web.Util
+﻿using System.Collections.Generic;
+using System.Linq;
+using Castle.DynamicProxy;
+
+namespace BCC.Web.Util
 {
     public class InMemoryCachingInterceptor : IInterceptor
     {

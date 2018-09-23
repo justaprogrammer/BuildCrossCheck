@@ -1,4 +1,9 @@
-﻿using BCC.Core.IntegrationTests.Utilities;
+﻿using System.Threading.Tasks;
+using BCC.Core.IntegrationTests.Utilities;
+using BCC.Core.Interfaces.GitHub;
+using BCC.Core.Services.GitHub;
+using GitHubJwt;
+using Octokit;
 
 namespace BCC.Core.IntegrationTests
 {

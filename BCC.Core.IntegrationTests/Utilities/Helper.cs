@@ -1,4 +1,7 @@
-﻿namespace BCC.Core.IntegrationTests.Utilities
+﻿using System;
+using Castle.Core.Internal;
+
+namespace BCC.Core.IntegrationTests.Utilities
 {
     public static class Helper
     {

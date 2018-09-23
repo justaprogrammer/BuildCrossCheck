@@ -1,4 +1,7 @@
-﻿namespace BCC.Web.Models
+﻿using System.ComponentModel.DataAnnotations;
+using BCC.Web.Attributes;
+
+namespace BCC.Web.Models
 {
     public class LogUploadData
     {

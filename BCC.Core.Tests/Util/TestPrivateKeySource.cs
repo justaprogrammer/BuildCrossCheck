@@ -1,4 +1,7 @@
-﻿namespace BCC.Core.Tests.Util
+﻿using System.IO;
+using GitHubJwt;
+
+namespace BCC.Core.Tests.Util
 {
     public class TestPrivateKeySource : IPrivateKeySource
     {

@@ -1,4 +1,6 @@
-﻿namespace BCC.Web.Attributes
+﻿using System;
+
+namespace BCC.Web.Attributes
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class FormFileAttribute : Attribute

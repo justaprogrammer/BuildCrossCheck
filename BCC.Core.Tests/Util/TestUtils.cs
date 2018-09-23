@@ -1,3 +1,8 @@
+using System;
+using System.IO;
+using System.Reflection;
+using FluentAssertions;
+
 namespace BCC.Core.Tests.Util
 {
     public static class TestUtils

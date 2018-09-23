@@ -1,4 +1,8 @@
-﻿namespace BCC.Core.Tests.Util
+﻿using System;
+using Microsoft.Extensions.Logging;
+using Xunit.Abstractions;
+
+namespace BCC.Core.Tests.Util
 {
     public static class TestLogger
     {

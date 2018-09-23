@@ -1,4 +1,10 @@
-﻿namespace BCC.Core.IntegrationTests.Utilities
+﻿using System.Collections.Generic;
+using System.Linq;
+using Xunit;
+using Xunit.Abstractions;
+using Xunit.Sdk;
+
+namespace BCC.Core.IntegrationTests.Utilities
 {
     public class IntegrationTestDiscoverer : IXunitTestCaseDiscoverer
     {
@@ -17,7 +23,7 @@
         }
     }
 
-    [XunitTestCaseDiscoverer(".Core.IntegrationTests.Utilities.IntegrationTestDiscoverer", ".Core.IntegrationTests")]
+    [XunitTestCaseDiscoverer("BCC.Core.IntegrationTests.Utilities.IntegrationTestDiscoverer", "BCC.Core.IntegrationTests")]
     public class IntegrationTestAttribute : FactAttribute
     {
     }

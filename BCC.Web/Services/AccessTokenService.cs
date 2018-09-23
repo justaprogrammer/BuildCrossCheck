@@ -1,7 +1,20 @@
-﻿using BCC.Web.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+using BCC.Core.Interfaces.GitHub;
+using BCC.Infrastructure.Interfaces;
+using BCC.Web.Interfaces;
 using BCC.Web.Models;
-using AccessToken = .Infrastructure.Models.AccessToken;
-using Repository = .Core.Model.GitHub.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
+using AccessToken = BCC.Infrastructure.Models.AccessToken;
+using Repository = BCC.Core.Model.GitHub.Repository;
 
 namespace BCC.Web.Services
 {
