@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using BCC.Core.Tests.Util;
 using BCC.Submission.Console.Services;
@@ -43,11 +44,16 @@ namespace BCC.Submission.Console.Tests.Services
             var mockFileData = new MockFileData(textContents);
             mockFileSystem.AddFile(inputFile, mockFileData);
 
+            var restResponse = Substitute.For<IRestResponse>();
+            restResponse.StatusCode.Returns(HttpStatusCode.OK);
+
             var restClient = Substitute.For<IRestClient>();
+            restClient.ExecutePostTaskAsync(Arg.Any<IRestRequest>()).Returns(restResponse);
 
             var submissionService = new SubmissionService(mockFileSystem, restClient);
 
-            await submissionService.SubmitAsync(inputFile, token, headSha);
+            var result = await submissionService.SubmitAsync(inputFile, token, headSha);
+            result.Should().BeTrue();
 
             await restClient.Received(1).ExecutePostTaskAsync(Arg.Any<IRestRequest>());
             var objects = restClient.ReceivedCalls().First().GetArguments();
