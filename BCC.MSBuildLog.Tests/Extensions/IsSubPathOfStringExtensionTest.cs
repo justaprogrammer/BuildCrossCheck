@@ -1,4 +1,6 @@
-﻿using Xunit;
+﻿using BCC.MSBuildLog.Extensions;
+using FluentAssertions;
+using Xunit;
 
 namespace BCC.MSBuildLog.Tests.Extensions
 {

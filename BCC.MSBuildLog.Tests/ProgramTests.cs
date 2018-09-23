@@ -1,6 +1,7 @@
-using BCC.MSBuildLog.Console.Interfaces;
+using BCC.MSBuildLog.Interfaces;
 using Bogus;
 using NSubstitute;
+using Xunit;
 
 namespace BCC.MSBuildLog.Tests
 {

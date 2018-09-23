@@ -22,7 +22,6 @@
   <ItemGroup>
     <ProjectReference Include="..\BCC.Core.Tests\BCC.Core.Tests.csproj" />
     <ProjectReference Include="..\BCC.Core\BCC.Core.csproj" />
-    <ProjectReference Include="..\BCC.MSBuildLog.Console\BCC.MSBuildLog.csproj" />
     <ProjectReference Include="..\BCC.MSBuildLog\BCC.MSBuildLog.csproj" />
   </ItemGroup>
 

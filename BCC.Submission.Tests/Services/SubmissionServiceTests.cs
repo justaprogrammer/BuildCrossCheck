@@ -1,9 +1,11 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using BCC.Core.Tests.Util;
 using BCC.Submission.Services;
 using Bogus;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using RestSharp;

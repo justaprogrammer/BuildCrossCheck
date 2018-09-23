@@ -1,7 +1,15 @@
-﻿using BCC.Core.Model.CheckRunSubmission;
+﻿using System.IO;
+using System.IO.Abstractions.TestingHelpers;
+using System.Text;
+using BCC.Core.Model.CheckRunSubmission;
 using BCC.Core.Tests.Util;
+using BCC.MSBuildLog.Interfaces;
+using BCC.MSBuildLog.Services;
 using Bogus;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
 

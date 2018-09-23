@@ -1,6 +1,8 @@
-using BCC.MSBuildLog.Console.Services;
+using BCC.MSBuildLog.Services;
 using Bogus;
+using FluentAssertions;
 using NSubstitute;
+using Xunit;
 
 namespace BCC.MSBuildLog.Tests.Services
 {
