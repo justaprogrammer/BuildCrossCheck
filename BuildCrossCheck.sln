@@ -29,34 +29,28 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.Infrastructure", "BCC.Infrastructure\BCC.Infrastructure.csproj", "{9D9E0A7A-0D0C-4DC9-9D99-D33BC351BF8F}"
 EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "docs", "docs\", "{88913F3F-7D89-4CC4-A7C6-89C79286220B}"
-	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
-		Debug.AspNetCompiler.VirtualPath = "/localhost_60757"
-		Debug.AspNetCompiler.PhysicalPath = "docs\"
-		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_60757\"
-		Debug.AspNetCompiler.Updateable = "true"
-		Debug.AspNetCompiler.ForceOverwrite = "true"
-		Debug.AspNetCompiler.FixedNames = "false"
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.VirtualPath = "/localhost_60757"
-		Release.AspNetCompiler.PhysicalPath = "docs\"
-		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_60757\"
-		Release.AspNetCompiler.Updateable = "true"
-		Release.AspNetCompiler.ForceOverwrite = "true"
-		Release.AspNetCompiler.FixedNames = "false"
-		Release.AspNetCompiler.Debug = "False"
-		VWDPort = "60757"
-		SlnRelativePath = "docs\"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.MSBuildLog", "BCC.MSBuildLog\BCC.MSBuildLog.csproj", "{0F91B1F4-D2E7-45D2-A106-E733D0720D5B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.MSBuildLog.Tests", "BCC.MSBuildLog.Tests\BCC.MSBuildLog.Tests.csproj", "{8BE2296B-CFC5-41E3-B91E-D9091CA4306F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.Submission", "BCC.Submission\BCC.Submission.csproj", "{319D560D-CA3E-48DF-B049-902474E73EB9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.Submission.Tests", "BCC.Submission.Tests\BCC.Submission.Tests.csproj", "{6786A559-3907-42E7-9CDE-AD96C2D28FD3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{51A5C645-9407-4F2C-BEC1-80134F1AE3CB}"
+	ProjectSection(SolutionItems) = preProject
+		docs\contributing.md = docs\contributing.md
+		docs\integrating.md = docs\integrating.md
+		docs\readme.md = docs\readme.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.MSBuildLog.Console", "BCC.MSBuildLog.Console\BCC.MSBuildLog.Console.csproj", "{0F91B1F4-D2E7-45D2-A106-E733D0720D5B}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.MSBuildLog.Console.Tests", "BCC.MSBuildLog.Console.Tests\BCC.MSBuildLog.Console.Tests.csproj", "{8BE2296B-CFC5-41E3-B91E-D9091CA4306F}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.Submission.Console", "BCC.Submission.Console\BCC.Submission.Console.csproj", "{319D560D-CA3E-48DF-B049-902474E73EB9}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.Submission.Console.Tests", "BCC.Submission.Console.Tests\BCC.Submission.Console.Tests.csproj", "{6786A559-3907-42E7-9CDE-AD96C2D28FD3}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{72EADED4-6A38-4930-90F5-BA148A3FBEA2}"
+	ProjectSection(SolutionItems) = preProject
+		docs\images\testconsole1-error-pr-changes.png = docs\images\testconsole1-error-pr-changes.png
+		docs\images\testconsole1-error-pr-check-runs.png = docs\images\testconsole1-error-pr-check-runs.png
+		docs\images\testconsole1-warning-pr-changes.png = docs\images\testconsole1-warning-pr-changes.png
+		docs\images\testconsole1-warning-pr-check-runs.png = docs\images\testconsole1-warning-pr-check-runs.png
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,10 +82,6 @@ Global
 		{9D9E0A7A-0D0C-4DC9-9D99-D33BC351BF8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D9E0A7A-0D0C-4DC9-9D99-D33BC351BF8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D9E0A7A-0D0C-4DC9-9D99-D33BC351BF8F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{88913F3F-7D89-4CC4-A7C6-89C79286220B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{88913F3F-7D89-4CC4-A7C6-89C79286220B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{88913F3F-7D89-4CC4-A7C6-89C79286220B}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{88913F3F-7D89-4CC4-A7C6-89C79286220B}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{0F91B1F4-D2E7-45D2-A106-E733D0720D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0F91B1F4-D2E7-45D2-A106-E733D0720D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F91B1F4-D2E7-45D2-A106-E733D0720D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -111,6 +101,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{72EADED4-6A38-4930-90F5-BA148A3FBEA2} = {51A5C645-9407-4F2C-BEC1-80134F1AE3CB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {05191D52-B17D-4449-BE8F-26B3F4F081A5}
