@@ -1,4 +1,4 @@
-﻿namespace BCC.MSBuildLog.Console
+﻿namespace BCC.MSBuildLog
 {
     public class ApplicationArguments
     {

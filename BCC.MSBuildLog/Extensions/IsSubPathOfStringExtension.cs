@@ -2,7 +2,7 @@
 using System.IO;
 using JetBrains.Annotations;
 
-namespace BCC.MSBuildLog.Console.Extensions
+namespace BCC.MSBuildLog.Extensions
 {
     //https://stackoverflow.com/a/31941159/104877
     public static class IsSubPathOfStringExtension

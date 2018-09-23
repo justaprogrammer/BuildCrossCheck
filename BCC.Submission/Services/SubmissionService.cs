@@ -2,10 +2,10 @@
 using System.IO.Abstractions;
 using System.Net;
 using System.Threading.Tasks;
-using BCC.Submission.Console.Interfaces;
+using BCC.Submission.Interfaces;
 using RestSharp;
 
-namespace BCC.Submission.Console.Services
+namespace BCC.Submission.Services
 {
     public class SubmissionService : ISubmissionService
     {

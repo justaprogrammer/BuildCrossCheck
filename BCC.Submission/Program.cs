@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
-using BCC.Submission.Console.Interfaces;
-using BCC.Submission.Console.Services;
+using BCC.Submission.Interfaces;
+using BCC.Submission.Services;
 using RestSharp;
 
-namespace BCC.Submission.Console
+namespace BCC.Submission
 {
     public class Program
     {

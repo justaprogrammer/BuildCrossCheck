@@ -1,19 +1,11 @@
-﻿using System.IO;
-using System.IO.Abstractions.TestingHelpers;
-using System.Text;
-using BCC.Core.Model.CheckRunSubmission;
+﻿using BCC.Core.Model.CheckRunSubmission;
 using BCC.Core.Tests.Util;
-using BCC.MSBuildLog.Console.Interfaces;
-using BCC.MSBuildLog.Console.Services;
 using Bogus;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace BCC.MSBuildLog.Console.Tests.Services
+namespace BCC.MSBuildLog.Tests.Services
 {
     public class BuildLogProcessorTests
     {

@@ -1,8 +1,8 @@
 ﻿using System;
-using BCC.Submission.Console.Interfaces;
+using BCC.Submission.Interfaces;
 using Fclp;
 
-namespace BCC.Submission.Console.Services
+namespace BCC.Submission.Services
 {
     public class CommandLineParser: ICommandLineParser
     {

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
-    <id>BCC.MSBuildLog</id>
-    <version>1.0.0</version>
-    <authors>Stanley Goldman</authors>
-    <description>Generates input for  from binlog files</description>
+    <id>$packageid$</id>
+    <version>$version$-$versionsuffix$</version>
+    <authors>$authors$</authors>
+    <description>Generates input for BCC from binlog files</description>
   </metadata>
   <files>
     <file src="$publishdir$\net471\**\*" target="tools/net471/" />

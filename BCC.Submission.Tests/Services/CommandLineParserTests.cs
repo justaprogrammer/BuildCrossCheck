@@ -1,10 +1,9 @@
-using BCC.Submission.Console.Services;
+using BCC.Submission.Services;
 using Bogus;
-using FluentAssertions;
 using NSubstitute;
 using Xunit;
 
-namespace BCC.Submission.Console.Tests.Services
+namespace BCC.Submission.Tests.Services
 {
     public class CommandLineParserTests
     {

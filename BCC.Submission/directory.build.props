@@ -1,0 +1,7 @@
+<Project>
+ <PropertyGroup>
+   <PackageId>BuildCrossCheck Submission</PackageId>
+   <Version>0.0.1</Version>
+   <VersionSuffix>beta</VersionSuffix>
+ </PropertyGroup>
+</Project>

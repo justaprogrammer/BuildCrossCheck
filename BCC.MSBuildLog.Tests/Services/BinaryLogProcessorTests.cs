@@ -1,16 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using BCC.Core.Model.CheckRunSubmission;
+﻿using BCC.Core.Model.CheckRunSubmission;
 using BCC.Core.Tests.Util;
-using BCC.MSBuildLog.Console.Services;
 using Bogus;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace BCC.MSBuildLog.Console.Tests.Services
+namespace BCC.MSBuildLog.Tests.Services
 {
     public class BinaryLogProcessorTests
     {
