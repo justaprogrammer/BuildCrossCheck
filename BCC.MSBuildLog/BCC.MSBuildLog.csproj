@@ -10,15 +10,42 @@
     <PackageReference Include="FluentCommandLineParser-netstandard" Version="1.4.3.13" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
     <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
-    <PackageReference Include="RestSharp" Version="106.3.1" />
     <PackageReference Include="System.IO.Abstractions" Version="2.1.0.230" />
+    <PackageReference Include="Microsoft.Build" Version="15.7.179" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.7.179" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.7.179" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.7.179" />
     <PackageReference Include="morelinq" Version="3.0.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BCC.Core\BCC.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System">
+      <HintPath>System</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="StructuredLogger">
+      <HintPath>..\lib\StructuredLogger.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="CreateAliasForStructuredLogger" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
+    <ItemGroup>
+      <ReferencePath Condition="'%(FileName)' == 'StructuredLogger'">
+        <Aliases>StructuredLogger</Aliases>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
 
   <!-- Pack settings -->
   <PropertyGroup>
     <NoPackageAnalysis>true</NoPackageAnalysis>
-    <NuspecFile>BCC.Submission.Console.nuspec</NuspecFile>
+    <NuspecFile>BCC.MSBuildLog.nuspec</NuspecFile>
     <IntermediatePackDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/publish/</IntermediatePackDir>
     <PublishDir>$(IntermediatePackDir)$(TargetFramework)/</PublishDir>
     <NuspecProperties>publishDir=$([MSBuild]::NormalizeDirectory($(IntermediatePackDir)))</NuspecProperties>
