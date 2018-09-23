@@ -1,4 +1,6 @@
 <Project>
+ <Import Project="../Directory.Build.props" />
+
  <PropertyGroup>
    <PackageId>BuildCrossCheck MSBuildLog</PackageId>
    <Version>0.0.1</Version>
