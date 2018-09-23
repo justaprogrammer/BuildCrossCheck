@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    ".MSBuildLog.Console": {
+      "commandName": "Project",
+      "commandLineArgs": "-i \"asdf\" -b \"asdf\""
+    }
+  }
+}

@@ -260,6 +260,6 @@ paket-files/
 __pycache__/
 *.pyc
 
-/MSBLOC.Web/wwwroot/js/*.min.js
-/MSBLOC.Web/wwwroot/css/*.min.css
-/MSBLOC.Web/Properties/PublishProfiles/*.pubxml
+/.Web/wwwroot/js/*.min.js
+/.Web/wwwroot/css/*.min.css
+/.Web/Properties/PublishProfiles/*.pubxml
