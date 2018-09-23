@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "MSBLOC.MSBuildLog.Console": {
-      "commandName": "Project",
-      "commandLineArgs": "-i \"asdf\" -b \"asdf\""
-    }
-  }
-}

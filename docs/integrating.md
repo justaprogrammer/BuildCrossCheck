@@ -2,13 +2,13 @@
 
 ## Adding the GitHub App to your Organization or Repository
 
-Add the [MSBLOC GitHub App](https://github.com/apps/msbuildlog-octokit-checker) to the repositories that you 
+Add the [BCC GitHub App](https://github.com/apps/msbuildlog-octokit-checker) to the repositories that you 
 would like to work with.
 
 ## Create a token
 
 In order to verify your build server, create a token to use when sending build logs.
-After installing the application to your repo, head to [MSBLOC WebApp](https://msblocweb.azurewebsites.net/) 
+After installing the application to your repo, head to [BCC WebApp](https://msblocweb.azurewebsites.net/) 
 and login with your GitHub account. There you will be able create a token per repository as well as
 revoke prior tokens if necessary.
 

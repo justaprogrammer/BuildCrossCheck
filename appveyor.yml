@@ -5,43 +5,43 @@ environment:
     secure: eWX23ydbzsvhziCB8woiK9EwwDv+ppl4E8j9ZuxwyrYOP6oQ9VFhBdsRvXiZo8AYsfNsYXMEPzndp5YhrbnNuE48FQ3QJQjmmISgpZN/V1INz5ukENLm3yeRYzg6YCDtRgv25+geZyrgG0oZ6rAR0GpTmBKG0SxFimkK6hA4GiB54+7BDiRQvIw776hyVUFW+sIjD8Za6xls3JDQmEEm/p4M5hPWOeLRJQqj8iTlVOLLRdk76FrawXdqIFK6dUtc/dcrx5ApAXm4bF5gPaBsbTfY5Q5IifGr6owrBW5z/vP9XsiN5wJz/HM7iCpwIW5w4Q9leruBMn7wdPZsFYf57j7z1INerDgqbptaSZWMD6Pm9D+ujrXNleuVEJN4+Gz8ZLSZfcY4hBI+t50Qp/YyEzqes/caJiD2qv01IymJe8P1DCoSoOgPzPykhJRfV8HVtnhMWJoh+HCmI+4MUNGHzUkCqvc8fXVxyl738OKE8SlZFb3XC6segwSo3zjHvPsLW5R2GJJX4cxVp3H78MJ9Nd4E+xejgms8tqLX4ELg1BBUf9dt/G+UIRstfsYz25ptVvLTvVpbkVLiwAbt99GYlTMixbS7HQyFrtqvgk0wAzGNBEHYyw6J2N+y53REZk+zyEdEmgIBWCY0xjYU8o5EZDjt47TiT4zYuveQlAqa3r2sHw+zXpTZTbz5DJLTYvsM
 before_build:
     - ps: |
-        nuget restore MSBuildLogOctokitChecker.sln -Verbosity Quiet
-        cd ./MSBLOC.web
+        nuget restore BuildCrossCheck.sln -Verbosity Quiet
+        cd ./BCC.web
         npm install
         cd ..
 build_script:
 - ps: >-
-    msbuild MSBuildLogOctokitChecker.sln --% /p:Configuration=Release /bl:output.binlog /verbosity:minimal
+    msbuild BuildCrossCheck.sln --% /p:Configuration=Release /bl:output.binlog /verbosity:minimal
 after_build:
-    - cmd: dotnet publish MSBLOC.Web --configuration Release --output %appveyor_build_folder%\dist
-    - cmd: dotnet pack -c Release .\MSBLOC.MSBuildLog.Console\MSBLOC.MSBuildLog.Console.csproj -o ..\
-    - cmd: dotnet pack -c Release .\MSBLOC.Submission.Console\MSBLOC.Submission.Console.csproj -o ..\
+    - cmd: dotnet publish BCC.Web --configuration Release --output %appveyor_build_folder%\dist
+    - cmd: dotnet pack -c Release .\BCC.MSBuildLog.Console\BCC.MSBuildLog.Console.csproj -o ..\
+    - cmd: dotnet pack -c Release .\BCC.Submission.Console\BCC.Submission.Console.csproj -o ..\
 test_script:
-    - cmd: '%xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\MSBLOC.Core.Tests\bin\Release\net471\MSBLOC.Core.Tests.dll" -appveyor'
-    - cmd: '%xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\MSBLOC.MSBuildLog.Console.Tests\bin\Release\net471\MSBLOC.MSBuildLog.Console.Tests.dll" -appveyor'
-    - cmd: '%xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\MSBLOC.Submission.Console.Tests\bin\Release\net471\MSBLOC.Submission.Console.Tests.dll" -appveyor'
-    - cmd: dotnet test -c Release MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj --logger:Appveyor
-    - cmd: dotnet test -c Release MSBLOC.MSBuildLog.Console.Tests\MSBLOC.MSBuildLog.Console.Tests.csproj --logger:Appveyor
-    - cmd: dotnet test -c Release MSBLOC.Submission.Console.Tests\MSBLOC.Submission.Console.Tests.csproj --logger:Appveyor
-    - cmd: dotnet test -c Release MSBLOC.Web.Tests\MSBLOC.Web.Tests.csproj --logger:Appveyor
+    - cmd: '%xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\BCC.Core.Tests\bin\Release\net471\BCC.Core.Tests.dll" -appveyor'
+    - cmd: '%xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\BCC.MSBuildLog.Console.Tests\bin\Release\net471\BCC.MSBuildLog.Console.Tests.dll" -appveyor'
+    - cmd: '%xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\BCC.Submission.Console.Tests\bin\Release\net471\BCC.Submission.Console.Tests.dll" -appveyor'
+    - cmd: dotnet test -c Release BCC.Core.Tests\BCC.Core.Tests.csproj --logger:Appveyor
+    - cmd: dotnet test -c Release BCC.MSBuildLog.Console.Tests\BCC.MSBuildLog.Console.Tests.csproj --logger:Appveyor
+    - cmd: dotnet test -c Release BCC.Submission.Console.Tests\BCC.Submission.Console.Tests.csproj --logger:Appveyor
+    - cmd: dotnet test -c Release BCC.Web.Tests\BCC.Web.Tests.csproj --logger:Appveyor
 after_test:
 - ps: |  
     dotnet tool install --global coverlet.console
-    coverlet .\MSBLOC.Core.Tests\bin\Release\netcoreapp2.1\MSBLOC.Core.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Core.Tests-netcoreapp2.1.coverage.xml"
-    coverlet .\MSBLOC.Web.Tests\bin\Release\netcoreapp2.1\MSBLOC.Web.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.Web.Tests\MSBLOC.Web.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Web.Tests-netcoreapp2.1.coverage.xml"
-    coverlet .\MSBLOC.MSBuildLog.Console.Tests\bin\Release\netcoreapp2.1\MSBLOC.MSBuildLog.Console.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.MSBuildLog.Console.Tests\MSBLOC.MSBuildLog.Console.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.MSBuildLog.Console.Tests-netcoreapp2.1.coverage.xml"
-    coverlet .\MSBLOC.Submission.Console.Tests\bin\Release\netcoreapp2.1\MSBLOC.Submission.Console.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.Submission.Console.Tests\MSBLOC.Submission.Console.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Submission.Console.Tests-netcoreapp2.1.coverage.xml"
-    coverlet .\MSBLOC.Core.Tests\bin\Release\net471\MSBLOC.Core.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.Core.Tests\MSBLOC.Core.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Core.Tests-net471.coverage.xml"
-    coverlet .\MSBLOC.MSBuildLog.Console.Tests\bin\Release\net471\MSBLOC.MSBuildLog.Console.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.MSBuildLog.Console.Tests\MSBLOC.MSBuildLog.Console.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.MSBuildLog.Console.Tests-net471.coverage.xml"
-    coverlet .\MSBLOC.Submission.Console.Tests\bin\Release\net471\MSBLOC.Submission.Console.Tests.dll --target "dotnet" --targetargs "test -c Release .\MSBLOC.Submission.Console.Tests\MSBLOC.Submission.Console.Tests.csproj --no-build" --format opencover --output ".\MSBLOC.Submission.Console.Tests-net471.coverage.xml"
+    coverlet .\BCC.Core.Tests\bin\Release\netcoreapp2.1\BCC.Core.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Core.Tests\BCC.Core.Tests.csproj --no-build" --format opencover --output ".\BCC.Core.Tests-netcoreapp2.1.coverage.xml"
+    coverlet .\BCC.Web.Tests\bin\Release\netcoreapp2.1\BCC.Web.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Web.Tests\BCC.Web.Tests.csproj --no-build" --format opencover --output ".\BCC.Web.Tests-netcoreapp2.1.coverage.xml"
+    coverlet .\BCC.MSBuildLog.Console.Tests\bin\Release\netcoreapp2.1\BCC.MSBuildLog.Console.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.MSBuildLog.Console.Tests\BCC.MSBuildLog.Console.Tests.csproj --no-build" --format opencover --output ".\BCC.MSBuildLog.Console.Tests-netcoreapp2.1.coverage.xml"
+    coverlet .\BCC.Submission.Console.Tests\bin\Release\netcoreapp2.1\BCC.Submission.Console.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Submission.Console.Tests\BCC.Submission.Console.Tests.csproj --no-build" --format opencover --output ".\BCC.Submission.Console.Tests-netcoreapp2.1.coverage.xml"
+    coverlet .\BCC.Core.Tests\bin\Release\net471\BCC.Core.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Core.Tests\BCC.Core.Tests.csproj --no-build" --format opencover --output ".\BCC.Core.Tests-net471.coverage.xml"
+    coverlet .\BCC.MSBuildLog.Console.Tests\bin\Release\net471\BCC.MSBuildLog.Console.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.MSBuildLog.Console.Tests\BCC.MSBuildLog.Console.Tests.csproj --no-build" --format opencover --output ".\BCC.MSBuildLog.Console.Tests-net471.coverage.xml"
+    coverlet .\BCC.Submission.Console.Tests\bin\Release\net471\BCC.Submission.Console.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Submission.Console.Tests\BCC.Submission.Console.Tests.csproj --no-build" --format opencover --output ".\BCC.Submission.Console.Tests-net471.coverage.xml"
     choco install --no-progress codecov
-    codecov -f ".\MSBLOC.Core.Tests-netcoreapp2.1.coverage.xml"
-    codecov -f ".\MSBLOC.Web.Tests-netcoreapp2.1.coverage.xml"
-    codecov -f ".\MSBLOC.MSBuildLog.Console.Tests-netcoreapp2.1.coverage.xml"
-    codecov -f ".\MSBLOC.Submission.Console.Tests-netcoreapp2.1.coverage.xml"
-    codecov -f ".\MSBLOC.Core.Tests-net471.coverage.xml"
-    codecov -f ".\MSBLOC.MSBuildLog.Console.Tests-net471.coverage.xml"
-    codecov -f ".\MSBLOC.Submission.Console.Tests-net471.coverage.xml"
+    codecov -f ".\BCC.Core.Tests-netcoreapp2.1.coverage.xml"
+    codecov -f ".\BCC.Web.Tests-netcoreapp2.1.coverage.xml"
+    codecov -f ".\BCC.MSBuildLog.Console.Tests-netcoreapp2.1.coverage.xml"
+    codecov -f ".\BCC.Submission.Console.Tests-netcoreapp2.1.coverage.xml"
+    codecov -f ".\BCC.Core.Tests-net471.coverage.xml"
+    codecov -f ".\BCC.MSBuildLog.Console.Tests-net471.coverage.xml"
+    codecov -f ".\BCC.Submission.Console.Tests-net471.coverage.xml"
 artifacts:
     - path: '*.coverage.xml'
       type: File
