@@ -1,4 +1,8 @@
-﻿namespace BCC.Web.Tests.Util
+﻿using System;
+using Microsoft.Extensions.Logging;
+using Xunit.Abstractions;
+
+namespace BCC.Web.Tests.Util
 {
     public static class TestLogger
     {

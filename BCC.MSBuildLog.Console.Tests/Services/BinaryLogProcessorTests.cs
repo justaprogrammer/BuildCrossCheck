@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using BCC.Core.Model.CheckRunSubmission;
 using BCC.Core.Tests.Util;

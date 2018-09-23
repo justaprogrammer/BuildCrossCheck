@@ -1,4 +1,12 @@
-﻿namespace BCC.Web.Tests
+﻿using FluentAssertions;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Azure.KeyVault;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.EnvironmentVariables;
+using NSubstitute;
+using Xunit;
+
+namespace BCC.Web.Tests
 {
     public class ProgramTests
     {

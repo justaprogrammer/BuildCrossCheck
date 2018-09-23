@@ -1,4 +1,8 @@
-﻿namespace BCC.Web.Tests.Controllers
+﻿using BCC.Web.Controllers;
+using Microsoft.AspNetCore.Mvc;
+using Xunit;
+
+namespace BCC.Web.Tests.Controllers
 {
     public class HomeControllerTest
     {

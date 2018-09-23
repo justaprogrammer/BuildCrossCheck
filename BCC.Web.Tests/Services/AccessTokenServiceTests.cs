@@ -1,4 +1,27 @@
-﻿using BCC.Web.Tests.Util;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using BCC.Core.Interfaces.GitHub;
+using BCC.Core.Model.GitHub;
+using BCC.Infrastructure.Interfaces;
+using BCC.Infrastructure.Models;
+using BCC.Web.Models;
+using BCC.Web.Services;
+using BCC.Web.Tests.Util;
+using Bogus;
+using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace BCC.Web.Tests.Services
 {
