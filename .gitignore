@@ -260,6 +260,6 @@ paket-files/
 __pycache__/
 *.pyc
 
-/.Web/wwwroot/js/*.min.js
-/.Web/wwwroot/css/*.min.css
-/.Web/Properties/PublishProfiles/*.pubxml
+/BCC.Web/wwwroot/js/*.min.js
+/BCC.Web/wwwroot/css/*.min.css
+/BCC.Web/Properties/PublishProfiles/*.pubxml
