@@ -21,7 +21,7 @@ namespace BCC.Core.Services.GitHub
         {
             var token = tokenGenerator.GetToken();
 
-            return new GitHubClient(new ProductHeaderValue("MSBuildLogOctokitChecker"))
+            return new GitHubClient(new ProductHeaderValue("BuildCrossCheck"))
             {
                 Credentials = new Credentials(token, AuthenticationType.Bearer)
             };

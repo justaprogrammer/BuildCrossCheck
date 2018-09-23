@@ -6,7 +6,7 @@
         public async Task ShouldGetResitoryFile()
         {
             var testAppModelService = CreateTarget();
-            var appveyor = await testAppModelService.GetRepositoryFileAsync("justaprogrammer", "MSBuildLogOctokitChecker", "appveyor.yml", "master");
+            var appveyor = await testAppModelService.GetRepositoryFileAsync("justaprogrammer", "BuildCrossCheck", "appveyor.yml", "master");
             appveyor.Should().NotBeNull();
         }
 
@@ -14,7 +14,7 @@
         public async Task ShouldNotGetFileThatDoesNotExist()
         {
             var testAppModelService = CreateTarget();
-            var appveyor = await testAppModelService.GetRepositoryFileAsync("justaprogrammer", "MSBuildLogOctokitChecker", "appveyor2.yml", "master");
+            var appveyor = await testAppModelService.GetRepositoryFileAsync("justaprogrammer", "BuildCrossCheck", "appveyor2.yml", "master");
             appveyor.Should().BeNull();
         }
 
