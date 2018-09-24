@@ -47,6 +47,13 @@
     </ItemGroup>
   </Target>
   
+  <!-- Pack settings -->
+  <PropertyGroup>
+    <IntermediatePackDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/publish/</IntermediatePackDir>
+    <PublishDir>$(IntermediatePackDir)$(TargetFramework)/</PublishDir>
+    <NuspecProperties>publishDir=$([MSBuild]::NormalizeDirectory($(IntermediatePackDir)))</NuspecProperties>
+  </PropertyGroup>
+
   <!-- Executes /t:Publish for all target frameworks before packing-->
   <Target Name="PublishAll" BeforeTargets="GenerateNuspec">
     <ItemGroup>
