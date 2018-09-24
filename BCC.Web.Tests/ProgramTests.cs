@@ -21,7 +21,7 @@ namespace BCC.Web.Tests
             var config = Substitute.For<IConfigurationBuilder>();
             config.Add(Arg.Do<EnvironmentVariablesConfigurationSource>(arg =>
             {
-                arg.Prefix.Should().Be("MSBLOC_");
+                arg.Prefix.Should().Be("BCC_");
             }));
             config.Build().Returns(baseConfigRoot);
 
@@ -42,7 +42,7 @@ namespace BCC.Web.Tests
                 ConfigurationBuilder = configurationBuilder
             };
 
-            program.MSBLOCConfigureAppConfiguration(context, config);
+            program.BuildCrossCheckConfigure(context, config);
 
             config.Received().Add(Arg.Any<EnvironmentVariablesConfigurationSource>());
             config.Received().Build();
@@ -64,11 +64,11 @@ namespace BCC.Web.Tests
             var config = Substitute.For<IConfigurationBuilder>();
             config.Add(Arg.Do<EnvironmentVariablesConfigurationSource>(arg =>
             {
-                arg.Prefix.Should().Be("MSBLOC_");
+                arg.Prefix.Should().Be("BCC_");
             }));
             config.Build().Returns(configRoot);
 
-            new ProgramStub().MSBLOCConfigureAppConfiguration(context, config);
+            new ProgramStub().BuildCrossCheckConfigure(context, config);
 
             config.Received().Add(Arg.Any<EnvironmentVariablesConfigurationSource>());
             config.Received().Build();

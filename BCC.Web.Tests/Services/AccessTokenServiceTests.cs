@@ -144,7 +144,7 @@ namespace BCC.Web.Tests.Services
             jsonWebToken.Payload.Value<string>(JwtRegisteredClaimNames.Jti).Should().Be(accessToken.Id.ToString());
             DateTimeOffset.FromUnixTimeSeconds(jsonWebToken.Payload.Value<int>(JwtRegisteredClaimNames.Iat)).Should()
                 .BeCloseTo(DateTimeOffset.UtcNow, 1000);
-            jsonWebToken.Payload.Value<long>("urn:msbloc:repositoryId").Should().Be(userRepository.Id);
+            jsonWebToken.Payload.Value<long>("urn:bcc:repositoryId").Should().Be(userRepository.Id);
         }
 
         [Fact]
