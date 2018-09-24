@@ -32,7 +32,7 @@ namespace BCC.MSBuildLog.Services
                 .Required();
 
             _parser.SetupHelp("?", "help")
-                .WithHeader("MSBuildLog.Console")
+                .WithHeader(typeof(CommandLineParser).Assembly.FullName)
                 .Callback(helpCallback);
         }
 
