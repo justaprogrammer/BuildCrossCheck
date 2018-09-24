@@ -41,7 +41,7 @@
       </ReferencePath>
     </ItemGroup>
   </Target>
-
+  
   <!-- Pack settings -->
   <PropertyGroup>
     <NoPackageAnalysis>true</NoPackageAnalysis>

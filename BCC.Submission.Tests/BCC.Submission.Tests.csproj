@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BCC.Core.Tests\BCC.Core.Tests.csproj" />
-    <ProjectReference Include="..\BCC.Submission.Console\BCC.Submission.csproj" />
+    <ProjectReference Include="..\BCC.Submission\BCC.Submission.csproj" />
   </ItemGroup>
 
 </Project>

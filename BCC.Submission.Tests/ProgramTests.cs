@@ -1,9 +1,9 @@
-using BCC.Submission.Console.Interfaces;
+using BCC.Submission.Interfaces;
 using Bogus;
 using NSubstitute;
 using Xunit;
 
-namespace BCC.Submission.Console.Tests
+namespace BCC.Submission.Tests
 {
     public class ProgramTests
     {

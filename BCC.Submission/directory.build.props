@@ -1,0 +1,9 @@
+<Project>
+ <Import Project="../Directory.Build.props" />
+
+ <PropertyGroup>
+   <PackageId>BuildCrossCheck Submission</PackageId>
+   <Version>0.0.1</Version>
+   <VersionSuffix>beta</VersionSuffix>
+ </PropertyGroup>
+</Project>

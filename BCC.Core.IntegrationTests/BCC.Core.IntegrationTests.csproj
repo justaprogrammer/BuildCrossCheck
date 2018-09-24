@@ -5,7 +5,7 @@
 
     <IsPackable>false</IsPackable>
 
-    <AssemblyName>.Core.IntegrationTests</AssemblyName>
+    <AssemblyName>BCC.Core.IntegrationTests</AssemblyName>
 
     <ApplicationIcon />
 
@@ -15,8 +15,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove=".Core.IntegrationTests.net471.v3.ncrunchproject" />
-    <None Remove=".Core.IntegrationTests.netcoreapp2.1.v3.ncrunchproject" />
+    <Compile Remove="Resources\**" />
+    <EmbeddedResource Remove="Resources\**" />
+    <None Remove="Resources\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="BCC.Core.IntegrationTests.net471.v3.ncrunchproject" />
+    <None Remove="BCC.Core.IntegrationTests.netcoreapp2.1.v3.ncrunchproject" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,10 +40,6 @@
   <ItemGroup>
     <ProjectReference Include="..\BCC.Core.Tests\BCC.Core.Tests.csproj" />
     <ProjectReference Include="..\BCC.Core\BCC.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Resources\" />
   </ItemGroup>
 
 </Project>

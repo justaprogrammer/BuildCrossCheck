@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace BCC.Submission.Console.Interfaces
+namespace BCC.Submission.Interfaces
 {
     public interface ISubmissionService
     {

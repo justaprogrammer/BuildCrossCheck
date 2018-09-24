@@ -1,4 +1,4 @@
-﻿namespace BCC.MSBuildLog.Console.Interfaces
+﻿namespace BCC.MSBuildLog.Interfaces
 {
     public interface IBuildLogProcessor
     {

@@ -1,9 +1,9 @@
-using BCC.MSBuildLog.Console.Interfaces;
+using BCC.MSBuildLog.Interfaces;
 using Bogus;
 using NSubstitute;
 using Xunit;
 
-namespace BCC.MSBuildLog.Console.Tests
+namespace BCC.MSBuildLog.Tests
 {
     public class ProgramTests
     {

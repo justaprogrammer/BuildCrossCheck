@@ -1,4 +1,4 @@
-﻿namespace BCC.Submission.Console
+﻿namespace BCC.Submission
 {
     public class ApplicationArguments
     {

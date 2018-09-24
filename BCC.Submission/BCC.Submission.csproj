@@ -14,7 +14,7 @@
     <PackageReference Include="System.IO.Abstractions" Version="2.1.0.230" />
     <PackageReference Include="morelinq" Version="3.0.0" />
   </ItemGroup>
-
+  
   <!-- Pack settings -->
   <PropertyGroup>
     <NoPackageAnalysis>true</NoPackageAnalysis>

@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
-using BCC.MSBuildLog.Console.Interfaces;
-using BCC.MSBuildLog.Console.Services;
+using BCC.MSBuildLog.Interfaces;
+using BCC.MSBuildLog.Services;
 
-namespace BCC.MSBuildLog.Console
+namespace BCC.MSBuildLog
 {
     public class Program
     {

@@ -1,8 +1,8 @@
 ﻿using System;
-using BCC.MSBuildLog.Console.Interfaces;
+using BCC.MSBuildLog.Interfaces;
 using Fclp;
 
-namespace BCC.MSBuildLog.Console.Services
+namespace BCC.MSBuildLog.Services
 {
     public class CommandLineParser: ICommandLineParser
     {
