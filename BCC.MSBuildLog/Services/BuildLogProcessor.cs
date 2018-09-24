@@ -70,8 +70,8 @@ namespace BCC.MSBuildLog.Services
                 StartedAt = dateTimeOffset,
                 CompletedAt = DateTimeOffset.Now,
                 Summary = string.Empty,
-                Name = configuration?.Name ?? "MSBuildLog Analyzer",
-                Title = configuration?.Title ?? "MSBuildLog Analysis",
+                Name = configuration?.Name ?? "MSBuild Analyzer",
+                Title = configuration?.Title ?? "MSBuild Log Messages",
             });
 
             _fileSystem.File.WriteAllText(outputFile, contents);
