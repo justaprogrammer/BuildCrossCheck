@@ -17,9 +17,9 @@ after_build:
     - cmd: dotnet pack -c Release .\BCC.MSBuildLog\BCC.MSBuildLog.csproj -o ..\
     - cmd: dotnet pack -c Release .\BCC.Submission\BCC.Submission.csproj -o ..\
 test_script:
-    - cmd: '%xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\BCC.Core.Tests\bin\Release\net471\BCC.Core.Tests.dll" -appveyor'
-    - cmd: '%xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\BCC.MSBuildLog.Tests\bin\Release\net471\BCC.MSBuildLog.Tests.dll" -appveyor'
-    - cmd: '%xunit20%\xunit.console.x86 "C:\projects\msbuildlogoctokitchecker\BCC.Submission.Tests\bin\Release\net471\BCC.Submission.Tests.dll" -appveyor'
+    - cmd: '%xunit20%\xunit.console.x86 "%appveyor_build_folder%\BCC.Core.Tests\bin\Release\net471\BCC.Core.Tests.dll" -appveyor'
+    - cmd: '%xunit20%\xunit.console.x86 "%appveyor_build_folder%\BCC.MSBuildLog.Tests\bin\Release\net471\BCC.MSBuildLog.Tests.dll" -appveyor'
+    - cmd: '%xunit20%\xunit.console.x86 "%appveyor_build_folder%\BCC.Submission.Tests\bin\Release\net471\BCC.Submission.Tests.dll" -appveyor'
     - cmd: dotnet test -c Release BCC.Core.Tests\BCC.Core.Tests.csproj --logger:Appveyor
     - cmd: dotnet test -c Release BCC.MSBuildLog.Tests\BCC.MSBuildLog.Tests.csproj --logger:Appveyor
     - cmd: dotnet test -c Release BCC.Submission.Tests\BCC.Submission.Tests.csproj --logger:Appveyor
