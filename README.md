@@ -3,6 +3,12 @@
 [![appveyor](https://ci.appveyor.com/api/projects/status/github/justaprogrammer/MSBuildLogOctokitChecker?svg=true&branch=master)](https://ci.appveyor.com/project/JustAProgrammer/msbuildlogoctokitchecker)
 [![codecov](https://codecov.io/gh/justaprogrammer/MSBuildLogOctokitChecker/branch/master/graph/badge.svg)](https://codecov.io/gh/justaprogrammer/MSBuildLogOctokitChecker)
 
+#### BCC-Submission
+[![NuGet](http://img.shields.io/nuget/v/bcc-submission.svg)](https://www.nuget.org/packages/bcc-submission)
+
+#### BCC-MSBuild
+[![NuGet](http://img.shields.io/nuget/v/bcc-msbuildlog.svg)](https://www.nuget.org/packages/bcc-msbuildlog)
+
 ## Overview
 
 MSBuildLogOctokitChecker is a GitHub App that uses MSBuild Binary log files to help check pull requests. Integrate it with the build process of any repository that uses MSBuild, and it will identify build warnings and errors in Pull Requests that you open like this:
