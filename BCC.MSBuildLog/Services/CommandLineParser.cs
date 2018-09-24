@@ -22,6 +22,10 @@ namespace BCC.MSBuildLog.Services
                 .WithDescription("Output file")
                 .Required();
 
+            _parser.Setup(arg => arg.ConfigurationFile)
+                .As("configuration")
+                .WithDescription("Configuration file");
+
             _parser.Setup(arg => arg.CloneRoot)
                 .As('c', "cloneRoot")
                 .WithDescription("Clone root")

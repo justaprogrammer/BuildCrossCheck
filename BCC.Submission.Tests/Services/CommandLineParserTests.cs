@@ -48,7 +48,13 @@ namespace BCC.Submission.Tests.Services
             var inputPath = Faker.System.FilePath();
             var token = Faker.Random.String();
             var headSha = Faker.Random.String();
-            var applicationArguments = commandLineParser.Parse(new[]{"-i", $@"""{inputPath}""", "-t", $@"""{token}""", "-h", $@"""{headSha}"""});
+
+            var applicationArguments = commandLineParser.Parse(new[]
+            {
+                "-i", $@"""{inputPath}""",
+                "-t", $@"""{token}""",
+                "-h", $@"""{headSha}"""
+            });
 
             listener.DidNotReceive().Callback(Arg.Any<string>());
 
@@ -59,7 +65,12 @@ namespace BCC.Submission.Tests.Services
 
             listener.ClearReceivedCalls();
 
-            applicationArguments = commandLineParser.Parse(new[]{"--input", $@"""{inputPath}""", "--token", $@"""{token}""", "--headSha", $@"""{headSha}""" });
+            applicationArguments = commandLineParser.Parse(new[]
+            {
+                "--input", $@"""{inputPath}""",
+                "--token", $@"""{token}""",
+                "--headSha", $@"""{headSha}"""
+            });
 
             listener.DidNotReceive().Callback(Arg.Any<string>());
 

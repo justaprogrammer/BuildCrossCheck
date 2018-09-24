@@ -48,7 +48,13 @@ namespace BCC.MSBuildLog.Tests.Services
             var inputPath = Faker.System.FilePath();
             var outputPath = Faker.System.FilePath();
             var cloneRoot = Faker.System.DirectoryPath();
-            var applicationArguments = commandLineParser.Parse(new[]{"-i", $@"""{inputPath}""", "-o", $@"""{outputPath}""", "-c", $@"""{cloneRoot}"""});
+
+            var applicationArguments = commandLineParser.Parse(new[]
+            {
+                "-i", $@"""{inputPath}""",
+                "-o", $@"""{outputPath}""",
+                "-c", $@"""{cloneRoot}"""
+            });
 
             listener.DidNotReceive().Callback(Arg.Any<string>());
 
@@ -57,7 +63,12 @@ namespace BCC.MSBuildLog.Tests.Services
             applicationArguments.OutputFile.Should().Be(outputPath);
             applicationArguments.CloneRoot.Should().Be(cloneRoot);
 
-            applicationArguments = commandLineParser.Parse(new[]{"--input", $@"""{inputPath}""", "--output", $@"""{outputPath}""", "--cloneRoot", $@"""{cloneRoot}""" });
+            applicationArguments = commandLineParser.Parse(new[]
+            {
+                "--input", $@"""{inputPath}""",
+                "--output", $@"""{outputPath}""",
+                "--cloneRoot", $@"""{cloneRoot}"""
+            });
 
             listener.DidNotReceive().Callback(Arg.Any<string>());
 
@@ -65,6 +76,50 @@ namespace BCC.MSBuildLog.Tests.Services
             applicationArguments.InputFile.Should().Be(inputPath);
             applicationArguments.OutputFile.Should().Be(outputPath);
             applicationArguments.CloneRoot.Should().Be(cloneRoot);
+        }
+
+        [Fact]
+        public void ShouldBeAbleToSetConfigurationArgument()
+        {
+            var listener = Substitute.For<ICommandLineParserCallBackListener>();
+            var commandLineParser = new CommandLineParser(listener.Callback);
+
+            var inputPath = Faker.System.FilePath();
+            var configurationFile = Faker.System.FilePath();
+            var outputPath = Faker.System.FilePath();
+            var cloneRoot = Faker.System.DirectoryPath();
+
+            var applicationArguments = commandLineParser.Parse(new[]
+            {
+                "-i", $@"""{inputPath}""",
+                "-o", $@"""{outputPath}""",
+                "-c", $@"""{cloneRoot}""",
+                "--configuration", $@"""{configurationFile}"""
+            });
+
+            listener.DidNotReceive().Callback(Arg.Any<string>());
+
+            applicationArguments.Should().NotBeNull();
+            applicationArguments.InputFile.Should().Be(inputPath);
+            applicationArguments.OutputFile.Should().Be(outputPath);
+            applicationArguments.CloneRoot.Should().Be(cloneRoot);
+            applicationArguments.ConfigurationFile.Should().Be(configurationFile);
+
+            applicationArguments = commandLineParser.Parse(new[]
+            {
+                "--input", $@"""{inputPath}""",
+                "--output", $@"""{outputPath}""",
+                "--cloneRoot", $@"""{cloneRoot}""",
+                "--configuration", $@"""{configurationFile}"""
+            });
+
+            listener.DidNotReceive().Callback(Arg.Any<string>());
+
+            applicationArguments.Should().NotBeNull();
+            applicationArguments.InputFile.Should().Be(inputPath);
+            applicationArguments.OutputFile.Should().Be(outputPath);
+            applicationArguments.CloneRoot.Should().Be(cloneRoot);
+            applicationArguments.ConfigurationFile.Should().Be(configurationFile);
         }
 
         public interface ICommandLineParserCallBackListener
