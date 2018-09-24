@@ -62,6 +62,7 @@ namespace BCC.MSBuildLog.Tests.Services
             applicationArguments.InputFile.Should().Be(inputPath);
             applicationArguments.OutputFile.Should().Be(outputPath);
             applicationArguments.CloneRoot.Should().Be(cloneRoot);
+            applicationArguments.ConfigurationFile.Should().BeNull();
 
             applicationArguments = commandLineParser.Parse(new[]
             {
@@ -76,6 +77,7 @@ namespace BCC.MSBuildLog.Tests.Services
             applicationArguments.InputFile.Should().Be(inputPath);
             applicationArguments.OutputFile.Should().Be(outputPath);
             applicationArguments.CloneRoot.Should().Be(cloneRoot);
+            applicationArguments.ConfigurationFile.Should().BeNull();
         }
 
         [Fact]

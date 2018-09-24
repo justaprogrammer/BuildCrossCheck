@@ -1,6 +1,6 @@
 {
   "profiles": {
-    ".MSBuildLog.Console": {
+    "BCC.MSBuildLog": {
       "commandName": "Project",
       "commandLineArgs": "-i \"asdf\" -b \"asdf\""
     }
