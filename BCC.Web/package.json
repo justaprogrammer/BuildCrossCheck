@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "name": "msbloc.web",
+  "name": "bcc.web",
   "private": true,
   "devDependencies": {
     "bootstrap": "^4.1.3",

@@ -268,9 +268,9 @@ namespace BCC.Web.Tests.Controllers.api
 
             var claims = new[]
             {
-                new Claim("urn:msbloc:repositoryName", repoName),
-                new Claim("urn:msbloc:repositoryOwner", repoOwner),
-                new Claim("urn:msbloc:repositoryOwnerId", faker.Random.Long().ToString())
+                new Claim("urn:bcc:repositoryName", repoName),
+                new Claim("urn:bcc:repositoryOwner", repoOwner),
+                new Claim("urn:bcc:repositoryOwnerId", faker.Random.Long().ToString())
             };
 
             var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)

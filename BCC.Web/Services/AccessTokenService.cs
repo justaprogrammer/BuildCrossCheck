@@ -71,10 +71,10 @@ namespace BCC.Web.Services
                 { JwtRegisteredClaimNames.Aud, ".Api" },
                 { JwtRegisteredClaimNames.Jti, accessToken.Id },
                 { JwtRegisteredClaimNames.Iat, accessToken.IssuedAt.ToUnixTimeSeconds() },
-                { "urn:msbloc:repositoryId", repository.Id },
-                { "urn:msbloc:repositoryName", repository.Name },
-                { "urn:msbloc:repositoryOwner", repository.Owner},
-                { "urn:msbloc:repositoryOwnerId", repository.OwnerId },
+                { "urn:bcc:repositoryId", repository.Id },
+                { "urn:bcc:repositoryName", repository.Name },
+                { "urn:bcc:repositoryOwner", repository.Owner},
+                { "urn:bcc:repositoryOwnerId", repository.OwnerId },
                 { JwtRegisteredClaimNames.Sub, accessToken.IssuedTo },
             };
 

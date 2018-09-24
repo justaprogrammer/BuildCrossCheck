@@ -4,6 +4,6 @@
  <PropertyGroup>
    <PackageId>BuildCrossCheck MSBuildLog</PackageId>
    <Version>0.0.1</Version>
-   <VersionSuffix>beta</VersionSuffix>
+   <VersionSuffix>alpha</VersionSuffix>
  </PropertyGroup>
 </Project>

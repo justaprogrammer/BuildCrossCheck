@@ -17,7 +17,7 @@ namespace BCC.Submission
         {
             var commandLineParser = new CommandLineParser(System.Console.WriteLine);
             var fileSystem = new FileSystem();
-            var baseUrl = Environment.GetEnvironmentVariable("MSBLOC_URL") ?? "https://msblocweb.azurewebsites.net";
+            var baseUrl = Environment.GetEnvironmentVariable("BCC_URL") ?? "https://buildcrosscheck.azurewebsites.net";
             var restClient = new RestClient(baseUrl);
             var submissionService = new SubmissionService(fileSystem, restClient);
             var program = new Program(commandLineParser, submissionService);

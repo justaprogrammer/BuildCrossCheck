@@ -20,13 +20,13 @@ namespace BCC.Web
         [ExcludeFromCodeCoverage]
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration(new Program().MSBLOCConfigureAppConfiguration)
+                .ConfigureAppConfiguration(new Program().BuildCrossCheckConfigure)
                 .UseStartup<Startup>()
                 .Build();
 
-        public void MSBLOCConfigureAppConfiguration(WebHostBuilderContext context, IConfigurationBuilder config)
+        public void BuildCrossCheckConfigure(WebHostBuilderContext context, IConfigurationBuilder config)
         {
-            config.AddEnvironmentVariables("MSBLOC_");
+            config.AddEnvironmentVariables("BCC_");
 
             var builtConfig = config.Build();
 

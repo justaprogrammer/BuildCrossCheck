@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>BCC-Submission</id>
-    <version>0.0.1-alpha</version>
+    <version>0.0.2-alpha</version>
     <title>BuildCrossCheck Sumission</title>
     <authors>Stanley Goldman, Benjamin Grabkowitz, Justin Dearing</authors>
     <owners>Just A Programmer</owners>
