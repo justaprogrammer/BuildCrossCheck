@@ -1,9 +1,0 @@
-<Project>
- <PropertyGroup>
-   <Authors>Stanley Goldman, Benjamin Grabkowitz, Justin Dearing</Authors>
-   <Company>Just A Programmer</Company>
-   <PackageProjectUrl>https://github.com/JustAProgrammer/MSBuildLogOctokitChecker</PackageProjectUrl>
-   <Version>0.0.3</Version>
-   <VersionSuffix>beta</VersionSuffix>
- </PropertyGroup>
-</Project>

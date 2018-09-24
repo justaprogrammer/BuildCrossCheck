@@ -3,6 +3,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp2.1;net471</TargetFrameworks>
+    <Authors>Stanley Goldman, Benjamin Grabkowitz, Justin Dearing</Authors>
+    <Company>Just A Programmer</Company>
+    <PackageProjectUrl>https://github.com/JustAProgrammer/MSBuildLogOctokitChecker</PackageProjectUrl>
+    <PackageId>BuildCrossCheck-MSBuildLog</PackageId>
+    <PackageVersion>0.0.1</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,16 +46,7 @@
       </ReferencePath>
     </ItemGroup>
   </Target>
-
-  <!-- Pack settings -->
-  <PropertyGroup>
-    <NoPackageAnalysis>true</NoPackageAnalysis>
-    <NuspecFile>BCC.MSBuildLog.nuspec</NuspecFile>
-    <IntermediatePackDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/publish/</IntermediatePackDir>
-    <PublishDir>$(IntermediatePackDir)$(TargetFramework)/</PublishDir>
-    <NuspecProperties>publishDir=$([MSBuild]::NormalizeDirectory($(IntermediatePackDir)))</NuspecProperties>
-  </PropertyGroup>
-
+  
   <!-- Executes /t:Publish for all target frameworks before packing-->
   <Target Name="PublishAll" BeforeTargets="GenerateNuspec">
     <ItemGroup>

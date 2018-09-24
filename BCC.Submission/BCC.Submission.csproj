@@ -3,6 +3,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp2.1;net471</TargetFrameworks>
+    <Authors>Stanley Goldman, Benjamin Grabkowitz, Justin Dearing</Authors>
+    <Company>Just A Programmer</Company>
+    <PackageProjectUrl>https://github.com/JustAProgrammer/MSBuildLogOctokitChecker</PackageProjectUrl>
+    <PackageId>BuildCrossCheck-Submission</PackageId>
+    <Version>0.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
