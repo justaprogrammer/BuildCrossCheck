@@ -35,7 +35,7 @@ namespace BCC.Core.Services.GitHub
 
             if (string.IsNullOrWhiteSpace(repository))
             {
-                throw new ArgumentException("Name is invalid", nameof(repository));
+                throw new ArgumentException("Repository is invalid", nameof(repository));
             }
 
             if (string.IsNullOrWhiteSpace(sha))
