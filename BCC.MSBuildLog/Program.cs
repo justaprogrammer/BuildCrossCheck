@@ -14,7 +14,7 @@ namespace BCC.MSBuildLog
         static int Main(string[] args)
         {
             var fileSystem = new FileSystem();
-            var binaryLogProcessor = new BinaryLogProcessor();
+            var binaryLogProcessor = new BinaryLogProcessor(new BinaryLogReader());
             var buildLogProcessor = new BuildLogProcessor(fileSystem, binaryLogProcessor);
             var commandLineParser = new CommandLineParser(System.Console.WriteLine);
             var program = new Program(commandLineParser, buildLogProcessor);
@@ -34,7 +34,7 @@ namespace BCC.MSBuildLog
                 var result = _commandLineParser.Parse(args);
                 if (result != null)
                 {
-                    _buildLogProcessor.Proces(result.InputFile, result.OutputFile, result.CloneRoot);
+                    _buildLogProcessor.Proces(result.InputFile, result.OutputFile, result.CloneRoot, result.ConfigurationFile);
                     return true;
                 }
 

@@ -1,10 +1,13 @@
 ﻿extern alias StructuredLogger;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using BCC.Core.Model.CheckRunSubmission;
 using BCC.MSBuildLog.Extensions;
 using BCC.MSBuildLog.Interfaces;
+using BCC.MSBuildLog.Model;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -13,52 +16,76 @@ namespace BCC.MSBuildLog.Services
 {
     public class BinaryLogProcessor : IBinaryLogProcessor
     {
+        private readonly IBinaryLogReader _binaryLogReader;
         private ILogger<BinaryLogProcessor> Logger { get; }
 
-        public BinaryLogProcessor(ILogger<BinaryLogProcessor> logger = null)
+        public BinaryLogProcessor(IBinaryLogReader binaryLogReader, ILogger<BinaryLogProcessor> logger = null)
         {
+            _binaryLogReader = binaryLogReader;
             Logger = logger ?? new NullLogger<BinaryLogProcessor>();
         }
 
         /// <inheritdoc />
-        public IReadOnlyCollection<Annotation> ProcessLog(string binLogPath, string cloneRoot)
+        public IReadOnlyCollection<Annotation> CreateAnnotations(string binLogPath, string cloneRoot, CheckRunConfiguration configuration = null)
         {
-            Logger.LogInformation("ProcessLog binLogPath:{0} cloneRoot:{1}", binLogPath, cloneRoot);
+            Logger.LogInformation("CreateAnnotations binLogPath:{0} cloneRoot:{1}", binLogPath, cloneRoot);
 
-            var binLogReader = new StructuredLogger::Microsoft.Build.Logging.BinaryLogReplayEventSource();
+            var ruleDictionary = 
+                configuration?.Rules?.ToDictionary(rule => rule.Code, rule => rule.ReportAs);
 
             var annotations = new List<Annotation>();
-
-            foreach (var record in binLogReader.ReadRecords(binLogPath))
+            foreach (var record in _binaryLogReader.ReadRecords(binLogPath))
             {
                 var buildEventArgs = record.Args;
-                if (buildEventArgs is BuildWarningEventArgs buildWarning)
-                {
-                    var annotation = CreateAnnotation(CheckWarningLevel.Warning,
-                        cloneRoot, 
-                        buildWarning.ProjectFile, 
-                        buildWarning.File, 
-                        buildWarning.Code,
-                        buildWarning.Message,
-                        buildWarning.LineNumber,
-                        buildWarning.EndLineNumber);
 
-                    annotations.Add(annotation);
+                var buildWarning = buildEventArgs as BuildWarningEventArgs;
+                var buildError = buildEventArgs as BuildErrorEventArgs;
+
+                if (buildWarning == null && buildError == null)
+                    continue;
+
+                var checkWarningLevel = (buildWarning != null) ? CheckWarningLevel.Warning : CheckWarningLevel.Failure;
+                var buildCode = buildWarning?.Code ?? buildError.Code;
+                var projectFile = buildWarning?.ProjectFile ?? buildError.ProjectFile;
+                var file = buildWarning?.File ?? buildError.File;
+                var title = buildWarning?.Code ?? buildError.Code;
+                var message = buildWarning?.Message ?? buildError.Message;
+                var lineNumber = buildWarning?.LineNumber ?? buildError.LineNumber;
+                var endLineNumber = buildWarning?.EndLineNumber ?? buildError.EndLineNumber;
+
+                ReportAs reportAs = ReportAs.AsIs;
+                if (ruleDictionary?.TryGetValue(buildCode, out reportAs) ?? false)
+                {
+                    switch (reportAs)
+                    {
+                        case ReportAs.Ignore:
+                            continue;
+
+                        case ReportAs.AsIs:
+                            break;
+
+                        case ReportAs.Notice:
+                            checkWarningLevel = CheckWarningLevel.Notice;
+                            break;
+                        case ReportAs.Warning:
+                            checkWarningLevel = CheckWarningLevel.Warning;
+                            break;
+                        case ReportAs.Error:
+                            checkWarningLevel = CheckWarningLevel.Failure;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                 }
 
-                if (buildEventArgs is BuildErrorEventArgs buildError)
-                {
-                    var annotation = CreateAnnotation(CheckWarningLevel.Failure,
-                        cloneRoot, 
-                        buildError.ProjectFile, 
-                        buildError.File, 
-                        buildError.Code, 
-                        buildError.Message,
-                        buildError.LineNumber, 
-                        buildError.EndLineNumber);
-
-                    annotations.Add(annotation);
-                }
+                annotations.Add(CreateAnnotation(checkWarningLevel,
+                    cloneRoot,
+                    projectFile,
+                    file,
+                    title,
+                    message,
+                    lineNumber,
+                    endLineNumber));
             }
 
             return annotations.ToArray();

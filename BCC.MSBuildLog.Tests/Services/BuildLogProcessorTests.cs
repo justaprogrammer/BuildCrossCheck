@@ -1,9 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.IO.Abstractions.TestingHelpers;
+using System.Linq;
 using System.Text;
 using BCC.Core.Model.CheckRunSubmission;
 using BCC.Core.Tests.Util;
 using BCC.MSBuildLog.Interfaces;
+using BCC.MSBuildLog.Model;
 using BCC.MSBuildLog.Services;
 using Bogus;
 using FluentAssertions;
@@ -34,7 +37,7 @@ namespace BCC.MSBuildLog.Tests.Services
         }
 
         [Fact]
-        public void ShouldCreateEmptyCheckRun()
+        public void Should_Create_Empty_CheckRun()
         {
             var annotations = new Annotation[0];
 
@@ -48,7 +51,55 @@ namespace BCC.MSBuildLog.Tests.Services
         }
 
         [Fact]
-        public void ShouldCreateCheckRunWithWarning()
+        public void Should_Throw_If_Configuration_Does_Not_Exists()
+        {
+            var annotations = new Annotation[0];
+
+            var configurationFile = Faker.System.FilePath();
+            var mockFileSystem = new MockFileSystem();
+            new Action(() =>
+                    GetCheckRun(CreateMockBinaryLogProcessor(annotations),configurationFile: configurationFile, mockFileSystem: mockFileSystem))
+                .Should()
+                .Throw<InvalidOperationException>()
+                .WithMessage("Configuration file `" + configurationFile + "` does not exist.");
+        }
+
+        [Fact]
+        public void Should_Throw_If_Configuration_Is_Null_Or_Whitespace()
+        {
+            var annotations = new Annotation[0];
+
+            var configurationFile = Faker.System.FilePath();
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile(configurationFile, new MockFileData(string.Empty));
+
+            new Action(() =>
+                    GetCheckRun(CreateMockBinaryLogProcessor(annotations), configurationFile: configurationFile, mockFileSystem: mockFileSystem))
+                .Should()
+                .Throw<InvalidOperationException>()
+                .WithMessage("Content of configuration file `" + configurationFile + "` is null or empty.");
+        }
+
+        [Fact]
+        public void Should_Create_Empty_CheckRun_With_Configuration()
+        {
+            var annotations = new Annotation[0];
+
+            var configurationFile = Faker.System.FilePath();
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile(configurationFile, new MockFileData("{rules: [{code: 'CS1234', reportAs: 'Ignore'}]}"));
+
+            var checkRun = GetCheckRun(CreateMockBinaryLogProcessor(annotations), configurationFile: configurationFile, mockFileSystem: mockFileSystem);
+
+            checkRun.Success.Should().BeTrue();
+            checkRun.Name.Should().Be("MSBuildLog Analyzer");
+            checkRun.Title.Should().Be("MSBuildLog Analysis");
+            checkRun.Summary.Should().Be(string.Empty);
+            checkRun.Annotations.Should().AllBeEquivalentTo(annotations);
+        }
+
+        [Fact]
+        public void Should_Create_CheckRun_With_Warning()
         {
             var annotations = new[]
             {
@@ -69,7 +120,51 @@ namespace BCC.MSBuildLog.Tests.Services
         }
 
         [Fact]
-        public void ShouldCreateCheckRunWithFailure()
+        public void Should_Create_CheckRun_With_Configuration()
+        {
+            var annotations = new[]
+            {
+                new Annotation(
+                    Faker.System.FilePath(),
+                    CheckWarningLevel.Warning,
+                    Faker.Lorem.Word(), Faker.Lorem.Word(),
+                    Faker.Random.Int(), Faker.Random.Int())
+            };
+
+            var expectedCheckRunConfiguration = new CheckRunConfiguration
+            {
+                Name = Faker.Lorem.Word(),
+                Title = Faker.Lorem.Word(),
+                Rules = new[]
+                {
+                    new LogAnalyzerRule
+                    {
+                        Code = Faker.Lorem.Word(),
+                        ReportAs = Faker.Random.Enum<ReportAs>()
+                    },
+                }
+            };
+
+            var configurationFile = Faker.System.FilePath();
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile(configurationFile, new MockFileData(JsonConvert.SerializeObject(expectedCheckRunConfiguration)));
+
+            var mockBinaryLogProcessor = CreateMockBinaryLogProcessor(annotations);
+            var checkRun = GetCheckRun(mockBinaryLogProcessor, configurationFile: configurationFile, mockFileSystem: mockFileSystem);
+
+            mockBinaryLogProcessor.Received(1).CreateAnnotations(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CheckRunConfiguration>());
+            var checkRunConfiguration = mockBinaryLogProcessor.ReceivedCalls().First().GetArguments()[2] as CheckRunConfiguration;
+            checkRunConfiguration.Should().BeEquivalentTo(expectedCheckRunConfiguration);
+
+            checkRun.Success.Should().BeTrue();
+            checkRun.Name.Should().Be(expectedCheckRunConfiguration.Name);
+            checkRun.Title.Should().Be(expectedCheckRunConfiguration.Title);
+            checkRun.Summary.Should().Be(string.Empty);
+            checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
+        }
+
+        [Fact]
+        public void Should_Create_CheckRun_With_Failure()
         {
             var annotations = new[]
             {
@@ -90,7 +185,7 @@ namespace BCC.MSBuildLog.Tests.Services
         }
 
         [Fact]
-        public void ShouldCreateCheckRunWithWarningAndFailure()
+        public void Should_Create_CheckRun_With_WarningAndFailure()
         {
             var annotations = new[]
             {
@@ -116,7 +211,7 @@ namespace BCC.MSBuildLog.Tests.Services
         }
 
         [Fact]
-        public void ShouldCreateCheckRunTestConsoleApp1Warning()
+        public void Should_Create_CheckRun_TestConsoleApp1_Warning()
         {
             var annotations = new[]
             {
@@ -130,7 +225,7 @@ namespace BCC.MSBuildLog.Tests.Services
             var cloneRoot = @"C:\projects\testconsoleapp1\";
             var resourcePath = TestUtils.GetResourcePath("testconsoleapp1-1warning.binlog");
 
-            var checkRun = GetCheckRun(new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
+            var checkRun = GetCheckRun(new BinaryLogProcessor(new BinaryLogReader(), TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
 
             checkRun.Success.Should().BeTrue();
             checkRun.Name.Should().Be("MSBuildLog Analyzer");
@@ -140,7 +235,7 @@ namespace BCC.MSBuildLog.Tests.Services
         }
 
         [Fact]
-        public void ShouldCreateCheckRunTestConsoleApp1Error()
+        public void Should_Create_CheckRun_TestConsoleApp1_Error()
         {
             var annotations = new[]
             {
@@ -154,7 +249,7 @@ namespace BCC.MSBuildLog.Tests.Services
             var cloneRoot = @"C:\projects\testconsoleapp1\";
             var resourcePath = TestUtils.GetResourcePath("testconsoleapp1-1error.binlog");
 
-            var checkRun = GetCheckRun(new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
+            var checkRun = GetCheckRun(new BinaryLogProcessor(new BinaryLogReader(), TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
 
             checkRun.Success.Should().BeFalse();
             checkRun.Name.Should().Be("MSBuildLog Analyzer");
@@ -164,7 +259,7 @@ namespace BCC.MSBuildLog.Tests.Services
         }
 
         [Fact]
-        public void ShouldCreateCheckRunTestConsoleApp1CodeAnalysis()
+        public void Should_Create_CheckRun_TestConsoleApp1_CodeAnalysis()
         {
             var annotations = new[]
             {
@@ -178,7 +273,7 @@ namespace BCC.MSBuildLog.Tests.Services
             var cloneRoot = @"C:\projects\testconsoleapp1\";
             var resourcePath = TestUtils.GetResourcePath("testconsoleapp1-codeanalysis.binlog");
 
-            var checkRun = GetCheckRun(new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
+            var checkRun = GetCheckRun(new BinaryLogProcessor(new BinaryLogReader(), TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
 
             checkRun.Success.Should().BeTrue();
             checkRun.Name.Should().Be("MSBuildLog Analyzer");
@@ -187,21 +282,25 @@ namespace BCC.MSBuildLog.Tests.Services
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
 
-        private CreateCheckRun GetCheckRun(IBinaryLogProcessor binaryLogProcessor, string inputFile = null, string cloneRoot = null)
+        private CreateCheckRun GetCheckRun(IBinaryLogProcessor binaryLogProcessor, 
+            string inputFile = null, 
+            string cloneRoot = null, 
+            MockFileSystem mockFileSystem = null,
+            string configurationFile = null)
         {
             inputFile = inputFile ?? Faker.System.FilePath();
             cloneRoot = cloneRoot ?? Faker.System.DirectoryPath();
 
             var outputFile = Faker.System.FilePath();
 
-            var mockFileSystem = new MockFileSystem();
+            mockFileSystem = mockFileSystem ?? new MockFileSystem();
             mockFileSystem.AddFile(inputFile, new MockFileData(string.Empty, Encoding.UTF8));
             mockFileSystem.AddDirectory(Path.GetDirectoryName(outputFile));
 
             var buildLogProcessor = new BuildLogProcessor(mockFileSystem, binaryLogProcessor,
                 TestLogger.Create<BuildLogProcessor>(_testOutputHelper));
 
-            buildLogProcessor.Proces(inputFile, outputFile, cloneRoot);
+            buildLogProcessor.Proces(inputFile, outputFile, cloneRoot, configurationFile);
 
             mockFileSystem.FileExists(outputFile).Should().BeTrue();
 
@@ -214,7 +313,7 @@ namespace BCC.MSBuildLog.Tests.Services
         private static IBinaryLogProcessor CreateMockBinaryLogProcessor(Annotation[] annotations)
         {
             var binaryLogProcessor = Substitute.For<IBinaryLogProcessor>();
-            binaryLogProcessor.ProcessLog(Arg.Any<string>(), Arg.Any<string>())
+            binaryLogProcessor.CreateAnnotations(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CheckRunConfiguration>())
                 .Returns(annotations);
             return binaryLogProcessor;
         }
