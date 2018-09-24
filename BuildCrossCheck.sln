@@ -52,6 +52,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{72EADE
 		docs\images\testconsole1-warning-pr-check-runs.png = docs\images\testconsole1-warning-pr-check-runs.png
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCC.NUnit3", "BCC.NUnit3\BCC.NUnit3.csproj", "{C296DD4D-0A40-41C0-A4AF-88988FF41BF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCC.NUnit3.Tests", "BCC.NUnit3.Tests\BCC.NUnit3.Tests.csproj", "{C41C0D8F-6987-4E23-9752-35F7ED3AA274}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +102,14 @@ Global
 		{6786A559-3907-42E7-9CDE-AD96C2D28FD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6786A559-3907-42E7-9CDE-AD96C2D28FD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6786A559-3907-42E7-9CDE-AD96C2D28FD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C296DD4D-0A40-41C0-A4AF-88988FF41BF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C296DD4D-0A40-41C0-A4AF-88988FF41BF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C296DD4D-0A40-41C0-A4AF-88988FF41BF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C296DD4D-0A40-41C0-A4AF-88988FF41BF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C41C0D8F-6987-4E23-9752-35F7ED3AA274}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C41C0D8F-6987-4E23-9752-35F7ED3AA274}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C41C0D8F-6987-4E23-9752-35F7ED3AA274}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C41C0D8F-6987-4E23-9752-35F7ED3AA274}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>BCC-NUnit3</id>
+    <version>0.0.1-alpha</version>
+    <title>BuildCrossCheck NUnit3</title>
+    <authors>Stanley Goldman, Benjamin Grabkowitz, Justin Dearing</authors>
+    <owners>Just A Programmer</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>BuildCrossCheck tool to create check run data from nunit results file.</description>
+    <copyright>Copyright 2018</copyright>
+  </metadata>
+  <files>
+    <file src="$publishdir$\net471\**\*" target="tools/net471/" />
+    <file src="$publishdir$\netcoreapp2.1\**\*" target="tools/netcoreapp2.1/" />
+  </files>
+</package>

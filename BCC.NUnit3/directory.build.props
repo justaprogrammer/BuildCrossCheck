@@ -1,0 +1,9 @@
+<Project>
+ <Import Project="../Directory.Build.props" />
+
+ <PropertyGroup>
+   <PackageId>BuildCrossCheck NUnit3</PackageId>
+   <Version>0.0.1</Version>
+   <VersionSuffix>alpha</VersionSuffix>
+ </PropertyGroup>
+</Project>
