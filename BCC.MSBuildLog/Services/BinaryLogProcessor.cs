@@ -100,7 +100,7 @@ namespace BCC.MSBuildLog.Services
                 throw new InvalidOperationException($"FilePath `{filePath}` is not a child of `{cloneRoot}`");
             }
 
-            var relativePath = GetRelativePath(filePath, cloneRoot);
+            var relativePath = GetRelativePath(filePath, cloneRoot).Replace("\\", "/");
 
             return new Annotation(relativePath, checkWarningLevel,
                 title, message,
