@@ -8,7 +8,7 @@ would like to work with.
 ## Create a token
 
 In order to verify your build server, create a token to use when sending build logs.
-After installing the application to your repo, head to [BCC WebApp](https://msblocweb.azurewebsites.net/) 
+After installing the application to your repo, head to [BCC WebApp](https://buildcrosscheck.azurewebsites.net/) 
 and login with your GitHub account. There you will be able create a token per repository as well as
 revoke prior tokens if necessary.
 
@@ -33,42 +33,4 @@ We do not keep a copy of you binary log file.
 
 ## Integrating on AppVeyor
 
-1. Copy `MSBuildLogOctokitChecker.psd1` and `MSBuildLogOctokitChecker.psm1` from MSBLOC.Posh to your project
-   - [MSBuildLogOctokitChecker.psd1](../MSBLOC.Posh/MSBuildLogOctokitChecker.psd1)
-   - [MSBuildLogOctokitChecker.psm1](../MSBLOC.Posh/MSBuildLogOctokitChecker.psm1)
-1. Modify you build script to perform the following steps
-
-   ```
-   version: 1.0.{build}
-   image: Visual Studio 2017
-   environment:
-     MSBLOC_JWT:
-       secure: [Encrypted Token]
-   build_script:
-      - ps: >-
-          msbuild TestConsoleApp1.sln --% /bl:output.binlog
-   on_finish:
-      - ps: >-
-          if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
-          {
-              Import-Module .\tools\MSBLOC.Posh\MSBuildLogOctokitChecker.psm1
-              Send-MsbuildLogAppveyor -Path output.binlog -Token $env:MSBLOC_JWT
-          }
-   ```
-   The key points are as follows
-
-   1. Invoking MSBuild with the option to output the binary log
-   1. Using the `on_finish` task with a PowerShell script
-      1. If it is a branch build
-         1. Import the MSBLOC.Posh Powershell Module and send MSBLOC the binary log file
-
-   An example can be found [here](https://github.com/justaprogrammer/TestConsoleApp1/blob/appveyor/appveyor.yml)
-
 ## Integrating with other CI systems
-
-To facilitate integration on another CI system there is a Powershell command from the same module named 
-`Send-MsbuildLog`. This command should be provided the follow parameters.
-- `-Path` - Location to the binary log file
-- `-Token` - The token created for the repository.
-- `-CloneRoot` - Directory where build occured
-- `-HeadCommit` - Sha of the commit for the build log file
