@@ -26,7 +26,7 @@ comment:
   require_changes: no
   
 fixes:
-  - "/C/projects/msbuildlogoctokitchecker/::"
+  - "/C/projects/buildcrosscheck/::"
 
 ignore:
   - "*Tests/"
