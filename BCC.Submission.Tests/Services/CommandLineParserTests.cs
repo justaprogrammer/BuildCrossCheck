@@ -63,7 +63,8 @@ namespace BCC.Submission.Tests.Services
             applicationArguments.Token.Should().Be(token);
             applicationArguments.HeadSha.Should().Be(headSha);
 
-            listener.ClearReceivedCalls();
+            listener = Substitute.For<ICommandLineParserCallBackListener>();
+            commandLineParser = new CommandLineParser(listener.Callback);
 
             applicationArguments = commandLineParser.Parse(new[]
             {

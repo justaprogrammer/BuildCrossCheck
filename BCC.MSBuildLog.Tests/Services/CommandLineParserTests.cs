@@ -64,6 +64,9 @@ namespace BCC.MSBuildLog.Tests.Services
             applicationArguments.CloneRoot.Should().Be(cloneRoot);
             applicationArguments.ConfigurationFile.Should().BeNull();
 
+            listener = Substitute.For<ICommandLineParserCallBackListener>();
+            commandLineParser = new CommandLineParser(listener.Callback);
+
             applicationArguments = commandLineParser.Parse(new[]
             {
                 "--input", $@"""{inputPath}""",
