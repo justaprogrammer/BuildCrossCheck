@@ -57,6 +57,8 @@ namespace BCC.Submission.Tests.Services
             applicationArguments.Token.Should().Be(token);
             applicationArguments.HeadSha.Should().Be(headSha);
 
+            listener.ClearReceivedCalls();
+
             applicationArguments = commandLineParser.Parse(new[]{"--input", $@"""{inputPath}""", "--token", $@"""{token}""", "--headSha", $@"""{headSha}""" });
 
             listener.DidNotReceive().Callback(Arg.Any<string>());
