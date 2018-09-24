@@ -11,13 +11,16 @@ build_script:
     msbuild BuildCrossCheck.sln --% /p:Configuration=Release /bl:output.binlog /verbosity:minimal
 after_build:
     - cmd: dotnet publish BCC.Web --configuration Release --output %appveyor_build_folder%\dist
+    - cmd: dotnet pack -c Release .\BCC.NUnit3\BCC.NUnit3.csproj -o ..\
     - cmd: dotnet pack -c Release .\BCC.MSBuildLog\BCC.MSBuildLog.csproj -o ..\
     - cmd: dotnet pack -c Release .\BCC.Submission\BCC.Submission.csproj -o ..\
 test_script:
     - cmd: '%xunit20%\xunit.console.x86 "%appveyor_build_folder%\BCC.Core.Tests\bin\Release\net471\BCC.Core.Tests.dll" -appveyor'
+    - cmd: '%xunit20%\xunit.console.x86 "%appveyor_build_folder%\BCC.NUnit3.Tests\bin\Release\net471\BCC.NUnit3.Tests.dll" -appveyor'
     - cmd: '%xunit20%\xunit.console.x86 "%appveyor_build_folder%\BCC.MSBuildLog.Tests\bin\Release\net471\BCC.MSBuildLog.Tests.dll" -appveyor'
     - cmd: '%xunit20%\xunit.console.x86 "%appveyor_build_folder%\BCC.Submission.Tests\bin\Release\net471\BCC.Submission.Tests.dll" -appveyor'
     - cmd: dotnet test -c Release BCC.Core.Tests\BCC.Core.Tests.csproj --logger:Appveyor
+    - cmd: dotnet test -c Release BCC.NUnit3.Tests\BCC.NUnit3.Tests.csproj --logger:Appveyor
     - cmd: dotnet test -c Release BCC.MSBuildLog.Tests\BCC.MSBuildLog.Tests.csproj --logger:Appveyor
     - cmd: dotnet test -c Release BCC.Submission.Tests\BCC.Submission.Tests.csproj --logger:Appveyor
     - cmd: dotnet test -c Release BCC.Web.Tests\BCC.Web.Tests.csproj --logger:Appveyor
@@ -26,17 +29,21 @@ after_test:
     dotnet tool install --global coverlet.console
     coverlet .\BCC.Core.Tests\bin\Release\netcoreapp2.1\BCC.Core.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Core.Tests\BCC.Core.Tests.csproj --no-build" --format opencover --output ".\BCC.Core.Tests-netcoreapp2.1.coverage.xml"
     coverlet .\BCC.Web.Tests\bin\Release\netcoreapp2.1\BCC.Web.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Web.Tests\BCC.Web.Tests.csproj --no-build" --format opencover --output ".\BCC.Web.Tests-netcoreapp2.1.coverage.xml"
+    coverlet .\BCC.NUnit3.Tests\bin\Release\netcoreapp2.1\BCC.NUnit3.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.NUnit3.Tests\BCC.NUnit3.Tests.csproj --no-build" --format opencover --output ".\BCC.NUnit3.Tests-netcoreapp2.1.coverage.xml"
     coverlet .\BCC.MSBuildLog.Tests\bin\Release\netcoreapp2.1\BCC.MSBuildLog.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.MSBuildLog.Tests\BCC.MSBuildLog.Tests.csproj --no-build" --format opencover --output ".\BCC.MSBuildLog.Tests-netcoreapp2.1.coverage.xml"
     coverlet .\BCC.Submission.Tests\bin\Release\netcoreapp2.1\BCC.Submission.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Submission.Tests\BCC.Submission.Tests.csproj --no-build" --format opencover --output ".\BCC.Submission.Tests-netcoreapp2.1.coverage.xml"
     coverlet .\BCC.Core.Tests\bin\Release\net471\BCC.Core.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Core.Tests\BCC.Core.Tests.csproj --no-build" --format opencover --output ".\BCC.Core.Tests-net471.coverage.xml"
+    coverlet .\BCC.NUnit3.Tests\bin\Release\net471\BCC.NUnit3.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.NUnit3.Tests\BCC.NUnit3.Tests.csproj --no-build" --format opencover --output ".\BCC.NUnit3.Tests-net471.coverage.xml"
     coverlet .\BCC.MSBuildLog.Tests\bin\Release\net471\BCC.MSBuildLog.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.MSBuildLog.Tests\BCC.MSBuildLog.Tests.csproj --no-build" --format opencover --output ".\BCC.MSBuildLog.Tests-net471.coverage.xml"
     coverlet .\BCC.Submission.Tests\bin\Release\net471\BCC.Submission.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Submission.Tests\BCC.Submission.Tests.csproj --no-build" --format opencover --output ".\BCC.Submission.Tests-net471.coverage.xml"
     choco install --no-progress codecov
     codecov -f ".\BCC.Core.Tests-netcoreapp2.1.coverage.xml"
     codecov -f ".\BCC.Web.Tests-netcoreapp2.1.coverage.xml"
+    codecov -f ".\BCC.NUnit3.Tests-netcoreapp2.1.coverage.xml"
     codecov -f ".\BCC.MSBuildLog.Tests-netcoreapp2.1.coverage.xml"
     codecov -f ".\BCC.Submission.Tests-netcoreapp2.1.coverage.xml"
     codecov -f ".\BCC.Core.Tests-net471.coverage.xml"
+    codecov -f ".\BCC.NUnit3.Tests-net471.coverage.xml"
     codecov -f ".\BCC.MSBuildLog.Tests-net471.coverage.xml"
     codecov -f ".\BCC.Submission.Tests-net471.coverage.xml"
 artifacts:
