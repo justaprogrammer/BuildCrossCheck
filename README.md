@@ -6,7 +6,7 @@
 #### BCC-Submission
 [![NuGet](http://img.shields.io/nuget/v/bcc-submission.svg)](https://www.nuget.org/packages/bcc-submission)
 
-#### BCC-MSBuild
+#### BCC-MSBuildLog
 [![NuGet](http://img.shields.io/nuget/v/bcc-msbuildlog.svg)](https://www.nuget.org/packages/bcc-msbuildlog)
 
 ## Overview
