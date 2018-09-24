@@ -130,7 +130,7 @@ namespace BCC.MSBuildLog.Tests.Services
             var cloneRoot = @"C:\projects\testconsoleapp1\";
             var resourcePath = TestUtils.GetResourcePath("testconsoleapp1-1warning.binlog");
 
-            var checkRun = GetCheckRun(new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
+            var checkRun = GetCheckRun(new BinaryLogProcessor(new BinaryLogReader(), TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
 
             checkRun.Success.Should().BeTrue();
             checkRun.Name.Should().Be("MSBuildLog Analyzer");
@@ -154,7 +154,7 @@ namespace BCC.MSBuildLog.Tests.Services
             var cloneRoot = @"C:\projects\testconsoleapp1\";
             var resourcePath = TestUtils.GetResourcePath("testconsoleapp1-1error.binlog");
 
-            var checkRun = GetCheckRun(new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
+            var checkRun = GetCheckRun(new BinaryLogProcessor(new BinaryLogReader(), TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
 
             checkRun.Success.Should().BeFalse();
             checkRun.Name.Should().Be("MSBuildLog Analyzer");
@@ -178,7 +178,7 @@ namespace BCC.MSBuildLog.Tests.Services
             var cloneRoot = @"C:\projects\testconsoleapp1\";
             var resourcePath = TestUtils.GetResourcePath("testconsoleapp1-codeanalysis.binlog");
 
-            var checkRun = GetCheckRun(new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
+            var checkRun = GetCheckRun(new BinaryLogProcessor(new BinaryLogReader(), TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
 
             checkRun.Success.Should().BeTrue();
             checkRun.Name.Should().Be("MSBuildLog Analyzer");
@@ -214,7 +214,7 @@ namespace BCC.MSBuildLog.Tests.Services
         private static IBinaryLogProcessor CreateMockBinaryLogProcessor(Annotation[] annotations)
         {
             var binaryLogProcessor = Substitute.For<IBinaryLogProcessor>();
-            binaryLogProcessor.ProcessLog(Arg.Any<string>(), Arg.Any<string>())
+            binaryLogProcessor.CreateAnnotations(Arg.Any<string>(), Arg.Any<string>())
                 .Returns(annotations);
             return binaryLogProcessor;
         }

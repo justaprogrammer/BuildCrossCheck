@@ -40,7 +40,7 @@ namespace BCC.MSBuildLog.Services
             }
 
             var dateTimeOffset = DateTimeOffset.Now;
-            var annotations = _binaryLogProcessor.ProcessLog(inputFile, cloneRoot).ToArray();
+            var annotations = _binaryLogProcessor.CreateAnnotations(inputFile, cloneRoot).ToArray();
 
             var hasAnyFailure = annotations.Any() &&
                 annotations.Any(annotation => annotation.CheckWarningLevel == CheckWarningLevel.Failure);

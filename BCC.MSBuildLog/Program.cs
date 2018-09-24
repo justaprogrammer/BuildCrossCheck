@@ -14,7 +14,7 @@ namespace BCC.MSBuildLog
         static int Main(string[] args)
         {
             var fileSystem = new FileSystem();
-            var binaryLogProcessor = new BinaryLogProcessor();
+            var binaryLogProcessor = new BinaryLogProcessor(new BinaryLogReader());
             var buildLogProcessor = new BuildLogProcessor(fileSystem, binaryLogProcessor);
             var commandLineParser = new CommandLineParser(System.Console.WriteLine);
             var program = new Program(commandLineParser, buildLogProcessor);

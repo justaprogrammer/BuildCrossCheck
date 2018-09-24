@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BCC.Core.Model.CheckRunSubmission;
 using BCC.Core.Tests.Util;
+using BCC.MSBuildLog.Model;
 using BCC.MSBuildLog.Services;
 using Bogus;
 using FluentAssertions;
@@ -31,10 +33,10 @@ namespace BCC.MSBuildLog.Tests.Services
         }
 
         [Fact]
-        public void ShouldTestConsoleApp1Warning()
+        public void Should_TestConsoleApp1_Warning()
         {
             var cloneRoot = @"C:\projects\testconsoleapp1\";
-            var annotations = ProcessLog("testconsoleapp1-1warning.binlog", cloneRoot);
+            var annotations = CreateAnnotations("testconsoleapp1-1warning.binlog", cloneRoot);
 
             annotations.Should().AllBeEquivalentTo(
                 new Annotation(
@@ -46,10 +48,138 @@ namespace BCC.MSBuildLog.Tests.Services
         }
 
         [Fact]
-        public void ShouldTestConsoleApp1Error()
+        public void Should_TestConsoleApp1_Warning_ConfigureAs_Warning_For_Other_Code()
+        {
+            var checkRunConfiguration = new CheckRunConfiguration()
+            {
+                Rules = new LogAnalyzerRule[]
+                {
+                    new LogAnalyzerRule()
+                    {
+                        Code = "CS02191",
+                        ReportAs = ReportAs.Error
+                    }
+                }
+            };
+
+            var cloneRoot = @"C:\projects\testconsoleapp1\";
+            var annotations = CreateAnnotations("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
+
+            annotations.Should().AllBeEquivalentTo(
+                new Annotation(
+                    "TestConsoleApp1\\Program.cs",
+                    CheckWarningLevel.Warning, "CS0219",
+                    "The variable 'hello' is assigned but its value is never used",
+                    13, 13)
+            );
+        }
+
+        [Fact]
+        public void Should_TestConsoleApp1_Warning_ConfigureAs_Warning()
+        {
+            var checkRunConfiguration = new CheckRunConfiguration()
+            {
+                Rules = new LogAnalyzerRule[]
+                {
+                    new LogAnalyzerRule()
+                    {
+                        Code = "CS0219",
+                        ReportAs = ReportAs.Warning
+                    }
+                }
+            };
+
+            var cloneRoot = @"C:\projects\testconsoleapp1\";
+            var annotations = CreateAnnotations("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
+
+            annotations.Should().AllBeEquivalentTo(
+                new Annotation(
+                    "TestConsoleApp1\\Program.cs",
+                    CheckWarningLevel.Warning, "CS0219",
+                    "The variable 'hello' is assigned but its value is never used",
+                    13, 13)
+            );
+        }
+         
+        [Fact]
+        public void Should_TestConsoleApp1_Warning_ConfigureAs_Notice()
+        {
+            var checkRunConfiguration = new CheckRunConfiguration()
+            {
+                Rules = new LogAnalyzerRule[]
+                {
+                    new LogAnalyzerRule()
+                    {
+                        Code = "CS0219",
+                        ReportAs = ReportAs.Notice
+                    }
+                }
+            };
+
+            var cloneRoot = @"C:\projects\testconsoleapp1\";
+            var annotations = CreateAnnotations("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
+
+            annotations.Should().AllBeEquivalentTo(
+                new Annotation(
+                    "TestConsoleApp1\\Program.cs",
+                    CheckWarningLevel.Notice, "CS0219",
+                    "The variable 'hello' is assigned but its value is never used",
+                    13, 13)
+            );
+        }
+
+        [Fact]
+        public void Should_TestConsoleApp1_Warning_ConfigureAs_Error()
+        {
+            var checkRunConfiguration = new CheckRunConfiguration()
+            {
+                Rules = new LogAnalyzerRule[]
+                {
+                    new LogAnalyzerRule()
+                    {
+                        Code = "CS0219",
+                        ReportAs = ReportAs.Error
+                    }
+                }
+            };
+
+            var cloneRoot = @"C:\projects\testconsoleapp1\";
+            var annotations = CreateAnnotations("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
+
+            annotations.Should().AllBeEquivalentTo(
+                new Annotation(
+                    "TestConsoleApp1\\Program.cs",
+                    CheckWarningLevel.Failure, "CS0219",
+                    "The variable 'hello' is assigned but its value is never used",
+                    13, 13)
+            );
+        }
+
+        [Fact]
+        public void Should_TestConsoleApp1_Warning_ConfigureAs_Ignore()
+        {
+            var checkRunConfiguration = new CheckRunConfiguration()
+            {
+                Rules = new LogAnalyzerRule[]
+                {
+                    new LogAnalyzerRule()
+                    {
+                        Code = "CS0219",
+                        ReportAs = ReportAs.Ignore
+                    }
+                }
+            };
+
+            var cloneRoot = @"C:\projects\testconsoleapp1\";
+            var annotations = CreateAnnotations("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
+            annotations.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Should_TestConsoleApp1_Error()
         {
             var cloneRoot = @"C:\projects\testconsoleapp1\";
-            var annotations = ProcessLog("testconsoleapp1-1error.binlog", cloneRoot);
+            var annotations = CreateAnnotations("testconsoleapp1-1error.binlog", cloneRoot);
 
             annotations.Should().AllBeEquivalentTo(
                 new Annotation(
@@ -61,10 +191,10 @@ namespace BCC.MSBuildLog.Tests.Services
         }
 
         [Fact]
-        public void ShouldTestConsoleApp1CodeAnalysis()
+        public void Should_TestConsoleApp1_CodeAnalysis()
         {
             var cloneRoot = @"C:\projects\testconsoleapp1\";
-            var annotations = ProcessLog("testconsoleapp1-codeanalysis.binlog", cloneRoot);
+            var annotations = CreateAnnotations("testconsoleapp1-codeanalysis.binlog", cloneRoot);
 
             annotations.Should().AllBeEquivalentTo(
                 new Annotation(
@@ -76,10 +206,10 @@ namespace BCC.MSBuildLog.Tests.Services
         }
 
         [Fact]
-        public void ShouldMSBLOC()
+        public void Should_MSBLOC()
         {
             var cloneRoot = @"C:\projects\msbuildlogoctokitchecker\";
-            var annotations = ProcessLog("msbloc.binlog", cloneRoot);
+            var annotations = CreateAnnotations("msbloc.binlog", cloneRoot);
 
             annotations.Length.Should().Be(10);
 
@@ -99,10 +229,10 @@ namespace BCC.MSBuildLog.Tests.Services
         }
 
         [Fact]
-        public void ShouldParseOctokitGraphQL()
+        public void Should_Parse_OctokitGraphQL()
         {
             var cloneRoot = @"C:\projects\octokit-graphql\";
-            var annotations = ProcessLog("octokit.graphql.binlog", cloneRoot);
+            var annotations = CreateAnnotations("octokit.graphql.binlog", cloneRoot);
 
             annotations.Length.Should().Be(803);
 
@@ -122,38 +252,39 @@ namespace BCC.MSBuildLog.Tests.Services
         }
 
         [Fact]
-        public void ShouldParseDBATools()
+        public void Should_Parse_DBATools()
         {
             var cloneRoot = @"c:\github\dbatools\bin\projects\dbatools\";
-            var annotations = ProcessLog("dbatools.binlog", cloneRoot);
+            var annotations = CreateAnnotations("dbatools.binlog", cloneRoot);
 
             annotations.Length.Should().Be(0);
         }
 
         [Fact]
-        public void ShouldThrowWhenBuildPathOutisdeCloneRoot()
+        public void Should_ThrowWhen_BuildPath_Outisde_CloneRoot()
         {
             var invalidOperationException = Assert.Throws<InvalidOperationException>(() =>
             {
-                ProcessLog("testconsoleapp1-1warning.binlog", @"C:\projects\testconsoleapp2\");
+                CreateAnnotations("testconsoleapp1-1warning.binlog", @"C:\projects\testconsoleapp2\");
             });
 
             invalidOperationException.Message.Should().Be(@"FilePath `C:\projects\testconsoleapp1\TestConsoleApp1\Program.cs` is not a child of `C:\projects\testconsoleapp2\`");
 
             invalidOperationException = Assert.Throws<InvalidOperationException>(() =>
             {
-                ProcessLog("testconsoleapp1-1error.binlog", @"C:\projects\testconsoleapp2\");
+                CreateAnnotations("testconsoleapp1-1error.binlog", @"C:\projects\testconsoleapp2\");
             });
             invalidOperationException.Message.Should().Be(@"FilePath `C:\projects\testconsoleapp1\TestConsoleApp1\Program.cs` is not a child of `C:\projects\testconsoleapp2\`");
         }
 
-        private Annotation[] ProcessLog(string resourceName, string cloneRoot)
+        private Annotation[] CreateAnnotations(string resourceName, string cloneRoot, CheckRunConfiguration checkRunConfiguration = null)
         {
             var resourcePath = TestUtils.GetResourcePath(resourceName);
             File.Exists(resourcePath).Should().BeTrue();
 
-            var parser = new BinaryLogProcessor(TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
-            return parser.ProcessLog(resourcePath, cloneRoot).ToArray();
+            var binaryLogReader = new BinaryLogReader();
+            var parser = new BinaryLogProcessor(binaryLogReader, TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
+            return parser.CreateAnnotations(resourcePath, cloneRoot, checkRunConfiguration).ToArray();
         }
     }
 }
