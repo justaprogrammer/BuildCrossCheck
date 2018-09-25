@@ -21,6 +21,7 @@ test_script:
     - cmd: dotnet test -c Release BCC.MSBuildLog.Tests\BCC.MSBuildLog.Tests.csproj --logger:Appveyor
     - cmd: dotnet test -c Release BCC.Submission.Tests\BCC.Submission.Tests.csproj --logger:Appveyor
     - cmd: dotnet test -c Release BCC.Web.Tests\BCC.Web.Tests.csproj --logger:Appveyor
+    - cmd: dotnet test -c Release Cake.BCC.Tests\Cake.BCC.Tests.csproj --logger:Appveyor
 after_test:
 - ps: |  
     dotnet tool install --global coverlet.console
@@ -28,6 +29,7 @@ after_test:
     coverlet .\BCC.Web.Tests\bin\Release\netcoreapp2.1\BCC.Web.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Web.Tests\BCC.Web.Tests.csproj --no-build" --format opencover --output ".\BCC.Web.Tests-netcoreapp2.1.coverage.xml"
     coverlet .\BCC.MSBuildLog.Tests\bin\Release\netcoreapp2.1\BCC.MSBuildLog.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.MSBuildLog.Tests\BCC.MSBuildLog.Tests.csproj --no-build" --format opencover --output ".\BCC.MSBuildLog.Tests-netcoreapp2.1.coverage.xml"
     coverlet .\BCC.Submission.Tests\bin\Release\netcoreapp2.1\BCC.Submission.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Submission.Tests\BCC.Submission.Tests.csproj --no-build" --format opencover --output ".\BCC.Submission.Tests-netcoreapp2.1.coverage.xml"
+    coverlet .\Cake.BCC.Tests\bin\Release\netcoreapp2.1\Cake.BCC.Tests.dll --target "dotnet" --targetargs "test -c Release .\Cake.BCC.Tests\Cake.BCC.Tests.csproj --no-build" --format opencover --output ".\Cake.BCC.Tests-netcoreapp2.1.coverage.xml"
     coverlet .\BCC.Core.Tests\bin\Release\net471\BCC.Core.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Core.Tests\BCC.Core.Tests.csproj --no-build" --format opencover --output ".\BCC.Core.Tests-net471.coverage.xml"
     coverlet .\BCC.MSBuildLog.Tests\bin\Release\net471\BCC.MSBuildLog.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.MSBuildLog.Tests\BCC.MSBuildLog.Tests.csproj --no-build" --format opencover --output ".\BCC.MSBuildLog.Tests-net471.coverage.xml"
     coverlet .\BCC.Submission.Tests\bin\Release\net471\BCC.Submission.Tests.dll --target "dotnet" --targetargs "test -c Release .\BCC.Submission.Tests\BCC.Submission.Tests.csproj --no-build" --format opencover --output ".\BCC.Submission.Tests-net471.coverage.xml"
@@ -36,6 +38,7 @@ after_test:
     codecov -f ".\BCC.Web.Tests-netcoreapp2.1.coverage.xml"
     codecov -f ".\BCC.MSBuildLog.Tests-netcoreapp2.1.coverage.xml"
     codecov -f ".\BCC.Submission.Tests-netcoreapp2.1.coverage.xml"
+    codecov -f ".\Cake.BCC.Tests-netcoreapp2.1.coverage.xml"
     codecov -f ".\BCC.Core.Tests-net471.coverage.xml"
     codecov -f ".\BCC.MSBuildLog.Tests-net471.coverage.xml"
     codecov -f ".\BCC.Submission.Tests-net471.coverage.xml"
@@ -46,4 +49,4 @@ artifacts:
       name: dist.web
       type: WebDeployPackage
     - path: '*.nupkg'
-    - path: 'Cake.BCC\bin\Debug\*.nupkg'
+    - path: 'Cake.BCC\bin\Release\*.nupkg'
