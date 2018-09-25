@@ -44,8 +44,8 @@ namespace BCC.MSBuildLog.Tests.Services
             var checkRun = GetCheckRun(CreateMockBinaryLogProcessor(annotations));
 
             checkRun.Success.Should().BeTrue();
-            checkRun.Name.Should().Be("MSBuild Analyzer");
-            checkRun.Title.Should().Be("MSBuild Log Messages");
+            checkRun.Name.Should().Be("MSBuild Log");
+            checkRun.Title.Should().Be("0 Errors; 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().AllBeEquivalentTo(annotations);
         }
@@ -92,8 +92,8 @@ namespace BCC.MSBuildLog.Tests.Services
             var checkRun = GetCheckRun(CreateMockBinaryLogProcessor(annotations), configurationFile: configurationFile, mockFileSystem: mockFileSystem);
 
             checkRun.Success.Should().BeTrue();
-            checkRun.Name.Should().Be("MSBuild Analyzer");
-            checkRun.Title.Should().Be("MSBuild Log Messages");
+            checkRun.Name.Should().Be("MSBuild Log");
+            checkRun.Title.Should().Be("0 Errors; 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().AllBeEquivalentTo(annotations);
         }
@@ -113,8 +113,8 @@ namespace BCC.MSBuildLog.Tests.Services
             var checkRun = GetCheckRun(CreateMockBinaryLogProcessor(annotations));
 
             checkRun.Success.Should().BeTrue();
-            checkRun.Name.Should().Be("MSBuild Analyzer");
-            checkRun.Title.Should().Be("MSBuild Log Messages");
+            checkRun.Name.Should().Be("MSBuild Log");
+            checkRun.Title.Should().Be("0 Errors; 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
@@ -134,7 +134,6 @@ namespace BCC.MSBuildLog.Tests.Services
             var expectedCheckRunConfiguration = new CheckRunConfiguration
             {
                 Name = Faker.Lorem.Word(),
-                Title = Faker.Lorem.Word(),
                 Rules = new[]
                 {
                     new LogAnalyzerRule
@@ -152,13 +151,13 @@ namespace BCC.MSBuildLog.Tests.Services
             var mockBinaryLogProcessor = CreateMockBinaryLogProcessor(annotations);
             var checkRun = GetCheckRun(mockBinaryLogProcessor, configurationFile: configurationFile, mockFileSystem: mockFileSystem);
 
-            mockBinaryLogProcessor.Received(1).CreateAnnotations(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CheckRunConfiguration>());
+            mockBinaryLogProcessor.Received(1).ProcessLog(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CheckRunConfiguration>());
             var checkRunConfiguration = mockBinaryLogProcessor.ReceivedCalls().First().GetArguments()[2] as CheckRunConfiguration;
             checkRunConfiguration.Should().BeEquivalentTo(expectedCheckRunConfiguration);
 
             checkRun.Success.Should().BeTrue();
             checkRun.Name.Should().Be(expectedCheckRunConfiguration.Name);
-            checkRun.Title.Should().Be(expectedCheckRunConfiguration.Title);
+            checkRun.Title.Should().Be("0 Errors; 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
@@ -178,8 +177,8 @@ namespace BCC.MSBuildLog.Tests.Services
             var checkRun = GetCheckRun(CreateMockBinaryLogProcessor(annotations));
 
             checkRun.Success.Should().BeFalse();
-            checkRun.Name.Should().Be("MSBuild Analyzer");
-            checkRun.Title.Should().Be("MSBuild Log Messages");
+            checkRun.Name.Should().Be("MSBuild Log");
+            checkRun.Title.Should().Be("0 Errors; 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
@@ -204,8 +203,8 @@ namespace BCC.MSBuildLog.Tests.Services
             var checkRun = GetCheckRun(CreateMockBinaryLogProcessor(annotations));
 
             checkRun.Success.Should().BeFalse();
-            checkRun.Name.Should().Be("MSBuild Analyzer");
-            checkRun.Title.Should().Be("MSBuild Log Messages");
+            checkRun.Name.Should().Be("MSBuild Log");
+            checkRun.Title.Should().Be("0 Errors; 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
@@ -228,8 +227,8 @@ namespace BCC.MSBuildLog.Tests.Services
             var checkRun = GetCheckRun(new BinaryLogProcessor(new BinaryLogReader(), TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
 
             checkRun.Success.Should().BeTrue();
-            checkRun.Name.Should().Be("MSBuild Analyzer");
-            checkRun.Title.Should().Be("MSBuild Log Messages");
+            checkRun.Name.Should().Be("MSBuild Log");
+            checkRun.Title.Should().Be("0 Errors; 1 Warning");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
@@ -252,8 +251,8 @@ namespace BCC.MSBuildLog.Tests.Services
             var checkRun = GetCheckRun(new BinaryLogProcessor(new BinaryLogReader(), TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
 
             checkRun.Success.Should().BeFalse();
-            checkRun.Name.Should().Be("MSBuild Analyzer");
-            checkRun.Title.Should().Be("MSBuild Log Messages");
+            checkRun.Name.Should().Be("MSBuild Log");
+            checkRun.Title.Should().Be("1 Error; 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
@@ -276,8 +275,8 @@ namespace BCC.MSBuildLog.Tests.Services
             var checkRun = GetCheckRun(new BinaryLogProcessor(new BinaryLogReader(), TestLogger.Create<BinaryLogProcessor>(_testOutputHelper)), resourcePath, cloneRoot);
 
             checkRun.Success.Should().BeTrue();
-            checkRun.Name.Should().Be("MSBuild Analyzer");
-            checkRun.Title.Should().Be("MSBuild Log Messages");
+            checkRun.Name.Should().Be("MSBuild Log");
+            checkRun.Title.Should().Be("0 Errors; 1 Warning");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
@@ -310,11 +309,16 @@ namespace BCC.MSBuildLog.Tests.Services
             return JsonConvert.DeserializeObject<CreateCheckRun>(output);
         }
 
-        private static IBinaryLogProcessor CreateMockBinaryLogProcessor(Annotation[] annotations)
+        private static IBinaryLogProcessor CreateMockBinaryLogProcessor(Annotation[] annotations, int warningCount = 0, int errorCount = 0)
         {
             var binaryLogProcessor = Substitute.For<IBinaryLogProcessor>();
-            binaryLogProcessor.CreateAnnotations(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CheckRunConfiguration>())
-                .Returns(annotations);
+            binaryLogProcessor.ProcessLog(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CheckRunConfiguration>())
+                .Returns(new LogData()
+                {
+                    Annotations = annotations,
+                    WarningCount = warningCount,
+                    ErrorCount = errorCount
+                });
             return binaryLogProcessor;
         }
     }

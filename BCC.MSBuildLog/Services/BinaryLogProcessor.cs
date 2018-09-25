@@ -26,13 +26,15 @@ namespace BCC.MSBuildLog.Services
         }
 
         /// <inheritdoc />
-        public IReadOnlyCollection<Annotation> CreateAnnotations(string binLogPath, string cloneRoot, CheckRunConfiguration configuration = null)
+        public LogData ProcessLog(string binLogPath, string cloneRoot, CheckRunConfiguration configuration = null)
         {
-            Logger.LogInformation("CreateAnnotations binLogPath:{0} cloneRoot:{1}", binLogPath, cloneRoot);
+            Logger.LogInformation("ProcessLog binLogPath:{0} cloneRoot:{1}", binLogPath, cloneRoot);
 
             var ruleDictionary = 
                 configuration?.Rules?.ToDictionary(rule => rule.Code, rule => rule.ReportAs);
 
+            var warningCount = 0;
+            var errorCount = 0;
             var annotations = new List<Annotation>();
             foreach (var record in _binaryLogReader.ReadRecords(binLogPath))
             {
@@ -44,14 +46,40 @@ namespace BCC.MSBuildLog.Services
                 if (buildWarning == null && buildError == null)
                     continue;
 
-                var checkWarningLevel = (buildWarning != null) ? CheckWarningLevel.Warning : CheckWarningLevel.Failure;
-                var buildCode = buildWarning?.Code ?? buildError.Code;
-                var projectFile = buildWarning?.ProjectFile ?? buildError.ProjectFile;
-                var file = buildWarning?.File ?? buildError.File;
-                var title = buildWarning?.Code ?? buildError.Code;
-                var message = buildWarning?.Message ?? buildError.Message;
-                var lineNumber = buildWarning?.LineNumber ?? buildError.LineNumber;
-                var endLineNumber = buildWarning?.EndLineNumber ?? buildError.EndLineNumber;
+                CheckWarningLevel checkWarningLevel;
+                string buildCode;
+                string projectFile;
+                string file;
+                string title;
+                string message;
+                int lineNumber;
+                int endLineNumber;
+
+                if (buildWarning != null)
+                {
+                    warningCount++;
+                    checkWarningLevel = CheckWarningLevel.Warning;
+                    buildCode = buildWarning.Code;
+                    projectFile = buildWarning.ProjectFile;
+                    file = buildWarning.File;
+                    title = buildWarning.Code;
+                    message = buildWarning.Message;
+                    lineNumber = buildWarning.LineNumber;
+                    endLineNumber = buildWarning.EndLineNumber;
+                }
+                else
+                {
+                    errorCount++;
+                    checkWarningLevel = CheckWarningLevel.Failure;
+                    buildCode = buildError.Code;
+                    projectFile = buildError.ProjectFile;
+                    file = buildError.File;
+                    title = buildError.Code;
+                    message = buildError.Message;
+                    lineNumber = buildError.LineNumber;
+                    endLineNumber = buildError.EndLineNumber;
+                }
+                
 
                 ReportAs reportAs = ReportAs.AsIs;
                 if (ruleDictionary?.TryGetValue(buildCode, out reportAs) ?? false)
@@ -88,7 +116,12 @@ namespace BCC.MSBuildLog.Services
                     endLineNumber));
             }
 
-            return annotations.ToArray();
+            return new LogData
+            {
+                Annotations = annotations.ToArray(),
+                WarningCount = warningCount,
+                ErrorCount = errorCount
+            };
         }
 
         private Annotation CreateAnnotation(CheckWarningLevel checkWarningLevel, string cloneRoot, string projectFile,

@@ -36,9 +36,11 @@ namespace BCC.MSBuildLog.Tests.Services
         public void Should_TestConsoleApp1_Warning()
         {
             var cloneRoot = @"C:\projects\testconsoleapp1\";
-            var annotations = CreateAnnotations("testconsoleapp1-1warning.binlog", cloneRoot);
+            var logData = ProcessLog("testconsoleapp1-1warning.binlog", cloneRoot);
 
-            annotations.Should().AllBeEquivalentTo(
+            logData.ErrorCount.Should().Be(0);
+            logData.WarningCount.Should().Be(1);
+            logData.Annotations.Should().AllBeEquivalentTo(
                 new Annotation(
                     "TestConsoleApp1/Program.cs", 
                     CheckWarningLevel.Warning, "CS0219", 
@@ -63,9 +65,11 @@ namespace BCC.MSBuildLog.Tests.Services
             };
 
             var cloneRoot = @"C:\projects\testconsoleapp1\";
-            var annotations = CreateAnnotations("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
+            var logData = ProcessLog("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
 
-            annotations.Should().AllBeEquivalentTo(
+            logData.ErrorCount.Should().Be(0);
+            logData.WarningCount.Should().Be(1);
+            logData.Annotations.Should().AllBeEquivalentTo(
                 new Annotation(
                     "TestConsoleApp1/Program.cs",
                     CheckWarningLevel.Warning, "CS0219",
@@ -90,9 +94,11 @@ namespace BCC.MSBuildLog.Tests.Services
             };
 
             var cloneRoot = @"C:\projects\testconsoleapp1\";
-            var annotations = CreateAnnotations("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
+            var logData = ProcessLog("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
 
-            annotations.Should().AllBeEquivalentTo(
+            logData.ErrorCount.Should().Be(0);
+            logData.WarningCount.Should().Be(1);
+            logData.Annotations.Should().AllBeEquivalentTo(
                 new Annotation(
                     "TestConsoleApp1/Program.cs",
                     CheckWarningLevel.Warning, "CS0219",
@@ -117,9 +123,11 @@ namespace BCC.MSBuildLog.Tests.Services
             };
 
             var cloneRoot = @"C:\projects\testconsoleapp1\";
-            var annotations = CreateAnnotations("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
+            var logData = ProcessLog("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
 
-            annotations.Should().AllBeEquivalentTo(
+            logData.ErrorCount.Should().Be(0);
+            logData.WarningCount.Should().Be(1);
+            logData.Annotations.Should().AllBeEquivalentTo(
                 new Annotation(
                     "TestConsoleApp1/Program.cs",
                     CheckWarningLevel.Notice, "CS0219",
@@ -144,9 +152,11 @@ namespace BCC.MSBuildLog.Tests.Services
             };
 
             var cloneRoot = @"C:\projects\testconsoleapp1\";
-            var annotations = CreateAnnotations("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
+            var logData = ProcessLog("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
 
-            annotations.Should().AllBeEquivalentTo(
+            logData.ErrorCount.Should().Be(0);
+            logData.WarningCount.Should().Be(1);
+            logData.Annotations.Should().AllBeEquivalentTo(
                 new Annotation(
                     "TestConsoleApp1/Program.cs",
                     CheckWarningLevel.Failure, "CS0219",
@@ -171,17 +181,20 @@ namespace BCC.MSBuildLog.Tests.Services
             };
 
             var cloneRoot = @"C:\projects\testconsoleapp1\";
-            var annotations = CreateAnnotations("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
-            annotations.Should().BeEmpty();
+            var logData = ProcessLog("testconsoleapp1-1warning.binlog", cloneRoot, checkRunConfiguration);
+            logData.Annotations.Should().BeEmpty();
         }
 
         [Fact]
         public void Should_TestConsoleApp1_Error()
         {
             var cloneRoot = @"C:\projects\testconsoleapp1\";
-            var annotations = CreateAnnotations("testconsoleapp1-1error.binlog", cloneRoot);
+            var logData = ProcessLog("testconsoleapp1-1error.binlog", cloneRoot);
 
-            annotations.Should().AllBeEquivalentTo(
+            logData.ErrorCount.Should().Be(1);
+            logData.WarningCount.Should().Be(0);
+
+            logData.Annotations.Should().AllBeEquivalentTo(
                 new Annotation(
                     "TestConsoleApp1/Program.cs",
                     CheckWarningLevel.Failure, "CS1002", 
@@ -194,9 +207,12 @@ namespace BCC.MSBuildLog.Tests.Services
         public void Should_TestConsoleApp1_CodeAnalysis()
         {
             var cloneRoot = @"C:\projects\testconsoleapp1\";
-            var annotations = CreateAnnotations("testconsoleapp1-codeanalysis.binlog", cloneRoot);
+            var logData = ProcessLog("testconsoleapp1-codeanalysis.binlog", cloneRoot);
 
-            annotations.Should().AllBeEquivalentTo(
+            logData.ErrorCount.Should().Be(0);
+            logData.WarningCount.Should().Be(1);
+
+            logData.Annotations.Should().AllBeEquivalentTo(
                 new Annotation(
                     "TestConsoleApp1/Program.cs",
                     CheckWarningLevel.Warning, "CA2213",
@@ -209,18 +225,21 @@ namespace BCC.MSBuildLog.Tests.Services
         public void Should_MSBLOC()
         {
             var cloneRoot = @"C:\projects\msbuildlogoctokitchecker\";
-            var annotations = CreateAnnotations("msbloc.binlog", cloneRoot);
+            var logData = ProcessLog("msbloc.binlog", cloneRoot);
 
-            annotations.Length.Should().Be(10);
+            logData.ErrorCount.Should().Be(0);
+            logData.WarningCount.Should().Be(10);
 
-            annotations[0].Should().BeEquivalentTo(
+            logData.Annotations.Length.Should().Be(10);
+
+            logData.Annotations[0].Should().BeEquivalentTo(
                 new Annotation(
                     "MSBLOC.Core.Tests/Services/BinaryLogProcessorTests.cs", 
                     CheckWarningLevel.Warning,"CS0219",
                     "The variable 'filename' is assigned but its value is never used",
                     56, 56));
 
-            annotations[1].Should().BeEquivalentTo(
+            logData.Annotations[1].Should().BeEquivalentTo(
                 new Annotation(
                     "MSBLOC.Core.Tests/Services/BinaryLogProcessorTests.cs", 
                     CheckWarningLevel.Warning,"CS0219",
@@ -232,18 +251,21 @@ namespace BCC.MSBuildLog.Tests.Services
         public void Should_Parse_OctokitGraphQL()
         {
             var cloneRoot = @"C:\projects\octokit-graphql\";
-            var annotations = CreateAnnotations("octokit.graphql.binlog", cloneRoot);
+            var logData = ProcessLog("octokit.graphql.binlog", cloneRoot);
 
-            annotations.Length.Should().Be(803);
+            logData.ErrorCount.Should().Be(0);
+            logData.WarningCount.Should().Be(803);
 
-            annotations[0].Should().BeEquivalentTo(
+            logData.Annotations.Length.Should().Be(803);
+
+            logData.Annotations[0].Should().BeEquivalentTo(
                 new Annotation(
                     "Octokit.GraphQL.Core/Connection.cs",
                     CheckWarningLevel.Warning,"CS1591",
                     "Missing XML comment for publicly visible type or member 'Connection.Uri'",
                     43, 43));
 
-            annotations[1].Should().BeEquivalentTo(
+            logData.Annotations[1].Should().BeEquivalentTo(
                 new Annotation(
                     "Octokit.GraphQL.Core/Connection.cs",
                     CheckWarningLevel.Warning,"CS1591",
@@ -255,9 +277,12 @@ namespace BCC.MSBuildLog.Tests.Services
         public void Should_Parse_DBATools()
         {
             var cloneRoot = @"c:\github\dbatools\bin\projects\dbatools\";
-            var annotations = CreateAnnotations("dbatools.binlog", cloneRoot);
+            var logData = ProcessLog("dbatools.binlog", cloneRoot);
 
-            annotations.Length.Should().Be(0);
+            logData.ErrorCount.Should().Be(0);
+            logData.WarningCount.Should().Be(0);
+
+            logData.Annotations.Length.Should().Be(0);
         }
 
         [Fact]
@@ -265,26 +290,26 @@ namespace BCC.MSBuildLog.Tests.Services
         {
             var invalidOperationException = Assert.Throws<InvalidOperationException>(() =>
             {
-                CreateAnnotations("testconsoleapp1-1warning.binlog", @"C:\projects\testconsoleapp2\");
+                ProcessLog("testconsoleapp1-1warning.binlog", @"C:\projects\testconsoleapp2\");
             });
 
             invalidOperationException.Message.Should().Be(@"FilePath `C:\projects\testconsoleapp1\TestConsoleApp1\Program.cs` is not a child of `C:\projects\testconsoleapp2\`");
 
             invalidOperationException = Assert.Throws<InvalidOperationException>(() =>
             {
-                CreateAnnotations("testconsoleapp1-1error.binlog", @"C:\projects\testconsoleapp2\");
+                ProcessLog("testconsoleapp1-1error.binlog", @"C:\projects\testconsoleapp2\");
             });
             invalidOperationException.Message.Should().Be(@"FilePath `C:\projects\testconsoleapp1\TestConsoleApp1\Program.cs` is not a child of `C:\projects\testconsoleapp2\`");
         }
 
-        private Annotation[] CreateAnnotations(string resourceName, string cloneRoot, CheckRunConfiguration checkRunConfiguration = null)
+        private LogData ProcessLog(string resourceName, string cloneRoot, CheckRunConfiguration checkRunConfiguration = null)
         {
             var resourcePath = TestUtils.GetResourcePath(resourceName);
             File.Exists(resourcePath).Should().BeTrue();
 
             var binaryLogReader = new BinaryLogReader();
-            var parser = new BinaryLogProcessor(binaryLogReader, TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
-            return parser.CreateAnnotations(resourcePath, cloneRoot, checkRunConfiguration).ToArray();
+            var logProcessor = new BinaryLogProcessor(binaryLogReader, TestLogger.Create<BinaryLogProcessor>(_testOutputHelper));
+            return logProcessor.ProcessLog(resourcePath, cloneRoot, checkRunConfiguration);
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Text;
 using BCC.Core.Model.CheckRunSubmission;
 using BCC.MSBuildLog.Interfaces;
 using BCC.MSBuildLog.Model;
@@ -58,20 +60,29 @@ namespace BCC.MSBuildLog.Services
             }
 
             var dateTimeOffset = DateTimeOffset.Now;
-            var annotations = _binaryLogProcessor.CreateAnnotations(inputFile, cloneRoot, configuration).ToArray();
+            var logData = _binaryLogProcessor.ProcessLog(inputFile, cloneRoot, configuration);
 
-            var hasAnyFailure = annotations.Any() &&
-                annotations.Any(annotation => annotation.CheckWarningLevel == CheckWarningLevel.Failure);
+            var hasAnyFailure = logData.Annotations.Any() &&
+                                logData.Annotations.Any(annotation => annotation.CheckWarningLevel == CheckWarningLevel.Failure);
+
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append(logData.ErrorCount.ToString());
+            stringBuilder.Append(" ");
+            stringBuilder.Append(logData.ErrorCount == 1 ? "Error": "Errors");
+            stringBuilder.Append("; ");
+            stringBuilder.Append(logData.WarningCount.ToString());
+            stringBuilder.Append(" ");
+            stringBuilder.Append(logData.WarningCount == 1 ? "Warning" : "Warnings");
 
             var contents = JsonConvert.SerializeObject(new CreateCheckRun
             {
-                Annotations = annotations,
+                Annotations = logData.Annotations,
                 Success = !hasAnyFailure,
                 StartedAt = dateTimeOffset,
                 CompletedAt = DateTimeOffset.Now,
                 Summary = string.Empty,
-                Name = configuration?.Name ?? "MSBuild Analyzer",
-                Title = configuration?.Title ?? "MSBuild Log Messages",
+                Name = configuration?.Name ?? "MSBuild Log",
+                Title = stringBuilder.ToString(),
             });
 
             _fileSystem.File.WriteAllText(outputFile, contents);
