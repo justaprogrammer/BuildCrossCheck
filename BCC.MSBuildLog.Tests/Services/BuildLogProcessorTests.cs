@@ -45,7 +45,7 @@ namespace BCC.MSBuildLog.Tests.Services
 
             checkRun.Success.Should().BeTrue();
             checkRun.Name.Should().Be("MSBuild Log");
-            checkRun.Title.Should().Be("0 Errors; 0 Warnings");
+            checkRun.Title.Should().Be("0 Errors 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().AllBeEquivalentTo(annotations);
         }
@@ -93,7 +93,7 @@ namespace BCC.MSBuildLog.Tests.Services
 
             checkRun.Success.Should().BeTrue();
             checkRun.Name.Should().Be("MSBuild Log");
-            checkRun.Title.Should().Be("0 Errors; 0 Warnings");
+            checkRun.Title.Should().Be("0 Errors 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().AllBeEquivalentTo(annotations);
         }
@@ -114,7 +114,7 @@ namespace BCC.MSBuildLog.Tests.Services
 
             checkRun.Success.Should().BeTrue();
             checkRun.Name.Should().Be("MSBuild Log");
-            checkRun.Title.Should().Be("0 Errors; 0 Warnings");
+            checkRun.Title.Should().Be("0 Errors 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
@@ -157,7 +157,7 @@ namespace BCC.MSBuildLog.Tests.Services
 
             checkRun.Success.Should().BeTrue();
             checkRun.Name.Should().Be(expectedCheckRunConfiguration.Name);
-            checkRun.Title.Should().Be("0 Errors; 0 Warnings");
+            checkRun.Title.Should().Be("0 Errors 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
@@ -178,7 +178,7 @@ namespace BCC.MSBuildLog.Tests.Services
 
             checkRun.Success.Should().BeFalse();
             checkRun.Name.Should().Be("MSBuild Log");
-            checkRun.Title.Should().Be("0 Errors; 0 Warnings");
+            checkRun.Title.Should().Be("0 Errors 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
@@ -204,7 +204,7 @@ namespace BCC.MSBuildLog.Tests.Services
 
             checkRun.Success.Should().BeFalse();
             checkRun.Name.Should().Be("MSBuild Log");
-            checkRun.Title.Should().Be("0 Errors; 0 Warnings");
+            checkRun.Title.Should().Be("0 Errors 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
@@ -228,7 +228,7 @@ namespace BCC.MSBuildLog.Tests.Services
 
             checkRun.Success.Should().BeTrue();
             checkRun.Name.Should().Be("MSBuild Log");
-            checkRun.Title.Should().Be("0 Errors; 1 Warning");
+            checkRun.Title.Should().Be("0 Errors 1 Warning");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
@@ -252,7 +252,7 @@ namespace BCC.MSBuildLog.Tests.Services
 
             checkRun.Success.Should().BeFalse();
             checkRun.Name.Should().Be("MSBuild Log");
-            checkRun.Title.Should().Be("1 Error; 0 Warnings");
+            checkRun.Title.Should().Be("1 Error 0 Warnings");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }
@@ -276,7 +276,7 @@ namespace BCC.MSBuildLog.Tests.Services
 
             checkRun.Success.Should().BeTrue();
             checkRun.Name.Should().Be("MSBuild Log");
-            checkRun.Title.Should().Be("0 Errors; 1 Warning");
+            checkRun.Title.Should().Be("0 Errors 1 Warning");
             checkRun.Summary.Should().Be(string.Empty);
             checkRun.Annotations.Should().BeEquivalentTo<Annotation>(annotations);
         }

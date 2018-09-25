@@ -69,7 +69,7 @@ namespace BCC.MSBuildLog.Services
             stringBuilder.Append(logData.ErrorCount.ToString());
             stringBuilder.Append(" ");
             stringBuilder.Append(logData.ErrorCount == 1 ? "Error": "Errors");
-            stringBuilder.Append("; ");
+            stringBuilder.Append(" ");
             stringBuilder.Append(logData.WarningCount.ToString());
             stringBuilder.Append(" ");
             stringBuilder.Append(logData.WarningCount == 1 ? "Warning" : "Warnings");
