@@ -46,3 +46,4 @@ artifacts:
       name: dist.web
       type: WebDeployPackage
     - path: '*.nupkg'
+    - path: 'Cake.BCC\bin\Debug\*.nupkg'
