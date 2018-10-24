@@ -248,6 +248,7 @@ paket-files/
 
 # FAKE - F# Make
 .fake/
+*.fsx.lock
 
 # JetBrains Rider
 .idea/
