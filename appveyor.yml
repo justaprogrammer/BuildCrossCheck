@@ -8,3 +8,4 @@ before_build:
 build_script:
 - ps: >-
     fake run Build.fsx
+test: off
