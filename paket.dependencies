@@ -18,4 +18,5 @@ group FakeBuildResources
   framework: net472, netcoreapp2.1
   storage: packages
 
+  nuget NuGet.CommandLine
   nuget xunit.runner.console

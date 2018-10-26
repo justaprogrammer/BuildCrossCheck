@@ -9,28 +9,29 @@ open Fake.DotNet.Testing.XUnit2
 open Fake.Core
 
 Target.create "Clean" (fun _ ->
+  let configuration = 
+    (fun p -> { p with 
+                  Properties = ["Configuration", "Release"]
+                  DisableInternalBinLog=true })
+
   !! "BCC.Core.sln"
-    |> MSBuild.run 
-        (fun p -> { p with Properties = ["Configuration", "Release"] })
-        null
-        "Clean"
-        list.Empty
-    |> Trace.logItems "Clean-Output: "
+  |> MSBuild.run configuration null "Clean" list.Empty
+  |> Trace.logItems "Clean-Output: "
 )
 
 Target.create "Build" (fun _ ->
-  !! "BCC.Core.sln"
-    |> MSBuild.run id null "Restore" list.Empty
-    |> Trace.logItems "Restore-Output: "
+  let configuration = (fun p -> { p with DoRestore = true })
 
   !! "BCC.Core.sln"
-    |> MSBuild.runRelease id null "Build"
-    |> Trace.logItems "AppBuild-Output: "
+  |> MSBuild.runRelease configuration null "Build"
+  |> Trace.logItems "AppBuild-Output: "
 )
 
 Target.create "Test" (fun _ ->
+    let configuration = (fun p -> { p with HtmlOutputPath = Some "reports/xunit.html" })
+
     !! "**/bin/Release/net471/*Tests.dll"
-    |> Fake.DotNet.Testing.XUnit2.run (fun p -> { p with HtmlOutputPath = Some "reports/xunit.html" })
+    |> Fake.DotNet.Testing.XUnit2.run configuration
 )
 
 Target.create "Default" (fun _ -> ())
