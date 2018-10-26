@@ -5,4 +5,4 @@ before_build:
     dotnet tool install fake-cli -g
 build_script:
 - ps: >-
-    fake run Build.fxd
+    fake run Build.fsx
