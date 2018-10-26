@@ -42,7 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BCC.Core.Tests\BCC.Core.Tests.csproj" />
     <ProjectReference Include="..\BCC.Core\BCC.Core.csproj" />
   </ItemGroup>
 

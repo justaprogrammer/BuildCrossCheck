@@ -1,0 +1,20 @@
+source https://www.nuget.org/api/v2
+
+// [ FAKE GROUP ]
+group FakeBuild
+  source https://www.nuget.org/api/v2
+  framework: netstandard2.0
+  storage:none
+
+  nuget Fake.IO.FileSystem
+  nuget Fake.DotNet.MSBuild
+  nuget Fake.DotNet.Testing.XUnit2
+  nuget Fake.Core.Target 
+  groupref FakeBuildResources
+
+group FakeBuildResources
+  source https://www.nuget.org/api/v2
+  framework: net472, netcoreapp2.1
+  storage: packages
+
+  nuget xunit.runner.console
