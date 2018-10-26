@@ -17,6 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.Core.IntegrationTests",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{5E9CBCEE-A212-40DF-ABD2-129C7D6E63A1}"
 	ProjectSection(SolutionItems) = preProject
+		..\appveyor.yml = ..\appveyor.yml
 		..\Build.fsx = ..\Build.fsx
 		..\paket.dependencies = ..\paket.dependencies
 	EndProjectSection
