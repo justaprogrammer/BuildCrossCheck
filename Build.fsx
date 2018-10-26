@@ -55,17 +55,24 @@ Target.create "Test" (fun _ ->
 Target.create "Coverage" (fun _ ->
     List.allPairs ["BCC.Core.Tests" ; "BCC.Core.IntegrationTests"] ["net471" ; "netcoreapp2.1"]
     |> Seq.iter (fun (proj, framework) -> 
+            let reportOutput = (sprintf "reports/%s-%s.coverage.xml" proj framework)
+
             [
                 (sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj) ;
                 "--target \"dotnet\"" ;
                 (sprintf "--targetargs \"test -c Release -f %s src\\%s\\%s.csproj --no-build\"" framework proj proj) ;
                 "--format opencover" ;
-                (sprintf "--output \"./reports/%s-%s.coverage.xml\"" proj framework) ;
+                (sprintf "--output \"./%s\"" reportOutput) ;
             ]
             |> String.concat " "
             |> CreateProcess.fromRawWindowsCommandLine "coverlet"
             |> Proc.run
             |> ignore
+
+            if isAppveyor then
+                CreateProcess.fromRawWindowsCommandLine "codecov" (sprintf "-f \"%s\"" reportOutput)
+                |> Proc.run
+                |> ignore
         )
 )
 
