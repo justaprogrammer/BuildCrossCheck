@@ -272,6 +272,15 @@ namespace BCC.MSBuildLog.Tests.Services
                     "Missing XML comment for publicly visible type or member 'Connection.CredentialStore'",
                     44, 44));
         }
+        [Fact]
+        public void Should_Parse_GitHubVisualStudio()
+        {
+            var cloneRoot = @"c:\users\spade\projects\github\visualstudio\";
+            var logData = ProcessLog("visualstudio.binlog", cloneRoot);
+
+            logData.ErrorCount.Should().Be(0);
+            logData.WarningCount.Should().Be(1556);
+        }
 
         [Fact]
         public void Should_Parse_DBATools()

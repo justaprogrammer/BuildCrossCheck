@@ -8,6 +8,7 @@ using BCC.Core.Model.CheckRunSubmission;
 using BCC.MSBuildLog.Extensions;
 using BCC.MSBuildLog.Interfaces;
 using BCC.MSBuildLog.Model;
+using JetBrains.Annotations;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -79,7 +80,18 @@ namespace BCC.MSBuildLog.Services
                     lineNumber = buildError.LineNumber;
                     endLineNumber = buildError.EndLineNumber;
                 }
-                
+
+                if (buildCode.StartsWith("MSB"))
+                {
+                    if (projectFile == null)
+                    {
+                        projectFile = file;
+                    }
+                    else
+                    {
+                        file = projectFile;
+                    }
+                }
 
                 ReportAs reportAs = ReportAs.AsIs;
                 if (ruleDictionary?.TryGetValue(buildCode, out reportAs) ?? false)
@@ -124,9 +136,35 @@ namespace BCC.MSBuildLog.Services
             };
         }
 
-        private Annotation CreateAnnotation(CheckWarningLevel checkWarningLevel, string cloneRoot, string projectFile,
-            string file, string title, string message, int lineNumber, int endLineNumber)
+        private Annotation CreateAnnotation(CheckWarningLevel checkWarningLevel, [NotNull] string cloneRoot,
+            [NotNull] string projectFile,
+            [NotNull] string file, [NotNull] string title, [NotNull] string message, int lineNumber, int endLineNumber)
         {
+            if (cloneRoot == null)
+            {
+                throw new ArgumentNullException(nameof(cloneRoot));
+            }
+
+            if (projectFile == null)
+            {
+                throw new ArgumentNullException(nameof(projectFile));
+            }
+
+            if (file == null)
+            {
+                throw new ArgumentNullException(nameof(file));
+            }
+
+            if (title == null)
+            {
+                throw new ArgumentNullException(nameof(title));
+            }
+
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
             var filePath = Path.Combine(Path.GetDirectoryName(projectFile), file);
             if (!filePath.IsSubPathOf(cloneRoot))
             {
