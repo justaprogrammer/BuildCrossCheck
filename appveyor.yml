@@ -2,7 +2,7 @@ version: 1.0.{build}
 image: Visual Studio 2017
 before_build:
 - ps: >-
-    dotnet tool install fake -g
+    dotnet tool install fake-cli -g
 build_script:
 - ps: >-
     fake run Build.fxd
