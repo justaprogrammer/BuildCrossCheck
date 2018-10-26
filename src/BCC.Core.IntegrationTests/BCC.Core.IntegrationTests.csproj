@@ -2,16 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.1;net471</TargetFrameworks>
-
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <IsPackable>false</IsPackable>
-
-    <AssemblyName>BCC.Core.IntegrationTests</AssemblyName>
-
-    <ApplicationIcon />
-
-    <OutputType>Library</OutputType>
-
-    <StartupObject />
   </PropertyGroup>
 
   <ItemGroup>
@@ -43,6 +35,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BCC.Core\BCC.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System">
+      <HintPath>System</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

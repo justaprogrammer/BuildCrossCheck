@@ -3,8 +3,8 @@ image: Visual Studio 2017
 install:
   - dotnet tool install fake-cli -g
   - dotnet tool install coverlet.console -g
-  - choco install --no-progress codecov
-  - choco install gitversion.portable -pre -y
+  - choco install --no-progress codecov -y
+  - choco install --no-progress gitversion.portable -pre -y
 before_build:
   - ps: gitversion /l console /output buildserver /updateAssemblyInfo
 build_script:

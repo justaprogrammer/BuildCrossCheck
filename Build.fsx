@@ -17,8 +17,7 @@ BuildServer.install [
 let isAppveyor = AppVeyor.detect()
 let gitVersion = GitVersion.generateProperties id
 
-Trace.logfn "FullSemVer: %s" gitVersion.FullSemVer
-Trace.logfn "AssemblySemVer: %s" gitVersion.AssemblySemVer
+Trace.log (gitVersion.ToString())
 
 Target.create "Clean" (fun _ ->
   !! "reports/**"
@@ -27,7 +26,7 @@ Target.create "Clean" (fun _ ->
   let configuration = 
     (fun p -> { p with 
                   Properties = ["Configuration", "Release"]
-                  DisableInternalBinLog=true })
+                  Verbosity = Some MSBuildVerbosity.Minimal  })
 
   !! "src/BCC.Core.sln"
   |> MSBuild.run configuration null "Clean" list.Empty
@@ -35,7 +34,9 @@ Target.create "Clean" (fun _ ->
 )
 
 Target.create "Build" (fun _ ->
-  let configuration = (fun p -> { p with DoRestore = true })
+  let configuration = (fun p -> { p with 
+                                    DoRestore = true
+                                    Verbosity = Some MSBuildVerbosity.Minimal })
 
   !! "src/BCC.Core.sln"
   |> MSBuild.runRelease configuration null "Build"
@@ -51,31 +52,21 @@ Target.create "Test" (fun _ ->
     |> Fake.DotNet.Testing.XUnit2.run configuration
 )
 
-// coverlet .\BCC.Core.Tests\bin\Release\net471\BCC.Core.Tests.dll 
-// --target "dotnet"
-// --targetargs \"test -c Release .\BCC.Core.Tests\BCC.Core.Tests.csproj --no-build\"
-// --format opencover
-// --output ".\BCC.Core.Tests-net471.coverage.xml"
-
 Target.create "Coverage" (fun _ ->
     List.allPairs ["BCC.Core.Tests" ; "BCC.Core.IntegrationTests"] ["net471" ; "netcoreapp2.1"]
     |> Seq.iter (fun (proj, framework) -> 
-            let reportOutput = (sprintf "reports/%s-%s.coverage.xml" proj framework)
+            let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
+            let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
+            let reportPath = sprintf "reports/%s-%s.coverage.xml" proj framework
 
-            [
-                (sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj) ;
-                "--target \"dotnet\"" ;
-                (sprintf "--targetargs \"test -c Release -f %s src\\%s\\%s.csproj --no-build\"" framework proj proj) ;
-                "--format opencover" ;
-                (sprintf "--output \"./%s\"" reportOutput) ;
-            ]
-            |> String.concat " "
+            sprintf "%s --target \"dotnet\" --targetargs \"test -c Release -f %s %s --no-build\" --format opencover --output \"./%s\""
+                dllPath framework projectPath reportPath
             |> CreateProcess.fromRawWindowsCommandLine "coverlet"
             |> Proc.run
             |> ignore
 
             if isAppveyor then
-                CreateProcess.fromRawWindowsCommandLine "codecov" (sprintf "-f \"%s\"" reportOutput)
+                CreateProcess.fromRawWindowsCommandLine "codecov" (sprintf "-f \"%s\"" reportPath)
                 |> Proc.run
                 |> ignore
         )
