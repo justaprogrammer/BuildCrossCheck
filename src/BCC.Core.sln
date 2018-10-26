@@ -15,29 +15,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.Core.IntegrationTests",
 		{3F926502-1D86-45B8-B222-056C1E766440} = {3F926502-1D86-45B8-B222-056C1E766440}
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F5F7D2C9-E170-451F-B4D0-B32904C7A7C5}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{5E9CBCEE-A212-40DF-ABD2-129C7D6E63A1}"
 	ProjectSection(SolutionItems) = preProject
-		.gitattributes = .gitattributes
-		.gitignore = .gitignore
-		appveyor.yml = appveyor.yml
-		Build.fsx = Build.fsx
-		paket.dependencies = paket.dependencies
-		README.md = README.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{51A5C645-9407-4F2C-BEC1-80134F1AE3CB}"
-	ProjectSection(SolutionItems) = preProject
-		docs\contributing.md = docs\contributing.md
-		docs\integrating.md = docs\integrating.md
-		docs\readme.md = docs\readme.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{72EADED4-6A38-4930-90F5-BA148A3FBEA2}"
-	ProjectSection(SolutionItems) = preProject
-		docs\images\testconsole1-error-pr-changes.png = docs\images\testconsole1-error-pr-changes.png
-		docs\images\testconsole1-error-pr-check-runs.png = docs\images\testconsole1-error-pr-check-runs.png
-		docs\images\testconsole1-warning-pr-changes.png = docs\images\testconsole1-warning-pr-changes.png
-		docs\images\testconsole1-warning-pr-check-runs.png = docs\images\testconsole1-warning-pr-check-runs.png
+		..\Build.fsx = ..\Build.fsx
+		..\paket.dependencies = ..\paket.dependencies
 	EndProjectSection
 EndProject
 Global
@@ -61,9 +42,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{72EADED4-6A38-4930-90F5-BA148A3FBEA2} = {51A5C645-9407-4F2C-BEC1-80134F1AE3CB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {05191D52-B17D-4449-BE8F-26B3F4F081A5}

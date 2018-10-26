@@ -3,6 +3,7 @@
 #load "./.fake/build.fsx/intellisense.fsx"
 
 open Fake.IO
+open Fake.BuildServer
 open Fake.IO.Globbing.Operators
 open Fake.DotNet
 open Fake.DotNet.Testing.XUnit2
@@ -14,7 +15,7 @@ Target.create "Clean" (fun _ ->
                   Properties = ["Configuration", "Release"]
                   DisableInternalBinLog=true })
 
-  !! "BCC.Core.sln"
+  !! "src/BCC.Core.sln"
   |> MSBuild.run configuration null "Clean" list.Empty
   |> Trace.logItems "Clean-Output: "
 )
@@ -22,7 +23,7 @@ Target.create "Clean" (fun _ ->
 Target.create "Build" (fun _ ->
   let configuration = (fun p -> { p with DoRestore = true })
 
-  !! "BCC.Core.sln"
+  !! "src/BCC.Core.sln"
   |> MSBuild.runRelease configuration null "Build"
   |> Trace.logItems "AppBuild-Output: "
 )
@@ -30,7 +31,7 @@ Target.create "Build" (fun _ ->
 Target.create "Test" (fun _ ->
     let configuration = (fun p -> { p with HtmlOutputPath = Some "reports/xunit.html" })
 
-    !! "**/bin/Release/net471/*Tests.dll"
+    !! "src/**/bin/Release/net471/*Tests.dll"
     |> Fake.DotNet.Testing.XUnit2.run configuration
 )
 

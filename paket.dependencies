@@ -6,11 +6,12 @@ group FakeBuild
   framework: netstandard2.0
   storage:none
 
-  nuget Fake.IO.FileSystem
+  nuget Fake.Core.Target 
+  nuget Fake.BuildServer.AppVeyor
   nuget Fake.DotNet.MSBuild
   nuget Fake.DotNet.NuGet
   nuget Fake.DotNet.Testing.XUnit2
-  nuget Fake.Core.Target 
+  nuget Fake.IO.FileSystem
   groupref FakeBuildResources
 
 group FakeBuildResources

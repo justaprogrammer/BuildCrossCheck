@@ -16,12 +16,6 @@
     <PackageReference Include="System.IO.Abstractions" Version="2.1.0.230" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="StructuredLogger">
-      <HintPath>..\lib\StructuredLogger.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
   <Target Name="CreateAliasForStructuredLogger" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
     <ItemGroup>
       <ReferencePath Condition="'%(FileName)' == 'StructuredLogger'">
