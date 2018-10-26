@@ -8,6 +8,7 @@ group FakeBuild
 
   nuget Fake.IO.FileSystem
   nuget Fake.DotNet.MSBuild
+  nuget Fake.DotNet.NuGet
   nuget Fake.DotNet.Testing.XUnit2
   nuget Fake.Core.Target 
   groupref FakeBuildResources

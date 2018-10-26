@@ -15,10 +15,14 @@ Target.create "Clean" (fun _ ->
         null
         "Clean"
         list.Empty
-    |> Trace.logItems "AppBuild-Output: "
+    |> Trace.logItems "Clean-Output: "
 )
 
 Target.create "Build" (fun _ ->
+  !! "BCC.Core.sln"
+    |> MSBuild.run id null "Restore" list.Empty
+    |> Trace.logItems "Restore-Output: "
+
   !! "BCC.Core.sln"
     |> MSBuild.runRelease id null "Build"
     |> Trace.logItems "AppBuild-Output: "
