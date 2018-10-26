@@ -8,12 +8,17 @@ open Fake.IO.Globbing.Operators
 open Fake.DotNet
 open Fake.DotNet.Testing.XUnit2
 open Fake.Core
+open Fake.Tools
 
 BuildServer.install [
     AppVeyor.Installer
 ]
 
 let isAppveyor = AppVeyor.detect()
+let gitVersion = GitVersion.generateProperties id
+
+Trace.logfn "FullSemVer: %s" gitVersion.FullSemVer
+Trace.logfn "AssemblySemVer: %s" gitVersion.AssemblySemVer
 
 Target.create "Clean" (fun _ ->
   !! "reports/**"
