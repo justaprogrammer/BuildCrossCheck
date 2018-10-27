@@ -47,12 +47,18 @@ Target.create "Build" (fun _ ->
 )
 
 Target.create "Test" (fun _ ->
+    let testHtmlReport = "reports/tests.html"
+    let testXmlReport = "reports/tests.html"
+
     let configuration = (fun p -> { p with
-                                      HtmlOutputPath = Some "reports/tests.html"
-                                      XmlOutputPath = Some "reports/tests.xml"})
+                                      HtmlOutputPath = Some testHtmlReport
+                                      XmlOutputPath = Some testXmlReport})
 
     !! "src/**/bin/Release/net471/*Tests.dll"
     |> Fake.DotNet.Testing.XUnit2.run configuration
+
+    Trace.publish ImportData.BuildArtifact testHtmlReport
+    Trace.publish ImportData.BuildArtifact testXmlReport
 )
 
 Target.create "Package" (fun _ ->
@@ -89,6 +95,8 @@ Target.create "Coverage" (fun _ ->
             |> CreateProcess.fromRawWindowsCommandLine "coverlet"
             |> Proc.run
             |> ignore
+
+            Trace.publish ImportData.BuildArtifact reportPath
 
             if isAppveyor then
                 CreateProcess.fromRawWindowsCommandLine "codecov" (sprintf "-f \"%s\"" reportPath)
