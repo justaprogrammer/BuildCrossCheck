@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>BCC-Core</id>
+    <version>1.0.0-beta</version>
+    <authors>Stanley Goldman, Benjamin Grabkowitz, Justin Dearing</authors>
+    <owners>StanleyGoldman, profet, zippy1981</owners>
+    <licenseUrl>https://www.gnu.org/licenses/agpl-3.0.en.html</licenseUrl>
+    <projectUrl>https://github.com/justaprogrammer/BuildCrossCheck</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>BuildCrossCheck Core Functionality</description>
+    <copyright>Copyright 2018</copyright>
+    <dependencies>
+      <dependency id="GitHubJwt" version="0.0.3" />
+      <dependency id="JetBrains.Annotations" version="2018.2.1" />
+      <dependency id="Microsoft.Extensions.Logging" version="2.1.1" />
+      <dependency id="morelinq" version="3.0.0" />
+      <dependency id="Nito.AsyncEx.Coordination" version="5.0.0-pre-05" />
+      <dependency id="Octokit" version="0.32.0" />
+      <dependency id="Octokit.GraphQL" version="0.1.0-beta" />
+      <dependency id="System.IO.Abstractions" version="2.1.0.256" />
+    </dependencies>
+  </metadata>
+</package>
