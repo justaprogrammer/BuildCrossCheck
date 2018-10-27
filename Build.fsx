@@ -18,8 +18,6 @@ BuildServer.install [
 let isAppveyor = AppVeyor.detect()
 let gitVersion = GitVersion.generateProperties id
 
-Trace.log (Shell.pwd ())
-
 Target.create "Clean" (fun _ ->
   ["reports" ; "nuget" ; "src/common"]
   |> Shell.cleanDirs
@@ -73,6 +71,8 @@ Target.create "Package" (fun _ ->
 
     NuGet.NuGetPack (fun p -> { p with
                                   Version = version }) "nuget/Package.nuspec"
+
+    Trace.publish ImportData.BuildArtifact "nuget/*.nupkg"
 )
 
 Target.create "Coverage" (fun _ ->
