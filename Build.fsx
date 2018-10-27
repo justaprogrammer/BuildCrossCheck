@@ -35,9 +35,12 @@ Target.create "Clean" (fun _ ->
 )
 
 Target.create "Build" (fun _ ->
-  CreateProcess.fromRawWindowsCommandLine "gitversion" "/updateassemblyinfo src\\common\\SharedAssemblyInfo.cs /ensureassemblyinfo"
+  CreateProcess.fromRawWindowsCommandLine "gitversion" "/updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo"
   |> Proc.run
   |> ignore
+
+  File.read "src\common\SharedAssemblyInfo.cs"
+  |> Trace.logItems "SharedAssemblyInfo"
 
   let configuration = (fun p -> { p with 
                                     DoRestore = true
