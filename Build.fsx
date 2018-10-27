@@ -57,6 +57,10 @@ Target.create "Test" (fun _ ->
     |> Fake.DotNet.Testing.XUnit2.run configuration
 )
 
+Target.create "Package" (fun _ ->
+    ()
+)
+
 Target.create "Coverage" (fun _ ->
     List.allPairs ["BCC.Core.Tests" ; "BCC.Core.IntegrationTests"] ["net471" ; "netcoreapp2.1"]
     |> Seq.iter (fun (proj, framework) -> 
@@ -82,12 +86,8 @@ Target.create "Default" (fun _ -> ())
 open Fake.Core.TargetOperators
 "Clean" ==> "Build"
 
-"Build" ==> "Test"
-
-"Build" ==> "Coverage"
-
-"Test" ==> "Default"
-"Coverage" ==> "Default"
+"Build" ==> "Test" ==> "Package" ==> "Default"
+"Build" ==> "Coverage" ==> "Default"
 
 // start build
 Target.runOrDefault "Default"
