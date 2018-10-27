@@ -5,7 +5,7 @@ install:
   - choco install --no-progress codecov -y
   - choco install --no-progress gitversion.portable -y
 before_build:
-  - ps: gitversion /l console /output buildserver /updateAssemblyInfo
+  - ps: gitversion /l console /output buildserver
 build_script:
 - ps: >-
     fake run Build.fsx
