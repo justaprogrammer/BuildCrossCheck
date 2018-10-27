@@ -73,7 +73,8 @@ Target.create "Package" (fun _ ->
                                   Version = version
                                   OutputPath = "nuget" }) "nuget/Package.nuspec"
 
-    Trace.publish ImportData.BuildArtifact "nuget/*.nupkg"
+    !! "nuget/*.nupkg"
+    |> Seq.iter (Trace.publish ImportData.BuildArtifact)
 )
 
 Target.create "Coverage" (fun _ ->
