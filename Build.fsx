@@ -39,18 +39,6 @@ Target.create "Build" (fun _ ->
   |> Proc.run
   |> ignore
 
-  !! "**\*AssemblyInfo.cs"
-  |> Seq.iter (fun file -> 
-      Trace.log "****"
-      Trace.log file
-
-      File.read file
-      |> Trace.logItems file
-      Trace.log "****"
-    )
-
-  
-
   let configuration = (fun p -> { p with 
                                     DoRestore = true
                                     Verbosity = Some MSBuildVerbosity.Minimal })
