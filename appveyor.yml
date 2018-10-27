@@ -20,10 +20,9 @@ deploy:
   on:
     branch: master
     appveyor_repo_tag: true
-deploy:
+- provider: GitHub
   release: BCC-Core v$(GitVersion_SemVer)
   description: 'BCC-Core v$(GitVersion_SemVer)'
-  provider: GitHub
   auth_token:
     secure: 8wLI8hf2W3L/V5BUk/tdGDs+gWryh9Y8HxCQk9iq48xV/n+hxShodChwuHAm2DsS
   artifact: /.*\.nupkg/
