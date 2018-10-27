@@ -70,7 +70,8 @@ Target.create "Package" (fun _ ->
         | _ -> sprintf "%s-beta" gitVersion.MajorMinorPatch
 
     NuGet.NuGetPack (fun p -> { p with
-                                  Version = version }) "nuget/Package.nuspec"
+                                  Version = version
+                                  OutputPath = "nuget" }) "nuget/Package.nuspec"
 
     Trace.publish ImportData.BuildArtifact "nuget/*.nupkg"
 )
