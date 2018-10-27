@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" 
+             Condition="Exists('..\common\SharedAssemblyInfo.cs')"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="GitHubJwt" Version="0.0.2" />
     <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />

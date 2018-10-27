@@ -2,7 +2,6 @@ version: 1.0.{build}
 image: Visual Studio 2017
 install:
   - dotnet tool install fake-cli -g
-  - dotnet tool install coverlet.console -g
   - choco install --no-progress codecov -y
   - choco install --no-progress gitversion.portable -pre -y
 before_build:

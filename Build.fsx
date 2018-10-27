@@ -21,6 +21,7 @@ Trace.log (gitVersion.ToString())
 
 Target.create "Clean" (fun _ ->
   !! "reports/**"
+  ++ "**/SharedAssemblyInfo.cs"
   |> File.deleteAll
 
   let configuration = 
@@ -34,6 +35,11 @@ Target.create "Clean" (fun _ ->
 )
 
 Target.create "Build" (fun _ ->
+  if isAppveyor then
+    CreateProcess.fromRawWindowsCommandLine "gitversion" "/updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo"
+                |> Proc.run
+                |> ignore
+
   let configuration = (fun p -> { p with 
                                     DoRestore = true
                                     Verbosity = Some MSBuildVerbosity.Minimal })
@@ -74,12 +80,13 @@ Target.create "Coverage" (fun _ ->
 
 Target.create "Default" (fun _ -> ())
 
-let hasCoverlet = true
-
 open Fake.Core.TargetOperators
 "Clean" ==> "Build"
+
 "Build" ==> "Test"
-"Build" =?> ("Coverage", hasCoverlet)
+
+"Build" ==> "Coverage"
+
 "Test" ==> "Default"
 "Coverage" ==> "Default"
 

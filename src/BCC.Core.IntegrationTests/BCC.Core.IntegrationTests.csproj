@@ -18,6 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs"
+             Condition="Exists('..\common\SharedAssemblyInfo.cs')"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.4.1" />
     <PackageReference Include="GitHubJwt" Version="0.0.2" />
     <PackageReference Include="jose-jwt" Version="2.4.0" />
