@@ -5,6 +5,7 @@ open Fake.IO
 open Fake.BuildServer
 open Fake.IO.Globbing.Operators
 open Fake.DotNet
+open Fake.DotNet.NuGet
 open Fake.DotNet.Testing.XUnit2
 open Fake.Core
 open Fake.Tools
@@ -60,7 +61,13 @@ Target.create "Package" (fun _ ->
     Shell.mkdir "nuget"
     
     !! "Package.nuspec"
-    |> Shell.copyRecursive true "nuget"
+    |> Shell.copy "nuget"
+
+    Shell.copyRecursive "src/BCC.Core/bin/Release" "nuget/lib" false
+    |> ignore
+
+    NuGet.NuGetPack (fun p -> { p with
+                                  Version = "1.1.1-beta" }) "nuget/Package.nuspec"
 )
 
 Target.create "Coverage" (fun _ ->
@@ -88,7 +95,8 @@ Target.create "Default" (fun _ -> ())
 open Fake.Core.TargetOperators
 "Clean" ==> "Build"
 
-"Build" ==> "Test" ==> "Package" ==> "Default"
+"Build" ==> "Package" ==> "Default"
+"Build" ==> "Test" ==> "Default"
 "Build" ==> "Coverage" ==> "Default"
 
 // start build
