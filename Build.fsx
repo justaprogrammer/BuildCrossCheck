@@ -66,8 +66,13 @@ Target.create "Package" (fun _ ->
     Shell.copyRecursive "src/BCC.Core/bin/Release" "nuget/lib" false
     |> ignore
 
+    let version = 
+        match String.isNullOrWhiteSpace gitVersion.PreReleaseLabel with
+        | false -> sprintf "%s-beta-%s%s" gitVersion.MajorMinorPatch gitVersion.PreReleaseLabel gitVersion.BuildMetaDataPadded
+        | _ -> sprintf "%s-beta" gitVersion.MajorMinorPatch
+
     NuGet.NuGetPack (fun p -> { p with
-                                  Version = "1.1.1-beta" }) "nuget/Package.nuspec"
+                                  Version = version }) "nuget/Package.nuspec"
 )
 
 Target.create "Coverage" (fun _ ->
