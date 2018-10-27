@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.Web", "BCC.Web\BCC.Web.csproj", "{67A43249-8F30-4706-9D91-3383996A017A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.Web.Tests", "BCC.Web.Tests\BCC.Web.Tests.csproj", "{3D23FE93-9009-4384-A845-2C1EE36F5F96}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{25CCEA2D-C190-4456-893D-6D4DE1EFA49C}"
+	ProjectSection(SolutionItems) = preProject
+		..\appveyor.yml = ..\appveyor.yml
+		..\Build.fsx = ..\Build.fsx
+		..\codecov.yml = ..\codecov.yml
+		..\paket.dependencies = ..\paket.dependencies
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{67A43249-8F30-4706-9D91-3383996A017A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67A43249-8F30-4706-9D91-3383996A017A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67A43249-8F30-4706-9D91-3383996A017A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67A43249-8F30-4706-9D91-3383996A017A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D23FE93-9009-4384-A845-2C1EE36F5F96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D23FE93-9009-4384-A845-2C1EE36F5F96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D23FE93-9009-4384-A845-2C1EE36F5F96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D23FE93-9009-4384-A845-2C1EE36F5F96}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CA688152-B62B-4597-BE2E-FD55A32B3DA0}
+	EndGlobalSection
+EndGlobal
