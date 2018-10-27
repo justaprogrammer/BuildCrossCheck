@@ -27,7 +27,7 @@ Target.create "Clean" (fun _ ->
   let configuration = 
     (fun p -> { p with 
                   Properties = ["Configuration", "Release"]
-                  Verbosity = Some MSBuildVerbosity.Minimal  })
+                  Verbosity = Some MSBuildVerbosity.Minimal })
 
   !! "src/BCC.Core.sln"
   |> MSBuild.run configuration null "Clean" list.Empty
@@ -39,8 +39,17 @@ Target.create "Build" (fun _ ->
   |> Proc.run
   |> ignore
 
-  File.read "src\common\SharedAssemblyInfo.cs"
-  |> Trace.logItems "SharedAssemblyInfo"
+  !! "**\*AssemblyInfo.cs"
+  |> Seq.iter (fun file -> 
+      Trace.log "****"
+      Trace.log file
+
+      File.read file
+      |> Trace.logItems file
+      Trace.log "****"
+    )
+
+  
 
   let configuration = (fun p -> { p with 
                                     DoRestore = true
