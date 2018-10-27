@@ -19,7 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{5E9CBCEE
 	ProjectSection(SolutionItems) = preProject
 		..\appveyor.yml = ..\appveyor.yml
 		..\Build.fsx = ..\Build.fsx
-		..\nuget\Package.nuspec = ..\nuget\Package.nuspec
+		..\Package.nuspec = ..\Package.nuspec
 		..\paket.dependencies = ..\paket.dependencies
 	EndProjectSection
 EndProject

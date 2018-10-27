@@ -1,4 +1,3 @@
-
 #r "paket: groupref FakeBuild //"
 #load "./.fake/build.fsx/intellisense.fsx"
 
@@ -9,6 +8,7 @@ open Fake.DotNet
 open Fake.DotNet.Testing.XUnit2
 open Fake.Core
 open Fake.Tools
+open Fake.IO
 
 BuildServer.install [
     AppVeyor.Installer
@@ -17,12 +17,11 @@ BuildServer.install [
 let isAppveyor = AppVeyor.detect()
 let gitVersion = GitVersion.generateProperties id
 
-Trace.log (gitVersion.ToString())
+Trace.log (Shell.pwd ())
 
 Target.create "Clean" (fun _ ->
-  !! "reports/**"
-  ++ "**/SharedAssemblyInfo.cs"
-  |> File.deleteAll
+  ["reports" ; "nuget" ; "src/common"]
+  |> Shell.cleanDirs
 
   let configuration = 
     (fun p -> { p with 
@@ -58,7 +57,10 @@ Target.create "Test" (fun _ ->
 )
 
 Target.create "Package" (fun _ ->
-    ()
+    Shell.mkdir "nuget"
+    
+    !! "Package.nuspec"
+    |> Shell.copyRecursive true "nuget"
 )
 
 Target.create "Coverage" (fun _ ->
