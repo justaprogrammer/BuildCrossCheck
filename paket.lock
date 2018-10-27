@@ -7,7 +7,6 @@ NUGET
   remote: https://www.nuget.org/api/v2
     BlackFox.VsWhere (0.3.2)
       FSharp.Core (>= 4.2.3)
-    coverlet.console (1.2.1) - clitool: true
     Fake.BuildServer.AppVeyor (5.9.3)
       Fake.Core.Environment (>= 5.9.3)
       Fake.Core.Process (>= 5.9.3)
