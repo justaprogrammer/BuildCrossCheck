@@ -35,10 +35,9 @@ Target.create "Clean" (fun _ ->
 )
 
 Target.create "Build" (fun _ ->
-  if isAppveyor then
-    CreateProcess.fromRawWindowsCommandLine "gitversion" "/updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo"
-                |> Proc.run
-                |> ignore
+  CreateProcess.fromRawWindowsCommandLine "gitversion" "/updateassemblyinfo src\\common\\SharedAssemblyInfo.cs /ensureassemblyinfo"
+  |> Proc.run
+  |> ignore
 
   let configuration = (fun p -> { p with 
                                     DoRestore = true
