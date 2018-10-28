@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using AccessToken = BCC.Infrastructure.Models.AccessToken;
 using Repository = BCC.Core.Model.GitHub.Repository;
@@ -78,9 +79,7 @@ namespace BCC.Web.Services
                 { JwtRegisteredClaimNames.Sub, accessToken.IssuedTo },
             };
 
-            var accessTokenString = tokenHandler.CreateToken(payload, signingCredentials);
-
-            return accessTokenString;
+            return tokenHandler.CreateToken(payload.ToString(Formatting.None), signingCredentials);
         }
 
         public async Task<JsonWebToken> ValidateTokenAsync(string accessToken)

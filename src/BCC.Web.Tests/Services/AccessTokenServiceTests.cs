@@ -139,12 +139,12 @@ namespace BCC.Web.Tests.Services
             await tokenRepository.Received().GetAsync(accessToken.Id);
 
             jsonWebToken.Should().NotBeNull();
-            jsonWebToken.Payload.Value<long>(JwtRegisteredClaimNames.Sub).Should().Be(githubUserId);
-            jsonWebToken.Payload.Value<string>(JwtRegisteredClaimNames.Aud).Should().Be(".Api");
-            jsonWebToken.Payload.Value<string>(JwtRegisteredClaimNames.Jti).Should().Be(accessToken.Id.ToString());
-            DateTimeOffset.FromUnixTimeSeconds(jsonWebToken.Payload.Value<int>(JwtRegisteredClaimNames.Iat)).Should()
+            jsonWebToken.GetPayloadValue<long>(JwtRegisteredClaimNames.Sub).Should().Be(githubUserId);
+            jsonWebToken.GetPayloadValue<string>(JwtRegisteredClaimNames.Aud).Should().Be(".Api");
+            jsonWebToken.GetPayloadValue<string>(JwtRegisteredClaimNames.Jti).Should().Be(accessToken.Id.ToString());
+            DateTimeOffset.FromUnixTimeSeconds(jsonWebToken.GetPayloadValue<int>(JwtRegisteredClaimNames.Iat)).Should()
                 .BeCloseTo(DateTimeOffset.UtcNow, 1000);
-            jsonWebToken.Payload.Value<long>("urn:bcc:repositoryId").Should().Be(userRepository.Id);
+            jsonWebToken.GetPayloadValue<long>("urn:bcc:repositoryId").Should().Be(userRepository.Id);
         }
 
         [Fact]
@@ -202,8 +202,8 @@ namespace BCC.Web.Tests.Services
             var jsonWebToken = await service.ValidateTokenAsync(jwt);
 
             jsonWebToken.Should().NotBeNull();
-            jsonWebToken.Payload.Value<string>(JwtRegisteredClaimNames.Jti).Should().NotBeNullOrWhiteSpace();
-            jsonWebToken.Payload.Value<string>(JwtRegisteredClaimNames.Jti).Should().HaveLength(36);
+            jsonWebToken.GetPayloadValue<string>(JwtRegisteredClaimNames.Jti).Should().NotBeNullOrWhiteSpace();
+            jsonWebToken.GetPayloadValue<string>(JwtRegisteredClaimNames.Jti).Should().HaveLength(36);
 
             var modifiedToken = jwt + " ";
             service.Awaiting(async s => await s.ValidateTokenAsync(modifiedToken)).Should()
