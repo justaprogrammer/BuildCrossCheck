@@ -28,3 +28,17 @@ deploy:
   on:
     branch: master
     appveyor_repo_tag: true
+- provider: WebDeploy
+  server: https://buildcrosscheck.scm.azurewebsites.net:443/msdeploy.axd?site=BuildCrossCheck
+  website: BuildCrossCheck
+  username: $BuildCrossCheck
+  password:
+    secure: 361bj2J7f6ObKuxxFf1gkkemdTFncdFNCVMd4ayyoe+GTXMIc8oREU3oPm9zDbNUnoPT5SPit6x4D86Ml+V5Qw==
+  aspnet_core: true
+  aspnet_core_force_restart: true
+  remove_files: true
+  app_offline: true
+  artifact: build.web
+  on:
+    branch: master
+    appveyor_repo_tag: true
