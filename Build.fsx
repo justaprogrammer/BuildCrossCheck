@@ -53,7 +53,7 @@ Target.create "Test" (fun _ ->
                              ResultsDirectory = Some "../../reports"})
                 "src/BCC.Web.Tests/BCC.Web.Tests.csproj"
 
-    Trace.publish ImportData.BuildArtifact "src/BCC.Web.Tests/"
+    Trace.publish ImportData.BuildArtifact "reports/results.trx"
 )
 
 Target.create "Package" (fun _ ->
