@@ -11,15 +11,11 @@ build_script:
 - ps: >-
     fake run Build.fsx
 test: off
+artifacts:
+  - path: build
+    name: build.web
+    type: WebDeployPackage
 deploy:
-- provider: NuGet
-  name: production
-  artifact: /.*\.nupkg/
-  api_key:
-    secure: dsO76Gkjz0FIjFDUQgSK5k04J5Kx+tBfpUVPA/YNOcvQN8dzfLfuoT+qmu4ezU2c
-  on:
-    branch: master
-    appveyor_repo_tag: true
 - provider: GitHub
   tag: $(APPVEYOR_REPO_TAG_NAME)
   release: BCC-Submission v$(GitVersion_SemVer)
