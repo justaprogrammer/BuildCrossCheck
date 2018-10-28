@@ -261,6 +261,7 @@ paket-files/
 __pycache__/
 *.pyc
 
+/build/
 reports/
 SharedAssemblyInfo.cs
 src/BCC.Web/wwwroot/css/*.min.css

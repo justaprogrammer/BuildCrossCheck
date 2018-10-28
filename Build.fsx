@@ -17,7 +17,7 @@ let isAppveyor = AppVeyor.detect()
 let gitVersion = GitVersion.generateProperties id
 
 Target.create "Clean" (fun _ ->
-  ["reports" ; "src/common"]
+  ["build" ; "reports" ; "src/common" ; "src/BCC.Web/node_modules"]
   |> Shell.cleanDirs
 
   let configuration = 
@@ -47,28 +47,19 @@ Target.create "Build" (fun _ ->
 )
 
 Target.create "Test" (fun _ ->
-(*
-    let testHtmlReport = "reports/tests.html"
-    let testXmlReport = "reports/tests.html"
+    DotNet.test (fun t -> {t with
+                             Configuration = DotNet.BuildConfiguration.Release
+                             Logger = Some "trx;LogFileName=results.trx"
+                             ResultsDirectory = Some "../../reports"})
+                "src/BCC.Web.Tests/BCC.Web.Tests.csproj"
 
-    let configuration = (fun p -> { p with
-                                      HtmlOutputPath = Some testHtmlReport
-                                      XmlOutputPath = Some testXmlReport})
-
-    !! "src/**/bin/Release/netcoreapp2.1/*Tests.dll"
-    |> Fake.DotNet.Testing.XUnit2.run configuration
-
-    Trace.publish ImportData.BuildArtifact testHtmlReport
-    Trace.publish ImportData.BuildArtifact testXmlReport
-*)
-    
-    ()
+    Trace.publish ImportData.BuildArtifact "src/BCC.Web.Tests/"
 )
 
 Target.create "Package" (fun _ ->
-    // dotnet publish BCC.Web --configuration Release --output %appveyor_build_folder%\dist
-    // Fake.DotNet.Cli.buildWebsites 
-    ()
+    DotNet.publish (fun p -> {p with 
+                                Configuration = DotNet.BuildConfiguration.Release
+                                OutputPath = Some "../../build"}) "src/BCC.Web"
 )
 
 Target.create "Coverage" (fun _ ->
