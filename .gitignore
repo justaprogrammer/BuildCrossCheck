@@ -263,4 +263,5 @@ __pycache__/
 
 reports/
 SharedAssemblyInfo.cs
-nuget/*
+src/BCC.Web/wwwroot/css/*.min.css
+src/BCC.Web/wwwroot/js/*.min.js

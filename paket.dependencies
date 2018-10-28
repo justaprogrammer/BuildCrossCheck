@@ -8,9 +8,10 @@ group FakeBuild
 
   nuget Fake.Core.Target 
   nuget Fake.BuildServer.AppVeyor
+  nuget Fake.DotNet.Cli
   nuget Fake.DotNet.MSBuild
-  nuget Fake.DotNet.Testing.XUnit2
   nuget Fake.IO.FileSystem
+  nuget Fake.JavaScript.Npm
   nuget Fake.Tools.GitVersion
   groupref FakeBuildResources
 
@@ -19,4 +20,3 @@ group FakeBuildResources
   storage: packages
 
   nuget NuGet.CommandLine
-  nuget xunit.runner.console

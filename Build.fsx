@@ -5,10 +5,9 @@ open Fake.IO
 open Fake.BuildServer
 open Fake.IO.Globbing.Operators
 open Fake.DotNet
-open Fake.DotNet.Testing.XUnit2
+open Fake.JavaScript
 open Fake.Core
 open Fake.Tools
-open Fake.IO
 
 BuildServer.install [
     AppVeyor.Installer
@@ -18,7 +17,7 @@ let isAppveyor = AppVeyor.detect()
 let gitVersion = GitVersion.generateProperties id
 
 Target.create "Clean" (fun _ ->
-  ["reports" ; "nuget" ; "src/common"]
+  ["reports" ; "src/common"]
   |> Shell.cleanDirs
 
   let configuration = 
@@ -36,6 +35,8 @@ Target.create "Build" (fun _ ->
   |> Proc.run
   |> ignore
 
+  Npm.install (fun p -> {p with WorkingDirectory = "src/BCC.Web"})
+
   let configuration = (fun p -> { p with 
                                     DoRestore = true
                                     Verbosity = Some MSBuildVerbosity.Minimal })
@@ -46,6 +47,7 @@ Target.create "Build" (fun _ ->
 )
 
 Target.create "Test" (fun _ ->
+(*
     let testHtmlReport = "reports/tests.html"
     let testXmlReport = "reports/tests.html"
 
@@ -53,19 +55,24 @@ Target.create "Test" (fun _ ->
                                       HtmlOutputPath = Some testHtmlReport
                                       XmlOutputPath = Some testXmlReport})
 
-    !! "src/**/bin/Release/net471/*Tests.dll"
+    !! "src/**/bin/Release/netcoreapp2.1/*Tests.dll"
     |> Fake.DotNet.Testing.XUnit2.run configuration
 
     Trace.publish ImportData.BuildArtifact testHtmlReport
     Trace.publish ImportData.BuildArtifact testXmlReport
+*)
+    
+    ()
 )
 
 Target.create "Package" (fun _ ->
+    // dotnet publish BCC.Web --configuration Release --output %appveyor_build_folder%\dist
+    // Fake.DotNet.Cli.buildWebsites 
     ()
 )
 
 Target.create "Coverage" (fun _ ->
-    List.allPairs ["BCC.Web.Tests"] ["net471" ; "netcoreapp2.1"]
+    List.allPairs ["BCC.Web.Tests"] ["netcoreapp2.1"]
     |> Seq.iter (fun (proj, framework) -> 
             let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
             let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
