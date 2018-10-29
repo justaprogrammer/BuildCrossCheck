@@ -3,6 +3,9 @@ using BCC.Core.Interfaces.GitHub;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Octokit;
+using IGitHubClientFactory = BCC.Web.Interfaces.GitHub.IGitHubClientFactory;
+using IGitHubGraphQLClient = BCC.Web.Interfaces.GitHub.IGitHubGraphQLClient;
+using IGitHubUserClientFactory = BCC.Web.Interfaces.GitHub.IGitHubUserClientFactory;
 
 namespace BCC.Web.Services
 {

@@ -7,6 +7,7 @@ using BCC.Web.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using IGitHubUserModelService = BCC.Web.Interfaces.GitHub.IGitHubUserModelService;
 
 namespace BCC.Web.Controllers
 {

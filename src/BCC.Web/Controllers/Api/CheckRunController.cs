@@ -7,6 +7,7 @@ using BCC.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ICheckRunSubmissionService = BCC.Web.Interfaces.ICheckRunSubmissionService;
 
 namespace BCC.Web.Controllers.Api
 {

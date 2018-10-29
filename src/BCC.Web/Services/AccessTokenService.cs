@@ -15,7 +15,8 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using AccessToken = BCC.Infrastructure.Models.AccessToken;
-using Repository = BCC.Core.Model.GitHub.Repository;
+using IGitHubUserModelService = BCC.Web.Interfaces.GitHub.IGitHubUserModelService;
+using Repository = BCC.Web.Models.GitHub.Repository;
 
 namespace BCC.Web.Services
 {
