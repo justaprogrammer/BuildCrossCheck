@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using BCC.Core.Model.GitHub;
 using BCC.Infrastructure.Models;
 using Repository = BCC.Web.Models.GitHub.Repository;
 

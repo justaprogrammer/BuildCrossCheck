@@ -1,9 +1,9 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
 using System.Text;
 using System.Threading.Tasks;
-using BCC.Core.Interfaces.GitHub;
 using BCC.Core.Model.CheckRunSubmission;
-using BCC.Core.Services.CheckRunSubmission;
+using BCC.Web.Interfaces.GitHub;
+using BCC.Web.Services;
 using BCC.Web.Tests.Util;
 using Bogus;
 using Microsoft.Extensions.Logging;

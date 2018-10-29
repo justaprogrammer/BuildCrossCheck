@@ -1,5 +1,4 @@
-﻿using BCC.Core.Interfaces.GitHub;
-using GitHubJwt;
+﻿using GitHubJwt;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using ITokenGenerator = BCC.Web.Interfaces.GitHub.ITokenGenerator;

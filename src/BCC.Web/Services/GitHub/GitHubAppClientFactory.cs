@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using BCC.Core.Interfaces.GitHub;
 using Octokit;
 using IGitHubAppClientFactory = BCC.Web.Interfaces.GitHub.IGitHubAppClientFactory;
 using IGitHubGraphQLClient = BCC.Web.Interfaces.GitHub.IGitHubGraphQLClient;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using BCC.Core.Interfaces.GitHub;
-using BCC.Core.Services.GitHub;
+using BCC.Web.Interfaces.GitHub;
+using BCC.Web.Services.GitHub;
 using BCC.Web.Tests.Util;
 using Bogus;
 using FluentAssertions;

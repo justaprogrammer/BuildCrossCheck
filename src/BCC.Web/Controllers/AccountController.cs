@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using BCC.Core.Interfaces.GitHub;
 using BCC.Web.Interfaces;
 using BCC.Web.ViewModels;
 using Microsoft.AspNetCore.Authentication;

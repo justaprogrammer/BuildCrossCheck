@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using BCC.Core.Model.GitHub;
 using CheckRun = BCC.Web.Models.GitHub.CheckRun;
 
 namespace BCC.Web.Interfaces

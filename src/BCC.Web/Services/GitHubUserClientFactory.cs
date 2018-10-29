@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using BCC.Core.Interfaces.GitHub;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Octokit;

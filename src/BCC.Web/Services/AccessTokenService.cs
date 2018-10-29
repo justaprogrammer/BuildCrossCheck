@@ -4,7 +4,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using BCC.Core.Interfaces.GitHub;
 using BCC.Infrastructure.Interfaces;
 using BCC.Web.Interfaces;
 using BCC.Web.Models;

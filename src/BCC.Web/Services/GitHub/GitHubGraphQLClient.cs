@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BCC.Core.Interfaces.GitHub;
 using Octokit.GraphQL;
 using Octokit.GraphQL.Core;
 using IGitHubGraphQLClient = BCC.Web.Interfaces.GitHub.IGitHubGraphQLClient;

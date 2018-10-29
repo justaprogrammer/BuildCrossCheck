@@ -1,4 +1,4 @@
-﻿using BCC.Core.Services.GitHub;
+﻿using BCC.Web.Services.GitHub;
 using BCC.Web.Tests.Util;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;

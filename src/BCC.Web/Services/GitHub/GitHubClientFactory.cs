@@ -1,4 +1,3 @@
-using BCC.Core.Interfaces.GitHub;
 using Octokit;
 using IGitHubClientFactory = BCC.Web.Interfaces.GitHub.IGitHubClientFactory;
 using IGitHubGraphQLClient = BCC.Web.Interfaces.GitHub.IGitHubGraphQLClient;

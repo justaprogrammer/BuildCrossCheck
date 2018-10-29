@@ -1,10 +1,7 @@
 ﻿using System;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
-using BCC.Core.Interfaces;
-using BCC.Core.Interfaces.GitHub;
 using BCC.Core.Model.CheckRunSubmission;
-using BCC.Core.Model.GitHub;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
