@@ -24,6 +24,7 @@
     <PackageReference Include="Octokit.GraphQL" Version="0.1.2-beta" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="3.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="3.0.0" />
+    <PackageReference Include="System.IO.Abstractions" Version="2.1.0.256" />
   </ItemGroup>
 
   <ItemGroup>
