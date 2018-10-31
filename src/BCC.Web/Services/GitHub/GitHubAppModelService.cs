@@ -109,10 +109,13 @@ namespace BCC.Web.Services.GitHub
                 {
                     Output = new NewCheckRunOutput(title, summary)
                     {
+                        Text = "##Custom Text\r\n- Also Markdown\r\n- What do I use this for?",
+                        Images = new[]
+                        {
+                            new NewCheckRunImage("What is this for too", "http://www.adpestelimination.com/images/pests/squirreltail.gif")
+                        },
                         Annotations = annotations?
-                            .Select(annotation => new NewCheckRunAnnotation(annotation.Filename,
-                                annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
-                                annotation.Message))
+                            .Select(CreateNewCheckRunAnnotation)
                             .ToArray()
                     },
                     Status = CheckStatus.Completed,
@@ -163,9 +166,7 @@ namespace BCC.Web.Services.GitHub
                     Output = new NewCheckRunOutput(title, summary)
                     {
                         Annotations = annotations
-                            .Select(annotation => new NewCheckRunAnnotation(annotation.Filename,
-                                annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
-                                annotation.Message))
+                            .Select(CreateNewCheckRunAnnotation)
                             .ToArray()
                     }
                 });
@@ -174,6 +175,22 @@ namespace BCC.Web.Services.GitHub
             {
                 throw new GitHubAppModelException("Error updating CheckRun.", ex);
             }
+        }
+
+        private static NewCheckRunAnnotation CreateNewCheckRunAnnotation(Annotation annotation)
+        {
+            var newCheckRunAnnotation = new NewCheckRunAnnotation(annotation.Filename,
+                annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
+                annotation.Message);
+
+            if (!string.IsNullOrWhiteSpace(annotation.Title))
+            {
+                newCheckRunAnnotation.Title = annotation.Title;
+            }
+
+            newCheckRunAnnotation.RawDetails = "##Even More PlainText\r\n- No Markdown Here.\r\n- What? Why?";
+
+            return newCheckRunAnnotation;
         }
 
         public async Task<string> GetRepositoryFileAsync(string owner, string repository, string path, string reference)
