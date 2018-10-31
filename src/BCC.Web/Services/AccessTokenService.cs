@@ -4,7 +4,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using BCC.Core.Interfaces.GitHub;
 using BCC.Infrastructure.Interfaces;
 using BCC.Web.Interfaces;
 using BCC.Web.Models;
@@ -15,7 +14,8 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using AccessToken = BCC.Infrastructure.Models.AccessToken;
-using Repository = BCC.Core.Model.GitHub.Repository;
+using IGitHubUserModelService = BCC.Web.Interfaces.GitHub.IGitHubUserModelService;
+using Repository = BCC.Web.Models.GitHub.Repository;
 
 namespace BCC.Web.Services
 {

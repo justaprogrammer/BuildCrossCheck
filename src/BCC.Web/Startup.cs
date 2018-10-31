@@ -4,10 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Claims;
-using BCC.Core.Interfaces;
-using BCC.Core.Interfaces.GitHub;
-using BCC.Core.Services.CheckRunSubmission;
-using BCC.Core.Services.GitHub;
 using BCC.Infrastructure.Extensions;
 using BCC.Web.Attributes;
 using BCC.Web.Interfaces;
@@ -26,6 +22,19 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
+using CheckRunSubmissionService = BCC.Web.Services.CheckRunSubmissionService;
+using GitHubAppClientFactory = BCC.Web.Services.GitHub.GitHubAppClientFactory;
+using GitHubAppModelService = BCC.Web.Services.GitHub.GitHubAppModelService;
+using GitHubClientFactory = BCC.Web.Services.GitHub.GitHubClientFactory;
+using GitHubUserModelService = BCC.Web.Services.GitHub.GitHubUserModelService;
+using ICheckRunSubmissionService = BCC.Web.Interfaces.ICheckRunSubmissionService;
+using IGitHubAppClientFactory = BCC.Web.Interfaces.GitHub.IGitHubAppClientFactory;
+using IGitHubAppModelService = BCC.Web.Interfaces.GitHub.IGitHubAppModelService;
+using IGitHubClientFactory = BCC.Web.Interfaces.GitHub.IGitHubClientFactory;
+using IGitHubUserClientFactory = BCC.Web.Interfaces.GitHub.IGitHubUserClientFactory;
+using IGitHubUserModelService = BCC.Web.Interfaces.GitHub.IGitHubUserModelService;
+using ITokenGenerator = BCC.Web.Interfaces.GitHub.ITokenGenerator;
+using TokenGenerator = BCC.Web.Services.GitHub.TokenGenerator;
 
 namespace BCC.Web
 {
