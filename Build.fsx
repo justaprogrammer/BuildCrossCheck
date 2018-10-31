@@ -47,13 +47,23 @@ Target.create "Build" (fun _ ->
 )
 
 Target.create "Test" (fun _ ->
-    DotNet.test (fun t -> {t with
-                             Configuration = DotNet.BuildConfiguration.Release
-                             Logger = Some "trx;LogFileName=results.trx"
-                             ResultsDirectory = Some "../../reports"})
-                "src/BCC.Web.Tests/BCC.Web.Tests.csproj"
+    List.allPairs ["BCC.Web.Tests"] ["netcoreapp2.1"]
+    |> Seq.iter (fun (proj, framework) -> 
+            let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
+            let reportFile = sprintf "%s-%s.results.trx" proj framework
 
-    Trace.publish ImportData.BuildArtifact "src/BCC.Web.Tests/"
+            let configuration: (DotNet.TestOptions -> DotNet.TestOptions)
+                = (fun t -> {t with
+                               Configuration = DotNet.BuildConfiguration.Release
+                               NoBuild = true
+                               Framework = Some framework
+                               Logger = Some (sprintf "trx;LogFileName=%s" reportFile)
+                               ResultsDirectory = Some "../../reports"})
+
+            DotNet.test configuration projectPath
+            
+            Trace.publish ImportData.BuildArtifact (sprintf "reports/%s" reportFile)
+    )
 )
 
 Target.create "Package" (fun _ ->

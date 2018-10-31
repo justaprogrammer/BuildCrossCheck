@@ -6,11 +6,10 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using BCC.Core.Interfaces;
-using BCC.Core.Model.GitHub;
 using BCC.Web.Controllers.Api;
 using BCC.Web.Interfaces;
 using BCC.Web.Models;
+using BCC.Web.Models.GitHub;
 using BCC.Web.Tests.Util;
 using Bogus;
 using FluentAssertions;
@@ -55,7 +54,7 @@ namespace BCC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> {{name, fileContent}};
 
             var fileService = Substitute.For<ITempFileService>();
-            var checkRunSubmissionService = Substitute.For<ICheckRunSubmissionService>();
+            var checkRunSubmissionService = Substitute.For<Web.Interfaces.ICheckRunSubmissionService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -90,7 +89,7 @@ namespace BCC.Web.Tests.Controllers.api
                 .ToDictionary(f => $"{string.Join("_", new Faker().Lorem.Words(4))}.txt", f => f);
 
             var fileService = Substitute.For<ITempFileService>();
-            var checkRunSubmissionService = Substitute.For<ICheckRunSubmissionService>();
+            var checkRunSubmissionService = Substitute.For<Web.Interfaces.ICheckRunSubmissionService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -122,7 +121,7 @@ namespace BCC.Web.Tests.Controllers.api
         public async Task UploadBadRequestTest()
         {
             var fileService = Substitute.For<ITempFileService>();
-            var checkRunSubmissionService = Substitute.For<ICheckRunSubmissionService>();
+            var checkRunSubmissionService = Substitute.For<Web.Interfaces.ICheckRunSubmissionService>();
 
             var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)
             {
@@ -150,7 +149,7 @@ namespace BCC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> { { name, fileContent } };
 
             var fileService = Substitute.For<ITempFileService>();
-            var checkRunSubmissionService = Substitute.For<ICheckRunSubmissionService>();
+            var checkRunSubmissionService = Substitute.For<Web.Interfaces.ICheckRunSubmissionService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -192,7 +191,7 @@ namespace BCC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> { { name, fileContent } };
 
             var fileService = Substitute.For<ITempFileService>();
-            var checkRunSubmissionService = Substitute.For<ICheckRunSubmissionService>();
+            var checkRunSubmissionService = Substitute.For<Web.Interfaces.ICheckRunSubmissionService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -234,7 +233,7 @@ namespace BCC.Web.Tests.Controllers.api
             var fileDictionary = new Dictionary<string, string> {{name, fileContent}};
 
             var fileService = Substitute.For<ITempFileService>();
-            var checkRunSubmissionService = Substitute.For<ICheckRunSubmissionService>();
+            var checkRunSubmissionService = Substitute.For<Web.Interfaces.ICheckRunSubmissionService>();
 
             var receivedFiles = new Dictionary<string, string>();
 
@@ -248,7 +247,7 @@ namespace BCC.Web.Tests.Controllers.api
                 });
             fileService.Files.Returns(new[] {name});
 
-            var checkRun = new CheckRun()
+            var checkRun = new Web.Models.GitHub.CheckRun()
             {
                 Id = Faker.Random.Long(),
                 Url = Faker.Internet.Url()
@@ -343,7 +342,7 @@ namespace BCC.Web.Tests.Controllers.api
         private class CheckRunControllerStub : CheckRunController
         {
             public CheckRunControllerStub(ILogger<CheckRunController> logger, ITempFileService tempFileService,
-                ICheckRunSubmissionService checkRunSubmissionService) : base(logger, tempFileService, checkRunSubmissionService)
+                Web.Interfaces.ICheckRunSubmissionService checkRunSubmissionService) : base(logger, tempFileService, checkRunSubmissionService)
             {
 
             }
