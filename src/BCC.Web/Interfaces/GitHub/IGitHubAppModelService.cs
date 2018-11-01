@@ -27,9 +27,6 @@ namespace BCC.Web.Interfaces.GitHub
         /// <param name="startedAt">The time when processing started</param>
         /// <param name="completedAt">The time when processing finished</param>
         /// <returns></returns>
-        Task<CheckRun> SubmitCheckRunAsync([NotNull] string owner,
-            [NotNull] string repository, [NotNull] string sha, [NotNull] string name,
-            [NotNull] string title, [CanBeNull] string summary, bool success,
-            [CanBeNull] Annotation[] annotations, DateTimeOffset startedAt, DateTimeOffset completedAt);
+        Task<CheckRun> SubmitCheckRunAsync([NotNull] string owner, [NotNull] string repository, [NotNull] string sha, CreateCheckRun checkRun);
     }
 }

@@ -13,6 +13,7 @@ using NSubstitute;
 using Octokit;
 using Xunit;
 using Xunit.Abstractions;
+using CheckConclusion = BCC.Core.Model.CheckRunSubmission.CheckConclusion;
 using CheckRun = Octokit.CheckRun;
 
 namespace BCC.Web.Tests.Services
@@ -22,13 +23,6 @@ namespace BCC.Web.Tests.Services
         static GitHubAppModelServiceTests()
         {
             Faker = new Faker();
-            FakeAnnotation = new Faker<Annotation>()
-                .CustomInstantiator(f =>
-                {
-                    var lineNumber = f.Random.Int(1);
-                    return new Annotation(f.System.FileName(), f.PickRandom<Core.Model.CheckRunSubmission.CheckWarningLevel>(),
-                        f.Lorem.Word(), f.Lorem.Sentence(), lineNumber, lineNumber);
-                });
         }
 
         public GitHubAppModelServiceTests(ITestOutputHelper testOutputHelper)
@@ -38,7 +32,6 @@ namespace BCC.Web.Tests.Services
         }
 
         private static readonly Faker Faker;
-        private static readonly Faker<Annotation> FakeAnnotation;
 
         private readonly ILogger<GitHubAppModelServiceTests> _logger;
         private readonly ITestOutputHelper _testOutputHelper;
@@ -115,7 +108,7 @@ namespace BCC.Web.Tests.Services
                     Faker.Internet.Url(),
                     htmlUrl,
                     Faker.PickRandom<CheckStatus>(),
-                    Faker.Random.Bool() ? (CheckConclusion?)null : Faker.PickRandom<CheckConclusion>(),
+                    Faker.PickRandom<Octokit.CheckConclusion>(),
                     Faker.Date.RecentOffset(2),
                     Faker.Date.RecentOffset(1),
                     null,
@@ -129,17 +122,10 @@ namespace BCC.Web.Tests.Services
             var owner = Faker.Internet.UserName();
             var name = Faker.Lorem.Word();
 
-            var checkRun = await gitHubAppModelService.SubmitCheckRunAsync(
-                owner,
-                name,
-                Faker.Random.String(),
-                Faker.Lorem.Word(),
-                Faker.Lorem.Sentence(),
-                Faker.Lorem.Paragraph(),
-                Faker.Random.Bool(),
-                FakeAnnotation.Generate(annotationCount).ToArray(),
-                Faker.Date.RecentOffset(2),
-                Faker.Date.RecentOffset(1));
+            var createCheckRun = FakerHelpers.FakeCreateCheckRun.Generate();
+            createCheckRun.Annotations = FakerHelpers.FakeAnnotation.Generate(annotationCount).ToArray();
+
+            var checkRun = await gitHubAppModelService.SubmitCheckRunAsync(owner, name, Faker.Random.String(), createCheckRun);
 
             await checkRunsClient.Received(1).Create(owner, name, Arg.Any<NewCheckRun>());
             await checkRunsClient.Received(updateCounts.Length).Update(owner, name, Arg.Any<long>(), Arg.Any<CheckRunUpdate>());
@@ -151,7 +137,6 @@ namespace BCC.Web.Tests.Services
             checkRun.Id.Should().Be(id);
             checkRun.Url.Should().Be(htmlUrl);
         }
-
 
         [Fact]
         public async Task ShouldCreateCheckRun()
@@ -169,7 +154,7 @@ namespace BCC.Web.Tests.Services
                     Faker.Internet.Url(),
                     htmlUrl,
                     Faker.PickRandom<CheckStatus>(),
-                    Faker.Random.Bool() ? (CheckConclusion?)null : Faker.PickRandom<CheckConclusion>(),
+                    Faker.PickRandom<Octokit.CheckConclusion>(),
                     Faker.Date.RecentOffset(2),
                     Faker.Date.RecentOffset(1),
                     null,
@@ -183,17 +168,15 @@ namespace BCC.Web.Tests.Services
             var owner = Faker.Internet.UserName();
             var name = Faker.Lorem.Word();
 
+            var createCheckRun = FakerHelpers.FakeCreateCheckRun.Generate();
+            createCheckRun.Annotations = FakerHelpers.FakeAnnotation.Generate(10).ToArray();
+
             var checkRun = await gitHubAppModelService.CreateCheckRunAsync(
                 owner,
                 name,
                 Faker.Random.String(),
-                Faker.Lorem.Word(),
-                Faker.Lorem.Sentence(),
-                Faker.Lorem.Paragraph(),
-                Faker.Random.Bool(),
-                FakeAnnotation.Generate(1).ToArray(),
-                Faker.Date.RecentOffset(2),
-                Faker.Date.RecentOffset(1));
+                createCheckRun.Annotations,
+                createCheckRun);
 
             checkRunsClient.Received(1).Create(owner, name, Arg.Any<NewCheckRun>());
 
@@ -217,7 +200,7 @@ namespace BCC.Web.Tests.Services
                     Faker.Internet.Url(),
                     htmlUrl,
                     Faker.PickRandom<CheckStatus>(),
-                    Faker.Random.Bool() ? (CheckConclusion?)null : Faker.PickRandom<CheckConclusion>(),
+                    Faker.PickRandom<Octokit.CheckConclusion>(),
                     Faker.Date.RecentOffset(2),
                     Faker.Date.RecentOffset(1),
                     null,
@@ -231,17 +214,15 @@ namespace BCC.Web.Tests.Services
             var owner = Faker.Internet.UserName();
             var name = Faker.Lorem.Word();
 
+            var createCheckRun = FakerHelpers.FakeCreateCheckRun.Generate();
+            createCheckRun.Annotations = null;
+
             var checkRun = await gitHubAppModelService.CreateCheckRunAsync(
                 owner,
                 name,
                 Faker.Random.String(),
-                Faker.Lorem.Word(),
-                Faker.Lorem.Sentence(),
-                Faker.Lorem.Paragraph(),
-                Faker.Random.Bool(),
-                null,
-                Faker.Date.RecentOffset(2),
-                Faker.Date.RecentOffset(1));
+                createCheckRun.Annotations,
+                createCheckRun);
 
             checkRunsClient.Received(1).Create(owner, name, Arg.Any<NewCheckRun>());
 
@@ -256,19 +237,18 @@ namespace BCC.Web.Tests.Services
 
             gitHubAppModelService.Awaiting(async s =>
                 {
-                    var annotations = FakeAnnotation.Generate(51).ToArray();
+                    var owner = Faker.Internet.UserName();
+                    var name = Faker.Lorem.Word();
 
-                    await s.CreateCheckRunAsync(
-                        Faker.Internet.UserName(),
-                        Faker.Lorem.Word(),
+                    var createCheckRun = FakerHelpers.FakeCreateCheckRun.Generate();
+                    createCheckRun.Annotations = FakerHelpers.FakeAnnotation.Generate(51).ToArray();
+
+                    var checkRun = await gitHubAppModelService.CreateCheckRunAsync(
+                        owner,
+                        name,
                         Faker.Random.String(),
-                        Faker.Lorem.Word(),
-                        Faker.Lorem.Sentence(),
-                        Faker.Lorem.Paragraph(),
-                        false,
-                        annotations,
-                        Faker.Date.RecentOffset(2),
-                        Faker.Date.RecentOffset(1));
+                        createCheckRun.Annotations,
+                        createCheckRun);
 
                 }).Should()
                 .Throw<GitHubAppModelException>()
@@ -284,15 +264,18 @@ namespace BCC.Web.Tests.Services
 
             gitHubAppModelService.Awaiting(async s =>
                 {
-                    var annotations1 = FakeAnnotation.Generate(51).ToArray();
+                    var owner = Faker.Internet.UserName();
+                    var name = Faker.Lorem.Word();
 
-                    await s.UpdateCheckRunAsync(
+                    var createCheckRun = FakerHelpers.FakeCreateCheckRun.Generate();
+                    createCheckRun.Annotations = FakerHelpers.FakeAnnotation.Generate(51).ToArray();
+
+                    await gitHubAppModelService.UpdateCheckRunAsync(
                         Faker.Random.Long(),
-                        Faker.Internet.UserName(),
-                        Faker.Lorem.Word(),
-                        Faker.Lorem.Sentence(),
-                        Faker.Lorem.Paragraph(),
-                        annotations1);
+                        owner,
+                        name,
+                        createCheckRun,
+                        createCheckRun.Annotations);
 
                 }).Should()
                 .Throw<GitHubAppModelException>()
@@ -311,19 +294,16 @@ namespace BCC.Web.Tests.Services
 
             var exceptionAssertions = gitHubAppModelService.Awaiting(async s =>
             {
-                var annotations = FakeAnnotation.Generate(1).ToArray();
+                var owner = Faker.Internet.UserName();
+                var name = Faker.Lorem.Word();
 
-                await s.CreateCheckRunAsync(
-                    Faker.Internet.UserName(),
-                    Faker.Lorem.Word(),
+                var createCheckRun = FakerHelpers.FakeCreateCheckRun.Generate();
+                await gitHubAppModelService.CreateCheckRunAsync(
+                    owner,
+                    name,
                     Faker.Random.String(),
-                    Faker.Lorem.Word(),
-                    Faker.Lorem.Sentence(),
-                    Faker.Lorem.Paragraph(),
-                    false,
-                    annotations,
-                    Faker.Date.RecentOffset(2),
-                    Faker.Date.RecentOffset(1));
+                    createCheckRun.Annotations,
+                    createCheckRun);
 
             }).Should().Throw<GitHubAppModelException>();
 
@@ -342,15 +322,18 @@ namespace BCC.Web.Tests.Services
 
             gitHubAppModelService.Awaiting(async s =>
                 {
-                    var annotations1 = FakeAnnotation.Generate(1).ToArray();
+                    var owner = Faker.Internet.UserName();
+                    var name = Faker.Lorem.Word();
 
-                    await s.UpdateCheckRunAsync(
+                    var createCheckRun = FakerHelpers.FakeCreateCheckRun.Generate();
+                    createCheckRun.Annotations = FakerHelpers.FakeAnnotation.Generate(10).ToArray();
+
+                    await gitHubAppModelService.UpdateCheckRunAsync(
                         Faker.Random.Long(),
-                        Faker.Internet.UserName(),
-                        Faker.Lorem.Word(),
-                        Faker.Lorem.Sentence(),
-                        Faker.Lorem.Paragraph(),
-                        annotations1);
+                        owner,
+                        name,
+                        createCheckRun,
+                        createCheckRun.Annotations);
 
                 }).Should().Throw<GitHubAppModelException>()
                 .WithMessage("Error updating CheckRun.")
@@ -364,18 +347,19 @@ namespace BCC.Web.Tests.Services
             var checkRunsClient = Substitute.For<ICheckRunsClient>();
             var gitHubAppModelService = CreateTarget(checkRunsClient: checkRunsClient);
 
+            var checkRunId = Faker.Random.Long();
             var owner = Faker.Internet.UserName();
             var name = Faker.Lorem.Word();
-            var checkRunId = Faker.Random.Long();
-            var annotations = FakeAnnotation.Generate(1).ToArray();
+
+            var createCheckRun = FakerHelpers.FakeCreateCheckRun.Generate();
+            createCheckRun.Annotations = FakerHelpers.FakeAnnotation.Generate(10).ToArray();
 
             await gitHubAppModelService.UpdateCheckRunAsync(
                 checkRunId,
                 owner,
                 name,
-                Faker.Lorem.Sentence(),
-                Faker.Lorem.Paragraph(),
-                annotations);
+                createCheckRun,
+                createCheckRun.Annotations);
 
             await checkRunsClient.Received(1).Update(owner, name, checkRunId, Arg.Any<CheckRunUpdate>());
         }

@@ -1,8 +1,11 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions.TestingHelpers;
 using System.Text;
 using System.Threading.Tasks;
 using BCC.Core.Model.CheckRunSubmission;
 using BCC.Web.Interfaces.GitHub;
+using BCC.Web.Models.GitHub;
 using BCC.Web.Services;
 using BCC.Web.Tests.Util;
 using Bogus;
@@ -16,20 +19,7 @@ namespace BCC.Web.Tests.Services
 {
     public class CheckRunSubmissionServiceTests
     {
-        static CheckRunSubmissionServiceTests()
-        {
-            Faker = new Faker();
-            FakeAnnotation = new Faker<Annotation>()
-                .CustomInstantiator(f =>
-                {
-                    var lineNumber = f.Random.Int(1);
-                    return new Annotation(f.System.FileName(), f.PickRandom<CheckWarningLevel>(),
-                        f.Lorem.Word(), f.Lorem.Sentence(), lineNumber, lineNumber);
-                });
-        }
-
-        public static Faker<Annotation> FakeAnnotation { get; }
-        public static Faker Faker { get; }
+        public static Faker Faker { get; } = new Faker();
 
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly ILogger<GitHubAppModelServiceTests> _logger;
@@ -41,23 +31,12 @@ namespace BCC.Web.Tests.Services
         }
 
         [Fact]
-        public async Task Blah()
+        public async Task ShouldSubmitCheckRun()
         {
-            var resourcePath = $"{Faker.System.DirectoryPath()}/{Faker.System.FileName(".json")}";
-
-            var createCheckRun = new CreateCheckRun
-            {
-                Name = Faker.Lorem.Word(),
-                Title = Faker.Lorem.Word(),
-                StartedAt = Faker.Date.Past(2),
-                CompletedAt = Faker.Date.Past(),
-                Success = Faker.Random.Bool(),
-                Summary = Faker.Lorem.Paragraph(),
-                Annotations = FakeAnnotation.Generate(10).ToArray()
-            };
-
+            var createCheckRun = FakerHelpers.FakeCreateCheckRun.Generate();
             var resourceText = JsonConvert.SerializeObject(createCheckRun);
 
+            var resourcePath = $"{Faker.System.DirectoryPath()}/{Faker.System.FileName(".json")}";
             var mockFileSystem = new MockFileSystem();
             mockFileSystem.AddFile(resourcePath, new MockFileData(resourceText, Encoding.UTF8));
 
@@ -65,7 +44,8 @@ namespace BCC.Web.Tests.Services
 
             var checkRunSubmissionService = new CheckRunSubmissionService(
                 TestLogger.Create<CheckRunSubmissionService>(_testOutputHelper), 
-                mockFileSystem, gitHubAppModelService);
+                mockFileSystem,
+                gitHubAppModelService);
 
             var owner = Faker.Person.UserName;
             var repository = Faker.Lorem.Word();
@@ -74,10 +54,7 @@ namespace BCC.Web.Tests.Services
             await checkRunSubmissionService.SubmitAsync(owner, repository, sha, resourcePath);
 
             await gitHubAppModelService.Received(1)
-                .SubmitCheckRunAsync(owner, repository, sha,
-                createCheckRun.Name, createCheckRun.Title, createCheckRun.Summary,
-                createCheckRun.Success, Arg.Any<Annotation[]>(),
-                createCheckRun.StartedAt, createCheckRun.CompletedAt);
+                .SubmitCheckRunAsync(owner, repository, sha, Arg.Is<CreateCheckRun>(run => run.Equals(createCheckRun)));
         }
     }
 }
