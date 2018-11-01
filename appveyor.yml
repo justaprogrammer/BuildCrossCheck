@@ -20,12 +20,10 @@ deploy:
   tag: $(APPVEYOR_REPO_TAG_NAME)
   release: BuildCrossCheck v$(GitVersion_SemVer)
   description: 'BuildCrossCheck v$(GitVersion_SemVer)'
-  auth_token:
-    secure: 8wLI8hf2W3L/V5BUk/tdGDs+gWryh9Y8HxCQk9iq48xV/n+hxShodChwuHAm2DsS
+  auth_token: $(GITHUB_TOKEN)
   draft: false
   prerelease: false
   on:
-    branch: master
     appveyor_repo_tag: true
 - provider: WebDeploy
   server: https://buildcrosscheck.scm.azurewebsites.net:443/msdeploy.axd?site=BuildCrossCheck
@@ -39,5 +37,4 @@ deploy:
   app_offline: true
   artifact: build.web
   on:
-    branch: master
     appveyor_repo_tag: true
