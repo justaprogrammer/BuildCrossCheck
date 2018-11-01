@@ -20,8 +20,7 @@ deploy:
   tag: $(APPVEYOR_REPO_TAG_NAME)
   release: BuildCrossCheck v$(GitVersion_SemVer)
   description: 'BuildCrossCheck v$(GitVersion_SemVer)'
-  auth_token:
-    secure: 8wLI8hf2W3L/V5BUk/tdGDs+gWryh9Y8HxCQk9iq48xV/n+hxShodChwuHAm2DsS
+  auth_token: $(GITHUB_TOKEN)
   draft: false
   prerelease: false
   on:
@@ -31,7 +30,8 @@ deploy:
   server: https://buildcrosscheck.scm.azurewebsites.net:443/msdeploy.axd?site=BuildCrossCheck
   website: BuildCrossCheck
   username: $BuildCrossCheck
-  password: $(GITHUB_TOKEN)
+  password:
+    secure: 361bj2J7f6ObKuxxFf1gkkemdTFncdFNCVMd4ayyoe+GTXMIc8oREU3oPm9zDbNUnoPT5SPit6x4D86Ml+V5Qw==
   aspnet_core: true
   aspnet_core_force_restart: true
   remove_files: true
