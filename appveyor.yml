@@ -31,8 +31,7 @@ deploy:
   server: https://buildcrosscheck.scm.azurewebsites.net:443/msdeploy.axd?site=BuildCrossCheck
   website: BuildCrossCheck
   username: $BuildCrossCheck
-  password:
-    secure: 361bj2J7f6ObKuxxFf1gkkemdTFncdFNCVMd4ayyoe+GTXMIc8oREU3oPm9zDbNUnoPT5SPit6x4D86Ml+V5Qw==
+  password: $(GITHUB_TOKEN)
   aspnet_core: true
   aspnet_core_force_restart: true
   remove_files: true
