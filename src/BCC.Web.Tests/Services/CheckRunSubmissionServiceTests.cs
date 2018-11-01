@@ -19,51 +19,7 @@ namespace BCC.Web.Tests.Services
 {
     public class CheckRunSubmissionServiceTests
     {
-        [SuppressMessage("ReSharper", "ArgumentsStyleOther")]
-        [SuppressMessage("ReSharper", "ArgumentsStyleNamedExpression")]
-        static CheckRunSubmissionServiceTests()
-        {
-            Faker = new Faker();
-            FakeAnnotation = new Faker<Annotation>()
-                .CustomInstantiator(f =>
-                {
-                    var lineNumber = f.Random.Int(1);
-                    return new Annotation(
-                        filename: f.System.FileName(),
-                        startLine: lineNumber,
-                        endLine: lineNumber,
-                        checkWarningLevel: f.PickRandom<CheckWarningLevel>(),
-                        message: f.Lorem.Word())
-                    {
-                        Title = f.Random.Words(3)
-                    };
-                });
-
-            FakeCheckRunImage = new Faker<CheckRunImage>()
-                .CustomInstantiator(f => new CheckRunImage(alt: f.Random.Words(3), imageUrl: f.Internet.Url())
-                {
-                    Caption = f.Random.Words(3)
-                });
-
-            FakeCheckRun = new Faker<CreateCheckRun>()
-                .CustomInstantiator(f => new CreateCheckRun(
-                    name: f.Random.Word(),
-                    title: f.Random.Word(),
-                    summary: f.Random.Word(),
-                    conclusion: f.Random.Enum<CheckConclusion>(),
-                    startedAt: f.Date.PastOffset(2),
-                    completedAt: f.Date.PastOffset())
-                {
-                    Annotations = f.Random.Bool() ? null : FakeAnnotation.Generate(f.Random.Int(2, 10)).ToArray(),
-                    Images = f.Random.Bool() ? null : FakeCheckRunImage.Generate(f.Random.Int(2, 10)).ToArray()
-                });
-        }
-
-        public static Faker<CreateCheckRun> FakeCheckRun { get; set; }
-        public static Faker<Annotation> FakeAnnotation { get; }
-        public static Faker<CheckRunImage> FakeCheckRunImage { get; set; }
-
-        public static Faker Faker { get; }
+        public static Faker Faker { get; } = new Faker();
 
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly ILogger<GitHubAppModelServiceTests> _logger;
@@ -77,7 +33,7 @@ namespace BCC.Web.Tests.Services
         [Fact]
         public async Task ShouldSubmitCheckRun()
         {
-            var createCheckRun = FakeCheckRun.Generate();
+            var createCheckRun = FakerHelpers.FakeCreateCheckRun.Generate();
             var resourceText = JsonConvert.SerializeObject(createCheckRun);
 
             var resourcePath = $"{Faker.System.DirectoryPath()}/{Faker.System.FileName(".json")}";
