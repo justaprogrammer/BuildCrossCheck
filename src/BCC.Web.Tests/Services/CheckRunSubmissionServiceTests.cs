@@ -1,8 +1,10 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+﻿using System;
+using System.IO.Abstractions.TestingHelpers;
 using System.Text;
 using System.Threading.Tasks;
 using BCC.Core.Model.CheckRunSubmission;
 using BCC.Web.Interfaces.GitHub;
+using BCC.Web.Models.GitHub;
 using BCC.Web.Services;
 using BCC.Web.Tests.Util;
 using Bogus;
@@ -23,8 +25,8 @@ namespace BCC.Web.Tests.Services
                 .CustomInstantiator(f =>
                 {
                     var lineNumber = f.Random.Int(1);
-                    return new Annotation(f.System.FileName(), f.PickRandom<CheckWarningLevel>(),
-                        f.Lorem.Word(), f.Lorem.Sentence(), lineNumber, lineNumber);
+                    return new Annotation(f.System.FileName(), lineNumber,
+                        lineNumber, f.PickRandom<CheckWarningLevel>(), f.Lorem.Word());
                 });
         }
 
@@ -51,7 +53,7 @@ namespace BCC.Web.Tests.Services
                 Title = Faker.Lorem.Word(),
                 StartedAt = Faker.Date.Past(2),
                 CompletedAt = Faker.Date.Past(),
-                Success = Faker.Random.Bool(),
+                Conclusion = Faker.Random.Enum<CheckConclusion>(),
                 Summary = Faker.Lorem.Paragraph(),
                 Annotations = FakeAnnotation.Generate(10).ToArray()
             };
@@ -74,10 +76,7 @@ namespace BCC.Web.Tests.Services
             await checkRunSubmissionService.SubmitAsync(owner, repository, sha, resourcePath);
 
             await gitHubAppModelService.Received(1)
-                .SubmitCheckRunAsync(owner, repository, sha,
-                createCheckRun.Name, createCheckRun.Title, createCheckRun.Summary,
-                createCheckRun.Success, Arg.Any<Annotation[]>(),
-                createCheckRun.StartedAt, createCheckRun.CompletedAt);
+                .SubmitCheckRunAsync(owner, repository, sha, createCheckRun);
         }
     }
 }

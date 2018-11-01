@@ -56,9 +56,7 @@ namespace BCC.Web.Services
 
             var createCheckRun = JsonConvert.DeserializeObject<CreateCheckRun>(readAllText);
 
-            return _gitHubAppModelService.SubmitCheckRunAsync(owner, repository, sha, createCheckRun.Name, createCheckRun.Title,
-                createCheckRun.Summary, createCheckRun.Success, createCheckRun.Annotations,
-                createCheckRun.StartedAt, createCheckRun.CompletedAt);
+            return _gitHubAppModelService.SubmitCheckRunAsync(owner, repository, sha, createCheckRun);
         }
     }
 }

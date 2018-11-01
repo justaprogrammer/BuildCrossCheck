@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="2.0.0" />
-    <PackageReference Include="BCC-Core" Version="0.1.3" />
+    <PackageReference Include="BCC-Core" Version="0.1.4" />
     <PackageReference Include="BuildBundlerMinifier" Version="2.8.391" />
     <PackageReference Include="Castle.Core" Version="4.3.1" />
     <PackageReference Include="GitHubJwt" Version="0.0.3" />

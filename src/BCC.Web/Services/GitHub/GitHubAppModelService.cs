@@ -5,6 +5,7 @@ using BCC.Core.Model.CheckRunSubmission;
 using BCC.Web.Interfaces.GitHub;
 using MoreLinq.Extensions;
 using Octokit;
+using CheckRun = BCC.Web.Models.GitHub.CheckRun;
 using CheckWarningLevel = BCC.Core.Model.CheckRunSubmission.CheckWarningLevel;
 
 namespace BCC.Web.Services.GitHub
@@ -22,10 +23,7 @@ namespace BCC.Web.Services.GitHub
         }
 
         /// <inheritdoc />
-        public async Task<Web.Models.GitHub.CheckRun> SubmitCheckRunAsync(string owner,
-            string repository, string sha, string name,
-            string title, string summary, bool success,
-            Annotation[] annotations, DateTimeOffset startedAt, DateTimeOffset completedAt)
+        public async Task<CheckRun> SubmitCheckRunAsync(string owner, string repository, string sha, CreateCheckRun createCheckRun)
         {
             if (string.IsNullOrWhiteSpace(owner))
             {
@@ -42,28 +40,26 @@ namespace BCC.Web.Services.GitHub
                 throw new ArgumentException("HeadSha is invalid", nameof(sha));
             }
 
-            if (string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(createCheckRun.Name))
             {
-                throw new ArgumentException("Name is invalid", nameof(name));
+                throw new ArgumentException("Name is invalid", nameof(createCheckRun.Name));
             }
 
-            if (string.IsNullOrWhiteSpace(title))
+            if (string.IsNullOrWhiteSpace(createCheckRun.Title))
             {
-                throw new ArgumentException("Title is invalid", nameof(title));
+                throw new ArgumentException("Title is invalid", nameof(createCheckRun.Title));
             }
 
-            var annotationBatches = annotations?.Batch(50).ToArray();
+            var annotationBatches = createCheckRun.Annotations?.Batch(50).ToArray();
 
-            var checkRun = await CreateCheckRunAsync(owner, repository, sha, name,
-                    title, summary, success, annotationBatches?.FirstOrDefault()?.ToArray(), startedAt, completedAt)
+            var checkRun = await CreateCheckRunAsync(owner, repository, sha, annotationBatches?.FirstOrDefault()?.ToArray(), createCheckRun)
                 .ConfigureAwait(false);
 
             if (annotationBatches != null)
             {
                 foreach (var annotationBatch in annotationBatches.Skip(1))
                 {
-                    await UpdateCheckRunAsync(checkRun.Id, owner, repository, title,
-                        summary, annotationBatch.ToArray()).ConfigureAwait(false);
+                    await UpdateCheckRunAsync(checkRun.Id, owner, repository, createCheckRun, annotationBatch.ToArray()).ConfigureAwait(false);
                 }
             }
 
@@ -84,18 +80,13 @@ namespace BCC.Web.Services.GitHub
         /// <param name="startedAt">The time when processing started</param>
         /// <param name="completedAt">The time when processing finished</param>
         /// <returns></returns>
-        public async Task<Web.Models.GitHub.CheckRun> CreateCheckRunAsync(string owner, string repository, string sha,
-            string name, string title, string summary,
-            bool success, Annotation[] annotations,
-            DateTimeOffset? startedAt, DateTimeOffset? completedAt)
+        public async Task<CheckRun> CreateCheckRunAsync(string owner, string repository, string sha, Annotation[] annotations, CreateCheckRun createCheckRun)
         {
             try
             {
                 if (owner == null) throw new ArgumentNullException(nameof(owner));
                 if (repository == null) throw new ArgumentNullException(nameof(repository));
                 if (sha == null) throw new ArgumentNullException(nameof(sha));
-                if (title == null) throw new ArgumentNullException(nameof(title));
-                if (summary == null) throw new ArgumentNullException(nameof(summary));
 
                 if ((annotations?.Length ?? 0) > 50)
                     throw new ArgumentException("Cannot create more than 50 annotations at a time");
@@ -105,31 +96,28 @@ namespace BCC.Web.Services.GitHub
 
                 if (checkRunsClient == null) throw new InvalidOperationException("ICheckRunsClient is null");
 
-                var newCheckRun = new NewCheckRun(name, sha)
+                var newCheckRun = new NewCheckRun(createCheckRun.Name, sha)
                 {
-                    Output = new NewCheckRunOutput(title, summary)
+                    Output = new NewCheckRunOutput(createCheckRun.Title, createCheckRun.Summary)
                     {
-                        Text = "##Custom Text\r\n- Also Markdown\r\n- What do I use this for?",
-                        Images = new[]
-                        {
-                            new NewCheckRunImage("What is this for too", "http://www.adpestelimination.com/images/pests/squirreltail.gif")
-                        },
+                        Text = createCheckRun.Text,
+                        Images = createCheckRun.Images?.Select(image => new NewCheckRunImage(image.Alt, image.ImageUrl){ Caption =  image.Caption}).ToArray(),
                         Annotations = annotations?
                             .Select(CreateNewCheckRunAnnotation)
                             .ToArray()
                     },
                     Status = CheckStatus.Completed,
-                    StartedAt = startedAt,
-                    CompletedAt = completedAt,
-                    Conclusion = success ? CheckConclusion.Success : CheckConclusion.Failure
+                    StartedAt = createCheckRun.StartedAt,
+                    CompletedAt = createCheckRun.CompletedAt,
+                    Conclusion = createCheckRun.Conclusion.ToOctokit()
                 };
 
                 var checkRun = await checkRunsClient.Create(owner, repository, newCheckRun);
 
-                return new Web.Models.GitHub.CheckRun
+                return new CheckRun
                 {
                     Id = checkRun.Id,
-                    Url = checkRun.HtmlUrl,
+                    Url = checkRun.HtmlUrl
                 };
             }
             catch (Exception ex)
@@ -143,13 +131,12 @@ namespace BCC.Web.Services.GitHub
         /// </summary>
         /// <param name="checkRunId">The id of the CheckRun being updated.</param>
         /// <param name="owner">The name of the repository owner.</param>
-        /// <param name="repository">The name of the repository</param>
-        /// <param name="title">The title of the CheckRun.</param>
-        /// <param name="summary">The summary of the CheckRun.</param>
+        /// <param name="repository">The name of the repository.</param>
+        /// <param name="createCheckRun">The CheckRun details.</param>
         /// <param name="annotations">Array of Annotations for the CheckRun.</param>
         /// <returns></returns>
-        public async Task UpdateCheckRunAsync(long checkRunId, string owner, string repository, 
-            string title, string summary, Annotation[] annotations)
+        public async Task UpdateCheckRunAsync(long checkRunId, string owner, string repository,
+            CreateCheckRun createCheckRun, Annotation[] annotations)
         {
             try
             {
@@ -161,9 +148,9 @@ namespace BCC.Web.Services.GitHub
 
                 if (checkRunsClient == null) throw new InvalidOperationException("ICheckRunsClient is null");
 
-                await checkRunsClient.Update(owner, repository, checkRunId, new CheckRunUpdate()
+                await checkRunsClient.Update(owner, repository, checkRunId, new CheckRunUpdate
                 {
-                    Output = new NewCheckRunOutput(title, summary)
+                    Output = new NewCheckRunOutput(createCheckRun.Title, createCheckRun.Summary)
                     {
                         Annotations = annotations
                             .Select(CreateNewCheckRunAnnotation)
@@ -180,7 +167,7 @@ namespace BCC.Web.Services.GitHub
         private static NewCheckRunAnnotation CreateNewCheckRunAnnotation(Annotation annotation)
         {
             var newCheckRunAnnotation = new NewCheckRunAnnotation(annotation.Filename,
-                annotation.LineNumber, annotation.EndLine, GetCheckWarningLevel(annotation),
+                annotation.StartLine, annotation.EndLine, GetCheckWarningLevel(annotation),
                 annotation.Message);
 
             if (!string.IsNullOrWhiteSpace(annotation.Title))
