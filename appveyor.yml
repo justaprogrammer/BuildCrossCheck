@@ -24,7 +24,6 @@ deploy:
   draft: false
   prerelease: false
   on:
-    branch: master
     appveyor_repo_tag: true
 - provider: WebDeploy
   server: https://buildcrosscheck.scm.azurewebsites.net:443/msdeploy.axd?site=BuildCrossCheck
@@ -38,5 +37,4 @@ deploy:
   app_offline: true
   artifact: build.web
   on:
-    branch: master
     appveyor_repo_tag: true
