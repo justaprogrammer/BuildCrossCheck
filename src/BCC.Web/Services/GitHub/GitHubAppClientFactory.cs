@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Octokit;
 using IGitHubAppClientFactory = BCC.Web.Interfaces.GitHub.IGitHubAppClientFactory;
-using IGitHubGraphQLClient = BCC.Web.Interfaces.GitHub.IGitHubGraphQLClient;
 using ITokenGenerator = BCC.Web.Interfaces.GitHub.ITokenGenerator;
 
 namespace BCC.Web.Services.GitHub
@@ -27,20 +26,6 @@ namespace BCC.Web.Services.GitHub
             {
                 Credentials = new Credentials(token, AuthenticationType.Bearer)
             };
-        }
-
-        /// <inheritdoc />
-        public IGitHubGraphQLClient CreateAppGraphQLClient(ITokenGenerator tokenGenerator)
-        {
-            var token = tokenGenerator.GetToken();
-            return GitHubClientFactoryHelper.GraphQLClient(token, GitHubClientFactory.UserAgent);
-        }
-
-        /// <inheritdoc />
-        public async Task<IGitHubGraphQLClient> CreateAppGraphQLClientForLoginAsync(ITokenGenerator tokenGenerator, string login)
-        {
-            var (installation, token) = await FindInstallationAndGetToken(tokenGenerator, login);
-            return GitHubClientFactoryHelper.GraphQLClient(token, GetUserAgent(installation));
         }
 
         private async Task<ValueTuple<Installation, string>> FindInstallationAndGetToken(ITokenGenerator tokenGenerator, string login)

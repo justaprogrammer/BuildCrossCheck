@@ -27,17 +27,15 @@ namespace BCC.Web.IntegrationTests.Services
 
         private TestAppModelService CreateTarget()
         {
-            return new TestAppModelService(CreateGitHubTokenClient(), CreateGitHubGraphQLTokenClient());
+            return new TestAppModelService(CreateGitHubTokenClient());
         }
 
         private class TestAppModelService : GitHubAppModelServiceBase
         {
             private readonly IGitHubClient _gitHubClient;
-            private readonly IGitHubGraphQLClient _graphQLClient;
 
-            public TestAppModelService(IGitHubClient gitHubClient, IGitHubGraphQLClient graphQLClient)
+            public TestAppModelService(IGitHubClient gitHubClient)
             {
-                _graphQLClient = graphQLClient;
                 _gitHubClient = gitHubClient;
             }
 

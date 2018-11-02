@@ -143,7 +143,7 @@ namespace BCC.Web.Tests.Services
             jsonWebToken.GetPayloadValue<string>(JwtRegisteredClaimNames.Aud).Should().Be(".Api");
             jsonWebToken.GetPayloadValue<string>(JwtRegisteredClaimNames.Jti).Should().Be(accessToken.Id.ToString());
             DateTimeOffset.FromUnixTimeSeconds(jsonWebToken.GetPayloadValue<int>(JwtRegisteredClaimNames.Iat)).Should()
-                .BeCloseTo(DateTimeOffset.UtcNow, 1000);
+                .BeCloseTo(DateTimeOffset.UtcNow, 2000);
             jsonWebToken.GetPayloadValue<long>("urn:bcc:repositoryId").Should().Be(userRepository.Id);
         }
 

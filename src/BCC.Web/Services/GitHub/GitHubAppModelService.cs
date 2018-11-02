@@ -175,8 +175,6 @@ namespace BCC.Web.Services.GitHub
                 newCheckRunAnnotation.Title = annotation.Title;
             }
 
-            newCheckRunAnnotation.RawDetails = "##Even More PlainText\r\n- No Markdown Here.\r\n- What? Why?";
-
             return newCheckRunAnnotation;
         }
 

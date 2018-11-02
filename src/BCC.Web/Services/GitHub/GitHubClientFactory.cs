@@ -1,6 +1,5 @@
 using Octokit;
 using IGitHubClientFactory = BCC.Web.Interfaces.GitHub.IGitHubClientFactory;
-using IGitHubGraphQLClient = BCC.Web.Interfaces.GitHub.IGitHubGraphQLClient;
 
 namespace BCC.Web.Services.GitHub
 {
@@ -13,12 +12,6 @@ namespace BCC.Web.Services.GitHub
         public IGitHubClient CreateClient(string token)
         {
             return GitHubClientFactoryHelper.GitHubClient(token, UserAgent);
-        }
-
-        /// <inheritdoc />
-        public IGitHubGraphQLClient CreateGraphQLClient(string token)
-        {
-            return GitHubClientFactoryHelper.GraphQLClient(token, UserAgent);
         }
     }
 }
