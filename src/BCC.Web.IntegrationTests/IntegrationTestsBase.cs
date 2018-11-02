@@ -38,37 +38,16 @@ namespace BCC.Web.IntegrationTests
             return gitHubClientFactory.CreateAppClient(tokenGenerator);
         }
 
-        protected IGitHubGraphQLClient CreateGitHubAppGraphQLClient()
-        {
-            var gitHubClientFactory = CreateGitHubAppClientFactory();
-            var tokenGenerator = CreateTokenGenerator();
-            return gitHubClientFactory.CreateAppGraphQLClient(tokenGenerator);
-        }
-
         protected async Task<IGitHubClient> CreateGitHubAppClientForLogin(string login)
         {
             var gitHubClientFactory = CreateGitHubAppClientFactory();
             var tokenGenerator = CreateTokenGenerator();
             return await gitHubClientFactory.CreateAppClientForLoginAsync(tokenGenerator, login);
         }
-
-        protected async Task<IGitHubGraphQLClient> CreateGitHubAppGraphQLClientForLogin(string login)
-        {
-            var gitHubClientFactory = CreateGitHubAppClientFactory();
-            var tokenGenerator = CreateTokenGenerator();
-            return await gitHubClientFactory.CreateAppGraphQLClientForLoginAsync(tokenGenerator, login);
-        }
-
         protected IGitHubClient CreateGitHubTokenClient()
         {
             var gitHubClientFactory = new GitHubClientFactory();
             return gitHubClientFactory.CreateClient(TestToken);
-        }
-
-        protected IGitHubGraphQLClient CreateGitHubGraphQLTokenClient()
-        {
-            var gitHubClientFactory = new GitHubClientFactory();
-            return gitHubClientFactory.CreateGraphQLClient(TestToken);
         }
     }
 }
