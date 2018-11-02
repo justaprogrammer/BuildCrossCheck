@@ -13,11 +13,5 @@ namespace BCC.Web.Interfaces.GitHub
         /// </summary>
         /// <returns>A client</returns>
         Task<IGitHubClient> CreateClient();
-
-        /// <summary>
-        /// Create a IGitHubGraphQLClient configured for GitHub App User-To-Server Authentication.
-        /// </summary>
-        /// <returns>A graphql client</returns>
-        Task<IGitHubGraphQLClient> CreateGraphQLClient();
     }
 }

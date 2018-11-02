@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Octokit;
 using IGitHubClientFactory = BCC.Web.Interfaces.GitHub.IGitHubClientFactory;
-using IGitHubGraphQLClient = BCC.Web.Interfaces.GitHub.IGitHubGraphQLClient;
 using IGitHubUserClientFactory = BCC.Web.Interfaces.GitHub.IGitHubUserClientFactory;
 
 namespace BCC.Web.Services
@@ -25,13 +24,6 @@ namespace BCC.Web.Services
         {
             var token = await GetAccessToken();
             return _gitHubClientFactory.CreateClient(token);
-        }
-
-        /// <inheritdoc />
-        public async Task<IGitHubGraphQLClient> CreateGraphQLClient()
-        {
-            var token = await GetAccessToken();
-            return _gitHubClientFactory.CreateGraphQLClient(token);
         }
 
         private async Task<string> GetAccessToken()

@@ -17,25 +17,10 @@ namespace BCC.Web.Interfaces.GitHub
         Task<IGitHubClient> CreateAppClientForLoginAsync(ITokenGenerator tokenGenerator, string login);
 
         /// <summary>
-        /// Create a IGitHubGraphQLClient configured for GitHub App Installation Authentication.
-        /// </summary>
-        /// <param name="tokenGenerator">A token generator configured for the GitHub App.</param>
-        /// <param name="login">The login to authenticate.</param>
-        /// <returns>A graphql client</returns>
-        Task<IGitHubGraphQLClient> CreateAppGraphQLClientForLoginAsync(ITokenGenerator tokenGenerator, string login);
-
-        /// <summary>
         /// Create a IGitHubClient configured for GitHub App Authentication.
         /// </summary>
         /// <param name="tokenGenerator">A token generator configured for the GitHub App.</param>
         /// <returns>A client</returns>
         IGitHubClient CreateAppClient(ITokenGenerator tokenGenerator);
-
-        /// <summary>
-        /// Create a IGitHubGraphQLClient configured for GitHub App Authentication.
-        /// </summary>
-        /// <param name="tokenGenerator">A token generator configured for the GitHub App.</param>
-        /// <returns>A graphql client</returns>
-        IGitHubGraphQLClient CreateAppGraphQLClient(ITokenGenerator tokenGenerator);
     }
 }
