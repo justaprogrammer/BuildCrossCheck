@@ -152,6 +152,8 @@ namespace BCC.Web.Services.GitHub
                 {
                     Output = new NewCheckRunOutput(createCheckRun.Title, createCheckRun.Summary)
                     {
+                        Text = createCheckRun.Text,
+                        Images = createCheckRun.Images?.Select(image => new NewCheckRunImage(image.Alt, image.ImageUrl) { Caption = image.Caption }).ToArray(),
                         Annotations = annotations
                             .Select(CreateNewCheckRunAnnotation)
                             .ToArray()
