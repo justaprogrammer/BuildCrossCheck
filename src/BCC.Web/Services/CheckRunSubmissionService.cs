@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
+using System.Text;
 using System.Threading.Tasks;
 using BCC.Core.Model.CheckRunSubmission;
 using JetBrains.Annotations;
@@ -55,6 +56,15 @@ namespace BCC.Web.Services
             var readAllText = _fileSystem.File.ReadAllText(resourcePath);
 
             var createCheckRun = JsonConvert.DeserializeObject<CreateCheckRun>(readAllText);
+
+            if (createCheckRun.Summary != null)
+            {
+                var byteCount = Encoding.Unicode.GetByteCount(createCheckRun.Summary) / 1024.0;
+                if (byteCount > 128.0)
+                {
+                    throw new InvalidOperationException();
+                }
+            }
 
             return _gitHubAppModelService.SubmitCheckRunAsync(owner, repository, sha, createCheckRun);
         }
