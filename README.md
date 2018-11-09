@@ -5,11 +5,11 @@
 
 #### BCC-Submission
 [![NuGet](http://img.shields.io/nuget/v/bcc-submission.svg)](https://www.nuget.org/packages/bcc-submission)
-[![Chocolatey](https://img.shields.io/chocolatey/v/git.svg)](https://chocolatey.org/packages/BCC-Submission)
+[![Chocolatey](https://img.shields.io/chocolatey/v/bcc-submission.svg)](https://chocolatey.org/packages/BCC-Submission)
 
 #### BCC-MSBuildLog
 [![NuGet](http://img.shields.io/nuget/v/bcc-msbuildlog.svg)](https://www.nuget.org/packages/bcc-msbuildlog)
-[![Chocolatey](https://img.shields.io/chocolatey/v/git.svg)](https://chocolatey.org/packages/BCC-MSBuildLog)
+[![Chocolatey](https://img.shields.io/chocolatey/v/bcc-msbuildlog.svg)](https://chocolatey.org/packages/BCC-MSBuildLog)
 
 ## Overview
 
