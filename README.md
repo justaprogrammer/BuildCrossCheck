@@ -1,6 +1,6 @@
 # Build Cross Check
 
-[![appveyor](https://ci.appveyor.com/api/projects/status/github/justaprogrammer/BuildCrossCheck?svg=true&branch=master)](https://ci.appveyor.com/project/JustAProgrammer/msbuildlogoctokitchecker)
+[![appveyor](https://ci.appveyor.com/api/projects/status/github/justaprogrammer/BuildCrossCheck?svg=true&branch=master)](https://ci.appveyor.com/project/JustAProgrammer/BuildCrossCheck)
 [![codecov](https://codecov.io/gh/justaprogrammer/BuildCrossCheck/branch/master/graph/badge.svg)](https://codecov.io/gh/justaprogrammer/BuildCrossCheck)
 
 #### BCC-Submission
