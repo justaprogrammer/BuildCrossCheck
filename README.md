@@ -11,6 +11,10 @@
 [![NuGet](http://img.shields.io/nuget/v/bcc-msbuildlog.svg)](https://www.nuget.org/packages/bcc-msbuildlog)
 [![Chocolatey](https://img.shields.io/chocolatey/v/bcc-msbuildlog.svg)](https://chocolatey.org/packages/BCC-MSBuildLog)
 
+| [BCC-Submission](http://github.com/justaprogrammer/BCC-Submission) | [BCC-MSBuildLog](http://github.com/justaprogrammer/BCC-MSBuildLog) |
+| ---- | ---- |
+|  [![NuGet](http://img.shields.io/nuget/v/bcc-submission.svg)](https://www.nuget.org/packages/bcc-submission) [![Chocolatey](https://img.shields.io/chocolatey/v/bcc-submission.svg)](https://chocolatey.org/packages/BCC-Submission) | [![NuGet](http://img.shields.io/nuget/v/bcc-msbuildlog.svg)](https://www.nuget.org/packages/bcc-msbuildlog) [![Chocolatey](https://img.shields.io/chocolatey/v/bcc-msbuildlog.svg)](https://chocolatey.org/packages/BCC-MSBuildLog) |
+
 ## Overview
 Build Cross Check is a GitHub App and set of tools to create [Checks](https://developer.github.com/v3/checks/) in GitHub.
 
