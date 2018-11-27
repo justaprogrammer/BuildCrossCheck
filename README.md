@@ -13,8 +13,7 @@
 ## Overview
 Build Cross Check is a GitHub App and set of tools to create [Checks](https://developer.github.com/v3/checks/) in GitHub.
 
-![img](docs/images/testconsole1-warning-pr-changes.png)
-![img](docs/images/testconsole1-warning-pr-check-runs.png)
+<img width="50%" src="docs/images/testconsole1-warning-pr-changes.png"><img width="50%" src="docs/images/testconsole1-warning-pr-check-runs.png">
 
 ## Getting started
 
