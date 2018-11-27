@@ -3,14 +3,6 @@
 [![appveyor](https://ci.appveyor.com/api/projects/status/github/justaprogrammer/BuildCrossCheck?svg=true&branch=master)](https://ci.appveyor.com/project/JustAProgrammer/BuildCrossCheck)
 [![codecov](https://codecov.io/gh/justaprogrammer/BuildCrossCheck/branch/master/graph/badge.svg)](https://codecov.io/gh/justaprogrammer/BuildCrossCheck)
 
-#### [BCC-Submission](http://github.com/justaprogrammer/BCC-Submission)
-[![NuGet](http://img.shields.io/nuget/v/bcc-submission.svg)](https://www.nuget.org/packages/bcc-submission)
-[![Chocolatey](https://img.shields.io/chocolatey/v/bcc-submission.svg)](https://chocolatey.org/packages/BCC-Submission)
-
-#### [BCC-MSBuildLog](http://github.com/justaprogrammer/BCC-MSBuildLog)
-[![NuGet](http://img.shields.io/nuget/v/bcc-msbuildlog.svg)](https://www.nuget.org/packages/bcc-msbuildlog)
-[![Chocolatey](https://img.shields.io/chocolatey/v/bcc-msbuildlog.svg)](https://chocolatey.org/packages/BCC-MSBuildLog)
-
 | [BCC-Submission](http://github.com/justaprogrammer/BCC-Submission) | [BCC-MSBuildLog](http://github.com/justaprogrammer/BCC-MSBuildLog) |
 | ---- | ---- |
 |  [![NuGet](http://img.shields.io/nuget/v/bcc-submission.svg)](https://www.nuget.org/packages/bcc-submission) [![Chocolatey](https://img.shields.io/chocolatey/v/bcc-submission.svg)](https://chocolatey.org/packages/BCC-Submission) | [![NuGet](http://img.shields.io/nuget/v/bcc-msbuildlog.svg)](https://www.nuget.org/packages/bcc-msbuildlog) [![Chocolatey](https://img.shields.io/chocolatey/v/bcc-msbuildlog.svg)](https://chocolatey.org/packages/BCC-MSBuildLog) |
