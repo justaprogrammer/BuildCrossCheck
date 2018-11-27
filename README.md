@@ -19,8 +19,7 @@ The authors of BuildCrossCheck maintain a hosted version of the source code you 
 Install it by adding the GitHub App: [github.com/apps/build-cross-check](https://github.com/apps/build-cross-check) to your repositories and following the [integration documentation](docs/integrating.md). 
 
 ## Documentation
-
-You can find our documentation [here](docs/readme.md).
+You can find the documentation [here](docs/readme.md).
 
 ## Licenses
 - This source is distributed under under the AGPL.

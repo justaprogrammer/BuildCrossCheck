@@ -12,6 +12,10 @@ After installing the application to your repo, head to [BuildCrossCheck WebApp](
 and login with your GitHub account. There you will be able create a token per repository as well as
 revoke prior tokens if necessary.
 
-## Integrating on AppVeyor
+## Integrating
 
-## Integrating with other CI systems
+### MSBuild Warnings and Errors
+
+### Custom Check Run Data
+
+### More coming soon...
