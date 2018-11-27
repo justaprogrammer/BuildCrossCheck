@@ -12,6 +12,7 @@
 [![Chocolatey](https://img.shields.io/chocolatey/v/bcc-msbuildlog.svg)](https://chocolatey.org/packages/BCC-MSBuildLog)
 
 ## Overview
+Build Cross Check is a GitHub App and set of tools to create Check Run data in GitHub.
 
 ## Getting started
 
@@ -25,7 +26,7 @@ You can find the documentation [here](docs/readme.md).
 - This source is distributed under under the AGPL.
 
 ## More information
-- [MSBuild Log](http://msbuildlog.com/)
+- [Build Cross Check GitHub App](https://github.com/apps/build-cross-check)
 - [GitHub Checks API](https://developer.github.com/v3/checks/)
 
 ## Questions?
