@@ -17,7 +17,7 @@ Build Cross Check is a GitHub App and set of tools to help build servers create 
 
 ## Getting started
 
-The authors of BuildCrossCheck maintain a hosted version of the source code you see here.
+The authors of **Build Cross Check** maintain a hosted version of the source code you see here.
 Install it by adding the GitHub App: [github.com/apps/build-cross-check](https://github.com/apps/build-cross-check) to your repositories and following the [integration documentation](docs/integrating.md). 
 
 ## Documentation
