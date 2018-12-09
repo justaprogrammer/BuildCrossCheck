@@ -6,7 +6,6 @@ using BCC.Web.Interfaces.GitHub;
 using MoreLinq.Extensions;
 using Octokit;
 using CheckRun = BCC.Web.Models.GitHub.CheckRun;
-using CheckWarningLevel = BCC.Core.Model.CheckRunSubmission.CheckWarningLevel;
 
 namespace BCC.Web.Services.GitHub
 {
@@ -193,13 +192,13 @@ namespace BCC.Web.Services.GitHub
 
         private static CheckAnnotationLevel GetCheckWarningLevel(Annotation annotation)
         {
-            switch (annotation.CheckWarningLevel)
+            switch (annotation.AnnotationLevel)
             {
-                case CheckWarningLevel.Notice:
+                case AnnotationLevel.Notice:
                     return CheckAnnotationLevel.Notice;
-                case CheckWarningLevel.Warning:
+                case AnnotationLevel.Warning:
                     return CheckAnnotationLevel.Warning;
-                case CheckWarningLevel.Failure:
+                case AnnotationLevel.Failure:
                     return CheckAnnotationLevel.Failure;
                 default:
                     throw new ArgumentOutOfRangeException();

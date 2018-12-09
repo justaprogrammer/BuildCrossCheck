@@ -47,7 +47,3 @@ This example is based on AppVeyor, but this will work from any CI system. For mo
    ```
 
 1. Enjoy your warnings and errors.
-
-### Custom Check Run Data
-
-### More coming soon...

@@ -4,7 +4,7 @@
 1. Create a GitHub app
 
 ## Running Web Application
-1. [TODO Add Web Application instructions]
+1. [TODO: Add Web Application instructions]
 
 ## Running Integration Tests
 
