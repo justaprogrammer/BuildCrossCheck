@@ -6,7 +6,6 @@ using BCC.Web.Interfaces.GitHub;
 using MoreLinq.Extensions;
 using Octokit;
 using CheckRun = BCC.Web.Models.GitHub.CheckRun;
-using CheckWarningLevel = BCC.Core.Model.CheckRunSubmission.CheckWarningLevel;
 
 namespace BCC.Web.Services.GitHub
 {
