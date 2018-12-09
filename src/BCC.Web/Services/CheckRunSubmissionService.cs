@@ -3,6 +3,7 @@ using System.IO.Abstractions;
 using System.Text;
 using System.Threading.Tasks;
 using BCC.Core.Model.CheckRunSubmission;
+using BCC.Core.Serialization;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -55,7 +56,7 @@ namespace BCC.Web.Services
 
             var readAllText = _fileSystem.File.ReadAllText(resourcePath);
 
-            var createCheckRun = JsonConvert.DeserializeObject<CreateCheckRun>(readAllText);
+            var createCheckRun = CreateCheckRunSerializer.DeSerialize(readAllText);
 
             if (createCheckRun.Summary != null)
             {
