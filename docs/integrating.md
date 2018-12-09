@@ -42,8 +42,8 @@ This example is based on AppVeyor, but this will work from any CI system. For mo
 
    ```yml
    on_finish:
-   - IF NOT "%BCC_TOKEN%x"=="x" BCCMSBuildLog --cloneRoot "%APPVEYOR_BUILD_FOLDER%" --input output.binlog --output checkrun.json --ownerRepo %APPVEYOR_REPO_NAME% --hash %APPVEYOR_REPO_COMMIT%
-   - IF NOT "%BCC_TOKEN%x"=="x" BCCSubmission -h %APPVEYOR_REPO_COMMIT% -i checkrun.json -t %BCC_TOKEN%
+   - IF NOT "%BCC_TOKEN%x"=="x" BCCMSBuildLog --input output.binlog --output checkrun.json --cloneRoot "%APPVEYOR_BUILD_FOLDER%" --ownerRepo %APPVEYOR_REPO_NAME% --hash %APPVEYOR_REPO_COMMIT%
+   - IF NOT "%BCC_TOKEN%x"=="x" BCCSubmission -i checkrun.json -h %APPVEYOR_REPO_COMMIT% -t %BCC_TOKEN%
    ```
 
 1. Enjoy your warnings and errors.
