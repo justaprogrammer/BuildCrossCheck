@@ -22,10 +22,9 @@ Install it by adding the GitHub App: [github.com/apps/build-cross-check](https:/
 
 ## Documentation
 
-- [Index](docs/readme.md)
-  - [Integrating](docs/integrating.md)
-  - [Customizing](docs/customizing.md)
-  - [Contributing](docs/contributing.md)
+- [Integrating](docs/integrating.md)
+- [Customizing](docs/customizing.md)
+- [Contributing](docs/contributing.md)
 
 ## Licenses
 - This source is distributed under under the AGPL.
