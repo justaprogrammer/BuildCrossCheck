@@ -10,9 +10,9 @@ namespace BCC.Web.Controllers.Api
     public class TestController : ApiControllerBase
     {
         [HttpGet]
-        [Route("test")]
+        [Route("authentication")]
         [ExcludeFromCodeCoverage]
-        public IActionResult TestAuthentication()
+        public IActionResult Authentication()
         {
             return Json(new
             {
