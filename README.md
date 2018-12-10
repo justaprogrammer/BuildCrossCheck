@@ -21,7 +21,11 @@ The authors of **Build Cross Check** maintain a hosted version of the source cod
 Install it by adding the GitHub App: [github.com/apps/build-cross-check](https://github.com/apps/build-cross-check) to your repositories and following the [integration documentation](docs/integrating.md). 
 
 ## Documentation
-You can find the documentation [here](docs/readme.md).
+
+- [Index](docs/readme.md)
+  - [Integrating](docs/integrating.md)
+  - [Customizing](docs/customizing.md)
+  - [Contributing](docs/contributing.md)
 
 ## Licenses
 - This source is distributed under under the AGPL.
