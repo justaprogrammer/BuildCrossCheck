@@ -184,7 +184,7 @@ namespace BCC.Web
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.UseHttpsRedirection();
+            app.UseHsts();
 
             app.UseSwagger(c =>
             {
