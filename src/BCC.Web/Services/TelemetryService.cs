@@ -42,6 +42,8 @@ namespace BCC.Web.Services
             {
                 {"User", user}
             });
+
+            _telemetryClient.GetMetric("CreateToken").TrackValue(1);
         }
 
         public void RevokeToken(string user)
@@ -50,6 +52,8 @@ namespace BCC.Web.Services
             {
                 {"User", user}
             });
+
+            _telemetryClient.GetMetric("RevokeToken").TrackValue(1);
         }
 
         public void CreateCheckRun(string repositoryOwner, string repositoryName)
@@ -59,6 +63,8 @@ namespace BCC.Web.Services
                 {"RepositoryOwner", repositoryOwner},
                 {"RepositoryName", repositoryName}
             });
+
+            _telemetryClient.GetMetric("CreateCheckRun").TrackValue(1);
         }
     }
 
