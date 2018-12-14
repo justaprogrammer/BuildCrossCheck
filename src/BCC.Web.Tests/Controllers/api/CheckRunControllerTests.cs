@@ -10,6 +10,7 @@ using BCC.Web.Controllers.Api;
 using BCC.Web.Interfaces;
 using BCC.Web.Models;
 using BCC.Web.Models.GitHub;
+using BCC.Web.Services;
 using BCC.Web.Tests.Util;
 using Bogus;
 using FluentAssertions;
@@ -67,7 +68,7 @@ namespace BCC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService, Substitute.For<ITelemetryService>())
             {
                 ControllerContext = await RequestWithFiles(fileDictionary),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -102,7 +103,7 @@ namespace BCC.Web.Tests.Controllers.api
                     return $"temp/{fileName}";
                 });
 
-            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService, Substitute.For<ITelemetryService>())
             {
                 ControllerContext = await RequestWithFiles(fileContents),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -123,7 +124,7 @@ namespace BCC.Web.Tests.Controllers.api
             var fileService = Substitute.For<ITempFileService>();
             var checkRunSubmissionService = Substitute.For<Web.Interfaces.ICheckRunSubmissionService>();
 
-            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService, Substitute.For<ITelemetryService>())
             {
                 ControllerContext = new ControllerContext
                 {
@@ -169,7 +170,7 @@ namespace BCC.Web.Tests.Controllers.api
                 LogFile = string.Empty //Bad Data
             };
 
-            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService, Substitute.For<ITelemetryService>())
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, logUploadData),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -211,7 +212,7 @@ namespace BCC.Web.Tests.Controllers.api
                 LogFile = "someOtherFileName.txt" //Bad Data
             };
 
-            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService, Substitute.For<ITelemetryService>())
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, logUploadData),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -272,7 +273,7 @@ namespace BCC.Web.Tests.Controllers.api
                 new Claim("urn:bcc:repositoryOwnerId", faker.Random.Long().ToString())
             };
 
-            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService)
+            var checkRunController = new CheckRunControllerStub(TestLogger.Create<CheckRunController>(_testOutputHelper), fileService, checkRunSubmissionService, Substitute.For<ITelemetryService>())
             {
                 ControllerContext = await RequestWithFiles(fileDictionary, logUploadData, claims),
                 MetadataProvider = new EmptyModelMetadataProvider(),
@@ -342,7 +343,7 @@ namespace BCC.Web.Tests.Controllers.api
         private class CheckRunControllerStub : CheckRunController
         {
             public CheckRunControllerStub(ILogger<CheckRunController> logger, ITempFileService tempFileService,
-                Web.Interfaces.ICheckRunSubmissionService checkRunSubmissionService) : base(logger, tempFileService, checkRunSubmissionService)
+                Web.Interfaces.ICheckRunSubmissionService checkRunSubmissionService, ITelemetryService telemetryService) : base(logger, tempFileService, checkRunSubmissionService, telemetryService)
             {
 
             }
