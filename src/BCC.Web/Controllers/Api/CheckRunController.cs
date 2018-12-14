@@ -17,7 +17,7 @@ namespace BCC.Web.Controllers.Api
     {
         private readonly ICheckRunSubmissionService _checkRunSubmissionService;
 
-        public CheckRunController(ILogger<CheckRunController> logger, ITempFileService tempFileService, ICheckRunSubmissionService checkRunSubmissionService, TelemetryClient telemetry)
+        public CheckRunController(ILogger<CheckRunController> logger, ITempFileService tempFileService, ICheckRunSubmissionService checkRunSubmissionService)
             : base(logger, tempFileService)
         {
             _checkRunSubmissionService = checkRunSubmissionService;

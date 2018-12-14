@@ -1,5 +1,7 @@
 ﻿using BCC.Web.Controllers;
+using BCC.Web.Services;
 using Microsoft.AspNetCore.Mvc;
+using NSubstitute;
 using Xunit;
 
 namespace BCC.Web.Tests.Controllers
@@ -10,7 +12,7 @@ namespace BCC.Web.Tests.Controllers
         public void Index()
         {
             // Arrange
-            HomeController controller = new HomeController();
+            HomeController controller = new HomeController(Substitute.For<ITelemetryService>());
 
             // Act
             ViewResult result = controller.Index() as ViewResult;
