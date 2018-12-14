@@ -182,9 +182,8 @@ namespace BCC.Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
             }
-
-            app.UseHsts();
 
             app.UseSwagger(c =>
             {
