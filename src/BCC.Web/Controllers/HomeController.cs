@@ -18,12 +18,14 @@ namespace BCC.Web.Controllers
         public IActionResult Index()
         {
             _telemetryService.TrackPageView(Pages.Home);
+
             var viewModelBase = new ViewModelBase();
             return View(viewModelBase);
         }
 
         public IActionResult Error()
         {
+            _telemetryService.TrackPageView(Pages.Error);
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }

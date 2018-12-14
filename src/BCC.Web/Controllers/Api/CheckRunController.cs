@@ -3,6 +3,7 @@ using BCC.Web.Attributes;
 using BCC.Web.Extensions;
 using BCC.Web.Interfaces;
 using BCC.Web.Models;
+using BCC.Web.Services;
 using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +17,13 @@ namespace BCC.Web.Controllers.Api
     public class CheckRunController : MultiPartFormControllerBase<CheckRunController>
     {
         private readonly ICheckRunSubmissionService _checkRunSubmissionService;
+        private readonly ITelemetryService _telemetryService;
 
-        public CheckRunController(ILogger<CheckRunController> logger, ITempFileService tempFileService, ICheckRunSubmissionService checkRunSubmissionService)
+        public CheckRunController(ILogger<CheckRunController> logger, ITempFileService tempFileService, ICheckRunSubmissionService checkRunSubmissionService, ITelemetryService telemetryService)
             : base(logger, tempFileService)
         {
             _checkRunSubmissionService = checkRunSubmissionService;
+            _telemetryService = telemetryService;
         }
 
         [HttpPost]
@@ -50,6 +53,8 @@ namespace BCC.Web.Controllers.Api
                 RepositoryName,
                 logUploadData.CommitSha,
                 resourcePath);
+
+            _telemetryService.CreateCheckRun(RepositoryOwner, RepositoryName);
 
             return Json(checkRun);
         }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Claims;
 using BCC.Infrastructure.Extensions;
 using BCC.Web.Attributes;
+using BCC.Web.Authentication;
 using BCC.Web.Interfaces;
 using BCC.Web.Models;
 using BCC.Web.Services;
@@ -86,13 +87,12 @@ namespace BCC.Web
                     options.Scope.Add("user:email");
                     options.Scope.Add("read:org");
 
-                    options.ClaimActions.MapAll();
                     options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
                     options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
                     options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
-                    options.ClaimActions.MapJsonKey("urn:github:login", "login");
-                    options.ClaimActions.MapJsonKey("urn:github:url", "html_url");
-                    options.ClaimActions.MapJsonKey("urn:github:avatar", "avatar_url");
+                    options.ClaimActions.MapJsonKey(CustomClaims.GithubLogin, "login");
+                    options.ClaimActions.MapJsonKey(CustomClaims.GithubUrl, "html_url");
+                    options.ClaimActions.MapJsonKey(CustomClaims.GithubAvatar, "avatar_url");
 
                     options.SaveTokens = true;
                 })
