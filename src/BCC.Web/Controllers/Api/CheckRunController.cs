@@ -3,6 +3,7 @@ using BCC.Web.Attributes;
 using BCC.Web.Extensions;
 using BCC.Web.Interfaces;
 using BCC.Web.Models;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -16,7 +17,7 @@ namespace BCC.Web.Controllers.Api
     {
         private readonly ICheckRunSubmissionService _checkRunSubmissionService;
 
-        public CheckRunController(ILogger<CheckRunController> logger, ITempFileService tempFileService, ICheckRunSubmissionService checkRunSubmissionService)
+        public CheckRunController(ILogger<CheckRunController> logger, ITempFileService tempFileService, ICheckRunSubmissionService checkRunSubmissionService, TelemetryClient telemetry)
             : base(logger, tempFileService)
         {
             _checkRunSubmissionService = checkRunSubmissionService;

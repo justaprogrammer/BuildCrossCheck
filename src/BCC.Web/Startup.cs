@@ -111,6 +111,8 @@ namespace BCC.Web
 
             services.AddInfrastructure(Configuration.GetSection("Infrastructure"));
 
+            services.AddSingleton<ITelemetryService, TelemetryService>();
+
             services.AddSingleton<IPrivateKeySource, GitHubAppOptionsPrivateKeySource>();
             services.AddSingleton<IProxyGenerator, ProxyGenerator>();
             services.AddSingleton<IFileSystem, FileSystem>();
