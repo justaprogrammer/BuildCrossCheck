@@ -54,7 +54,7 @@ namespace BCC.Web.Services
 
         public void CreateCheckRun(string repositoryOwner, string repositoryName)
         {
-            TrackEvent("RevokeToken", new Dictionary<string, string>
+            TrackEvent("CreateCheckRun", new Dictionary<string, string>
             {
                 {"RepositoryOwner", repositoryOwner},
                 {"RepositoryName", repositoryName}
