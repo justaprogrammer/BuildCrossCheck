@@ -1,4 +1,20 @@
 
+<a name="v0.1.6"></a>
+## [v0.1.6] - 2019-06-15
+### Bug Fixes
+- Endoe Submission data to Unicode instead of ASCII
+
+### Chores
+- Tweaking fake builds on AppVeyor
+- Adding a changelog
+
+### Pull Requests
+- Merge pull request [#151](https://github.com/justaprogrammer/BCC-MSBuildLog/issues/151) from justaprogrammer/fake-appveyor
+- Merge pull request [#152](https://github.com/justaprogrammer/BCC-MSBuildLog/issues/152) from justaprogrammer/changelog
+- Merge pull request [#150](https://github.com/justaprogrammer/BCC-MSBuildLog/issues/150) from justaprogrammer/files-be-unicode
+- Merge pull request [#148](https://github.com/justaprogrammer/BCC-MSBuildLog/issues/148) from justaprogrammer/telemetry-test
+
+
 <a name="v0.1.5"></a>
 ## [v0.1.5] - 2018-12-09
 ### Pull Requests
@@ -142,7 +158,8 @@
 - Merge pull request [#2](https://github.com/justaprogrammer/BCC-MSBuildLog/issues/2) from justaprogrammer/fixes/pr-builds
 
 
-[Unreleased]: https://github.com/justaprogrammer/BCC-MSBuildLog/compare/v0.1.5...HEAD
+[Unreleased]: https://github.com/justaprogrammer/BCC-MSBuildLog/compare/v0.1.6...HEAD
+[v0.1.6]: https://github.com/justaprogrammer/BCC-MSBuildLog/compare/v0.1.5...v0.1.6
 [v0.1.5]: https://github.com/justaprogrammer/BCC-MSBuildLog/compare/v0.1.4...v0.1.5
 [v0.1.4]: https://github.com/justaprogrammer/BCC-MSBuildLog/compare/v0.1.3...v0.1.4
 [v0.1.3]: https://github.com/justaprogrammer/BCC-MSBuildLog/compare/v0.1.2...v0.1.3
