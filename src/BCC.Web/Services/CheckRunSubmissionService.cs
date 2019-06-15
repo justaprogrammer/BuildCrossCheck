@@ -54,7 +54,7 @@ namespace BCC.Web.Services
             _logger.LogInformation("SubmitAsync owner:{0} repository:{1} sha:{2} resourcePath:{3}",
                 owner, repository, sha, resourcePath);
 
-            var readAllText = _fileSystem.File.ReadAllText(resourcePath);
+            var readAllText = _fileSystem.File.ReadAllText(resourcePath, Encoding.Unicode);
 
             var createCheckRun = CreateCheckRunSerializer.DeSerialize(readAllText);
 
