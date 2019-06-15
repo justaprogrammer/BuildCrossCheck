@@ -5,6 +5,7 @@ group FakeBuild
   source https://www.nuget.org/api/v2
   framework: netstandard2.0
   storage:none
+  cache ./nupkgs versions: current
 
   nuget Fake.Core.Target 
   nuget Fake.BuildServer.AppVeyor
@@ -18,5 +19,6 @@ group FakeBuild
 group FakeBuildResources
   source https://www.nuget.org/api/v2
   storage: packages
+  cache ./nupkgs versions: current
 
   nuget NuGet.CommandLine
