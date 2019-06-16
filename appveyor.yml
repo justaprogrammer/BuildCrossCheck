@@ -19,28 +19,3 @@ artifacts:
   - path: build
     name: build.web
     type: WebDeployPackage
-before_deploy:
-- ps: $Env:GITHUB_PRERELEASE = ![string]::IsNullOrWhiteSpace($Env:GitVersion_PreReleaseLabel)
-deploy:
-- provider: GitHub
-  tag: $(APPVEYOR_REPO_TAG_NAME)
-  release: BuildCrossCheck v$(GitVersion_SemVer)
-  description: 'BuildCrossCheck v$(GitVersion_SemVer)'
-  auth_token: $(GITHUB_TOKEN)
-  draft: false
-  prerelease: $(GITHUB_PRERELEASE)
-  on:
-    appveyor_repo_tag: true
-- provider: WebDeploy
-  server: https://buildcrosscheck.scm.azurewebsites.net:443/msdeploy.axd?site=BuildCrossCheck
-  website: BuildCrossCheck
-  username: $BuildCrossCheck
-  password:
-    secure: 361bj2J7f6ObKuxxFf1gkkemdTFncdFNCVMd4ayyoe+GTXMIc8oREU3oPm9zDbNUnoPT5SPit6x4D86Ml+V5Qw==
-  aspnet_core: true
-  aspnet_core_force_restart: true
-  remove_files: true
-  app_offline: true
-  artifact: build.web
-  on:
-    appveyor_repo_tag: true
