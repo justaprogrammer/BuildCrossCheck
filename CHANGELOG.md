@@ -1,14 +1,16 @@
 
 <a name="v0.1.6"></a>
-## [v0.1.6] - 2019-06-15
+## [v0.1.6] - 2019-06-16
 ### Bug Fixes
 - Endoe Submission data to Unicode instead of ASCII
 
 ### Chores
+- Remove the automatic deploy functionality
 - Tweaking fake builds on AppVeyor
 - Adding a changelog
 
 ### Pull Requests
+- Merge pull request [#153](https://github.com/justaprogrammer/BCC-MSBuildLog/issues/153) from justaprogrammer/bad-auto-deploy
 - Merge pull request [#151](https://github.com/justaprogrammer/BCC-MSBuildLog/issues/151) from justaprogrammer/fake-appveyor
 - Merge pull request [#152](https://github.com/justaprogrammer/BCC-MSBuildLog/issues/152) from justaprogrammer/changelog
 - Merge pull request [#150](https://github.com/justaprogrammer/BCC-MSBuildLog/issues/150) from justaprogrammer/files-be-unicode
