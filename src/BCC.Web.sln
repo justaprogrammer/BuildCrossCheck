@@ -21,6 +21,20 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.Infrastructure", "BCC.I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCC.Web.IntegrationTests", "BCC.Web.IntegrationTests\BCC.Web.IntegrationTests.csproj", "{66849B0F-F7B9-4CC8-ABB4-0D56F12BBF27}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{AF05C3A2-5CCE-4162-8D97-EF95F7A96BB4}"
+	ProjectSection(SolutionItems) = preProject
+		..\CHANGELOG.md = ..\CHANGELOG.md
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{2DE9A300-F6A8-4639-A4C2-C10B56E1D885}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\contributing.md = ..\docs\contributing.md
+		..\docs\customizing.md = ..\docs\customizing.md
+		..\docs\integrating.md = ..\docs\integrating.md
+		..\docs\readme.md = ..\docs\readme.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +60,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2DE9A300-F6A8-4639-A4C2-C10B56E1D885} = {AF05C3A2-5CCE-4162-8D97-EF95F7A96BB4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CA688152-B62B-4597-BE2E-FD55A32B3DA0}
