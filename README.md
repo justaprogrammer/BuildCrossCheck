@@ -6,7 +6,6 @@
 
 | Projects | Description | Versions |
 | :---- | :---- | :---- |
-| [**BCC-Submission**](http://github.com/justaprogrammer/BCC-Submission) | Submit data to **Build Cross Check** | [![NuGet](http://img.shields.io/nuget/v/bcc-submission.svg)](https://www.nuget.org/packages/bcc-submission) [![Chocolatey](https://img.shields.io/chocolatey/v/bcc-submission.svg)](https://chocolatey.org/packages/BCC-Submission) |
 | [**BCC-MSBuildLog**](http://github.com/justaprogrammer/BCC-MSBuildLog) | Create data for **Build Cross Check** from MSBuild binary logs | [![NuGet](http://img.shields.io/nuget/v/bcc-msbuildlog.svg)](https://www.nuget.org/packages/bcc-msbuildlog) [![Chocolatey](https://img.shields.io/chocolatey/v/bcc-msbuildlog.svg)](https://chocolatey.org/packages/BCC-MSBuildLog) |
 
 
