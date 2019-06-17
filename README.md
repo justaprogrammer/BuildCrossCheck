@@ -6,7 +6,7 @@
 
 | Projects | Description | Versions |
 | :---- | :---- | :---- |
-| [**BCC-MSBuildLog**](http://github.com/justaprogrammer/BCC-MSBuildLog) | Create data for **Build Cross Check** from MSBuild binary logs | [![NuGet](http://img.shields.io/nuget/v/bcc-msbuildlog.svg)](https://www.nuget.org/packages/bcc-msbuildlog) [![Chocolatey](https://img.shields.io/chocolatey/v/bcc-msbuildlog.svg)](https://chocolatey.org/packages/BCC-MSBuildLog) |
+| [**BCC-MSBuildLog**](http://github.com/justaprogrammer/BCC-MSBuildLog) | Create data for **Build Cross Check** from MSBuild binary logs | [![NuGet](http://img.shields.io/nuget/v/bcc-msbuildlog.svg)](https://www.nuget.org/packages/bcc-msbuildlog) |
 
 
 ## Overview
