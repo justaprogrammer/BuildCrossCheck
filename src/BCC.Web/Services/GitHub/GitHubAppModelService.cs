@@ -177,9 +177,14 @@ namespace BCC.Web.Services.GitHub
             }
         }
 
-        public async Task GetPullRequestDetails()
+        public async Task<string[]> GetPullRequestFiles(string owner, string repository, int number)
         {
-            await _gitHubAppClientFactory.CreateAppClient()
+            var gitHubClient = await _gitHubAppClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
+            var pullRequestsClient = gitHubClient?.Repository.PullRequest;
+
+            if (pullRequestsClient == null) throw new InvalidOperationException("IPullRequestsClient is null");
+            var files = await pullRequestsClient.Files(owner, repository, number);
+            return files.Select(file => file.FileName).ToArray();
         }
 
         private static NewCheckRunAnnotation CreateNewCheckRunAnnotation(Annotation annotation)

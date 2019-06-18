@@ -15,7 +15,9 @@ namespace BCC.Web.Interfaces
         /// <param name="repository">The name of the repository.</param>
         /// <param name="sha">The sha this build is for.</param>
         /// <param name="resourcePath">The path to the binary log file being processing.</param>
+        /// <param name="pullRequestNumber"></param>
         /// <returns>A CheckRun object</returns>
-        Task<CheckRun> SubmitAsync(string owner, string repository, string sha, string resourcePath);
+        Task<CheckRun> SubmitAsync(string owner, string repository, string sha, string resourcePath,
+            int pullRequestNumber);
     }
 }

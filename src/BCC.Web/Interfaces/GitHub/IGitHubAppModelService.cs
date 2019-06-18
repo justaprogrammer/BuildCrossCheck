@@ -28,5 +28,7 @@ namespace BCC.Web.Interfaces.GitHub
         /// <param name="completedAt">The time when processing finished</param>
         /// <returns></returns>
         Task<CheckRun> SubmitCheckRunAsync([NotNull] string owner, [NotNull] string repository, [NotNull] string sha, CreateCheckRun checkRun, Annotation[] annotations);
+
+        Task<string[]> GetPullRequestFiles(string owner, string repository, int number);
     }
 }

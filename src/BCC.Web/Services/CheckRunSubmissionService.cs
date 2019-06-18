@@ -29,7 +29,8 @@ namespace BCC.Web.Services
         }
 
         /// <inheritdoc/>
-        public Task<CheckRun> SubmitAsync([NotNull] string owner, [NotNull] string repository, [NotNull] string sha, [NotNull] string resourcePath)
+        public Task<CheckRun> SubmitAsync([NotNull] string owner, [NotNull] string repository, [NotNull] string sha,
+            [NotNull] string resourcePath, int pullRequestNumber)
         {
             if (string.IsNullOrWhiteSpace(owner))
             {

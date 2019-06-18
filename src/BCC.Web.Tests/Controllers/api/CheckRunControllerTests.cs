@@ -225,7 +225,7 @@ namespace BCC.Web.Tests.Controllers.api
             result.Value.Should().BeOfType<SerializableError>();
         }
 
-        [Fact(Skip = "Admittedly broken")]
+        [Fact()]
         public async Task UploadFileWithFormData()
         {
             var name = "dummyFileName.txt";
@@ -248,17 +248,18 @@ namespace BCC.Web.Tests.Controllers.api
                 });
             fileService.Files.Returns(new[] {name});
 
-            var checkRun = new Web.Models.GitHub.CheckRun()
+            var checkRun = new CheckRun
             {
                 Id = Faker.Random.Long(),
                 Url = Faker.Internet.Url()
             };
 
-            checkRunSubmissionService.SubmitAsync(null, null, null, null).ReturnsForAnyArgs(checkRun);
+            checkRunSubmissionService.SubmitAsync(null, null, null, null, 0).ReturnsForAnyArgs(checkRun);
 
             var logUploadData = new LogUploadData
             {
                 CommitSha = "12345",
+                PullRequestNumber = 345
             };
 
             var faker = new Faker();
@@ -288,7 +289,8 @@ namespace BCC.Web.Tests.Controllers.api
                 repoOwner,
                 repoName,
                 logUploadData.CommitSha,
-                string.Empty);
+                string.Empty,
+                logUploadData.PullRequestNumber);
 
             receivedFiles.Should().BeEquivalentTo(fileDictionary);
 

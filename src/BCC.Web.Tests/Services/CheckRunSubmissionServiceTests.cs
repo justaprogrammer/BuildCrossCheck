@@ -52,8 +52,9 @@ namespace BCC.Web.Tests.Services
             var owner = Faker.Person.UserName;
             var repository = Faker.Lorem.Word();
             var sha = Faker.Random.String();
+            var pr = Faker.Random.Int(0);
 
-            await checkRunSubmissionService.SubmitAsync(owner, repository, sha, resourcePath);
+            await checkRunSubmissionService.SubmitAsync(owner, repository, sha, resourcePath, pr);
 
             await gitHubAppModelService.Received(1)
                 .SubmitCheckRunAsync(owner, repository, sha, 
