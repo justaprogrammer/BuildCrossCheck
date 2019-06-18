@@ -1,3 +1,9 @@
+<a name="unreleased"></a>
+## [Unreleased]
+
+### Features
+- Filtering annotations by files changed in the pull request
+
 
 <a name="v0.1.6"></a>
 ## [v0.1.6] - 2019-06-16
