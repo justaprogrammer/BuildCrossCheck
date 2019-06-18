@@ -67,7 +67,7 @@ namespace BCC.Web.Services
                 }
             }
 
-            return _gitHubAppModelService.SubmitCheckRunAsync(owner, repository, sha, createCheckRun);
+            return _gitHubAppModelService.SubmitCheckRunAsync(owner, repository, sha, createCheckRun, createCheckRun.Annotations);
         }
     }
 }

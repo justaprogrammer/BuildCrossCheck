@@ -9,6 +9,9 @@ namespace BCC.Web.Models
         public string CommitSha { get; set; }
 
         [Required]
+        public int PullRequestNumber { get; set; }
+
+        [Required]
         [FormFile]
         public string LogFile { get; set; }
     }

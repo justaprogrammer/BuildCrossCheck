@@ -22,7 +22,7 @@ namespace BCC.Web.Services.GitHub
         }
 
         /// <inheritdoc />
-        public async Task<CheckRun> SubmitCheckRunAsync(string owner, string repository, string sha, CreateCheckRun createCheckRun)
+        public async Task<CheckRun> SubmitCheckRunAsync(string owner, string repository, string sha, CreateCheckRun createCheckRun, Annotation[] annotations)
         {
             if (string.IsNullOrWhiteSpace(owner))
             {
@@ -49,9 +49,8 @@ namespace BCC.Web.Services.GitHub
                 throw new ArgumentException("Title is invalid", nameof(createCheckRun.Title));
             }
 
-            var annotationBatches = createCheckRun.Annotations?.Batch(50).ToArray();
-
-            var checkRun = await CreateCheckRunAsync(owner, repository, sha, annotationBatches?.FirstOrDefault()?.ToArray(), createCheckRun)
+            var annotationBatches = annotations?.Batch(50).ToArray();
+            var checkRun = await CreateCheckRunAsync(owner, repository, sha, createCheckRun, annotationBatches?.FirstOrDefault()?.ToArray())
                 .ConfigureAwait(false);
 
             if (annotationBatches != null)
@@ -71,15 +70,17 @@ namespace BCC.Web.Services.GitHub
         /// <param name="owner">The name of the repository owner.</param>
         /// <param name="repository">The name of the repository.</param>
         /// <param name="sha">The sha we are creating this CheckRun for.</param>
+        /// <param name="createCheckRun"></param>
+        /// <param name="annotations">Array of Annotations for the CheckRun.</param>
         /// <param name="name">The name of the CheckRun.</param>
         /// <param name="title">The title of the CheckRun.</param>
         /// <param name="summary">The summary of the CheckRun.</param>
         /// <param name="success">If the CheckRun is a success.</param>
-        /// <param name="annotations">Array of Annotations for the CheckRun.</param>
         /// <param name="startedAt">The time when processing started</param>
         /// <param name="completedAt">The time when processing finished</param>
         /// <returns></returns>
-        public async Task<CheckRun> CreateCheckRunAsync(string owner, string repository, string sha, Annotation[] annotations, CreateCheckRun createCheckRun)
+        public async Task<CheckRun> CreateCheckRunAsync(string owner, string repository, string sha,
+            CreateCheckRun createCheckRun, Annotation[] annotations)
         {
             try
             {
@@ -163,6 +164,24 @@ namespace BCC.Web.Services.GitHub
             }
         }
 
+        public async Task<string> GetRepositoryFileAsync(string owner, string repository, string path, string reference)
+        {
+            try
+            {
+                var gitHubClient = await _gitHubAppClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
+                return await GetRepositoryFileAsync(gitHubClient, owner, repository, path, reference);
+            }
+            catch (Exception ex)
+            {
+                throw new GitHubAppModelException("Error getting repository file.", ex);
+            }
+        }
+
+        public async Task GetPullRequestDetails()
+        {
+            await _gitHubAppClientFactory.CreateAppClient()
+        }
+
         private static NewCheckRunAnnotation CreateNewCheckRunAnnotation(Annotation annotation)
         {
             var newCheckRunAnnotation = new NewCheckRunAnnotation(annotation.Filename,
@@ -175,19 +194,6 @@ namespace BCC.Web.Services.GitHub
             }
 
             return newCheckRunAnnotation;
-        }
-
-        public async Task<string> GetRepositoryFileAsync(string owner, string repository, string path, string reference)
-        {
-            try
-            {
-                var gitHubClient = await _gitHubAppClientFactory.CreateAppClientForLoginAsync(_tokenGenerator, owner);
-                return await GetRepositoryFileAsync(gitHubClient, owner, repository, path, reference);
-            }
-            catch (Exception ex)
-            {
-                throw new GitHubAppModelException("Error getting repository file.", ex);
-            }
         }
 
         private static CheckAnnotationLevel GetCheckWarningLevel(Annotation annotation)

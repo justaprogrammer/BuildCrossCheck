@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions.TestingHelpers;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BCC.Core.Model.CheckRunSubmission;
@@ -9,6 +10,7 @@ using BCC.Web.Models.GitHub;
 using BCC.Web.Services;
 using BCC.Web.Tests.Util;
 using Bogus;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using NSubstitute;
@@ -54,7 +56,9 @@ namespace BCC.Web.Tests.Services
             await checkRunSubmissionService.SubmitAsync(owner, repository, sha, resourcePath);
 
             await gitHubAppModelService.Received(1)
-                .SubmitCheckRunAsync(owner, repository, sha, Arg.Is<CreateCheckRun>(run => run.Equals(createCheckRun)));
+                .SubmitCheckRunAsync(owner, repository, sha, 
+                    Arg.Is<CreateCheckRun>(run => run.Equals(createCheckRun)), 
+                    Arg.Is<Annotation[]>(annotations => createCheckRun.Annotations == null && annotations == null || annotations.SequenceEqual(createCheckRun.Annotations)));
         }
     }
 }
