@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -52,6 +53,15 @@ namespace BCC.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpsRedirection(options => options.RedirectStatusCode = StatusCodes.Status301MovedPermanently);
+
+            services.AddHsts(options =>
+            {
+                options.MaxAge = TimeSpan.FromDays(30);
+                options.Preload = true;
+                options.IncludeSubDomains = true;
+            });
+
             services.Configure<ApplicationInsightsLoggerOptions>(Configuration.GetSection("ApplicationInsightsLogger"));
             services.Configure<GitHubAppOptions>(Configuration.GetSection("GitHub:App"));
             services.Configure<AuthOptions>(Configuration.GetSection("Auth"));
@@ -182,7 +192,10 @@ namespace BCC.Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
             }
+
+            app.UseHttpsRedirection();
 
             app.UseSwagger(c =>
             {
