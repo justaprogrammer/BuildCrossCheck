@@ -1,8 +1,12 @@
-<a name="unreleased"></a>
-## [Unreleased]
 
+<a name="v0.1.7"></a>
+## [v0.1.7] - 2019-09-05
 ### Features
 - Filtering annotations by files changed in the pull request
+
+### Pull Requests
+- Merge pull request [#155](https://github.com/justaprogrammer/BCC-MSBuildLog/issues/155) from justaprogrammer/relevant-annotations
+- Merge pull request [#154](https://github.com/justaprogrammer/BCC-MSBuildLog/issues/154) from justaprogrammer/documentation
 
 
 <a name="v0.1.6"></a>
@@ -166,7 +170,8 @@
 - Merge pull request [#2](https://github.com/justaprogrammer/BCC-MSBuildLog/issues/2) from justaprogrammer/fixes/pr-builds
 
 
-[Unreleased]: https://github.com/justaprogrammer/BCC-MSBuildLog/compare/v0.1.6...HEAD
+[Unreleased]: https://github.com/justaprogrammer/BCC-MSBuildLog/compare/v0.1.7...HEAD
+[v0.1.7]: https://github.com/justaprogrammer/BCC-MSBuildLog/compare/v0.1.6...v0.1.7
 [v0.1.6]: https://github.com/justaprogrammer/BCC-MSBuildLog/compare/v0.1.5...v0.1.6
 [v0.1.5]: https://github.com/justaprogrammer/BCC-MSBuildLog/compare/v0.1.4...v0.1.5
 [v0.1.4]: https://github.com/justaprogrammer/BCC-MSBuildLog/compare/v0.1.3...v0.1.4
