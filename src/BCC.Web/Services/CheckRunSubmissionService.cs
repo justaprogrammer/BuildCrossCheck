@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BCC.Core.Model.CheckRunSubmission;
@@ -7,6 +8,7 @@ using BCC.Core.Serialization;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Utilities.Collections;
 using CheckRun = BCC.Web.Models.GitHub.CheckRun;
 using ICheckRunSubmissionService = BCC.Web.Interfaces.ICheckRunSubmissionService;
 using IGitHubAppModelService = BCC.Web.Interfaces.GitHub.IGitHubAppModelService;
@@ -29,7 +31,8 @@ namespace BCC.Web.Services
         }
 
         /// <inheritdoc/>
-        public Task<CheckRun> SubmitAsync([NotNull] string owner, [NotNull] string repository, [NotNull] string sha, [NotNull] string resourcePath)
+        public async Task<CheckRun> SubmitAsync([NotNull] string owner, [NotNull] string repository, [NotNull] string sha,
+            [NotNull] string resourcePath, int pullRequestNumber)
         {
             if (string.IsNullOrWhiteSpace(owner))
             {
@@ -67,7 +70,14 @@ namespace BCC.Web.Services
                 }
             }
 
-            return _gitHubAppModelService.SubmitCheckRunAsync(owner, repository, sha, createCheckRun);
+            var pullRequestFiles = await _gitHubAppModelService.GetPullRequestFiles(owner, repository, pullRequestNumber);
+            var hashSet = new HashSet(pullRequestFiles);
+
+            var annotations = createCheckRun
+                .Annotations.Where(annotation => hashSet.Contains(annotation.Filename))
+                .ToArray();
+
+            return await _gitHubAppModelService.SubmitCheckRunAsync(owner, repository, sha, createCheckRun, annotations);
         }
     }
 }

@@ -52,7 +52,8 @@ namespace BCC.Web.Controllers.Api
                 RepositoryOwner,
                 RepositoryName,
                 logUploadData.CommitSha,
-                resourcePath);
+                resourcePath,
+                logUploadData.PullRequestNumber);
 
             _telemetryService.CreateCheckRun(RepositoryOwner, RepositoryName);
 

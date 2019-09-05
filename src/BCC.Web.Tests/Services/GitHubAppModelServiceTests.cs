@@ -125,7 +125,7 @@ namespace BCC.Web.Tests.Services
             var createCheckRun = FakerHelpers.FakeCreateCheckRun.Generate();
             createCheckRun.Annotations = FakerHelpers.FakeAnnotation.Generate(annotationCount).ToArray();
 
-            var checkRun = await gitHubAppModelService.SubmitCheckRunAsync(owner, name, Faker.Random.String(), createCheckRun);
+            var checkRun = await gitHubAppModelService.SubmitCheckRunAsync(owner, name, Faker.Random.String(), createCheckRun, createCheckRun.Annotations);
 
             await checkRunsClient.Received(1).Create(owner, name, Arg.Any<NewCheckRun>());
             await checkRunsClient.Received(updateCounts.Length).Update(owner, name, Arg.Any<long>(), Arg.Any<CheckRunUpdate>());
@@ -175,8 +175,7 @@ namespace BCC.Web.Tests.Services
                 owner,
                 name,
                 Faker.Random.String(),
-                createCheckRun.Annotations,
-                createCheckRun);
+                createCheckRun, createCheckRun.Annotations);
 
             checkRunsClient.Received(1).Create(owner, name, Arg.Any<NewCheckRun>());
 
@@ -221,8 +220,7 @@ namespace BCC.Web.Tests.Services
                 owner,
                 name,
                 Faker.Random.String(),
-                createCheckRun.Annotations,
-                createCheckRun);
+                createCheckRun, createCheckRun.Annotations);
 
             checkRunsClient.Received(1).Create(owner, name, Arg.Any<NewCheckRun>());
 
@@ -247,8 +245,7 @@ namespace BCC.Web.Tests.Services
                         owner,
                         name,
                         Faker.Random.String(),
-                        createCheckRun.Annotations,
-                        createCheckRun);
+                        createCheckRun, createCheckRun.Annotations);
 
                 }).Should()
                 .Throw<GitHubAppModelException>()
@@ -302,8 +299,7 @@ namespace BCC.Web.Tests.Services
                     owner,
                     name,
                     Faker.Random.String(),
-                    createCheckRun.Annotations,
-                    createCheckRun);
+                    createCheckRun, createCheckRun.Annotations);
 
             }).Should().Throw<GitHubAppModelException>();
 
